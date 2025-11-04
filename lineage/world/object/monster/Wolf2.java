@@ -1,0 +1,38 @@
+package lineage.world.object.monster;
+
+import lineage.bean.database.Monster;
+import lineage.network.packet.BasePacketPooling;
+import lineage.network.packet.server.S_Message;
+import lineage.share.Lineage;
+import lineage.world.controller.SummonController;
+import lineage.world.object.object;
+import lineage.world.object.instance.ItemInstance;
+import lineage.world.object.instance.MonsterInstance;
+
+public class Wolf2 extends MonsterInstance {
+
+	static synchronized public MonsterInstance clone(MonsterInstance mi, Monster m) {
+		if (mi == null)
+			mi = new Wolf2();
+		return MonsterInstance.clone(mi, m);
+	}
+
+	@Override
+	public void toGiveItem(object o, ItemInstance item, long count) {
+		// 고기를 1개씩만 줬을 경우 펫 길들이기로 판단.
+		if (count == 1 && item.getItem().getName().equalsIgnoreCase("괴물 눈 고기") && Lineage.pet_tame_is) {
+			// 확률 검사
+			if (SummonController.isTame(o, this, true)) {
+				// 아이템 개수 조정
+				o.getInventory().count(item, item.getCount() - count, true);
+				// 길들이기 성공 처리
+				if (SummonController.toPet(o, this));
+				return;
+			}
+			// 길들이기 실패 메시지 전송
+			o.toSender(S_Message.clone(BasePacketPooling.getPool(S_Message.class), 324));
+		}
+		// 원래 아이템 주기 로직 실행
+		super.toGiveItem(o, item, count);
+	}
+}
