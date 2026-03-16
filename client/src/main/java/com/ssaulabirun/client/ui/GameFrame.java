@@ -268,7 +268,7 @@ public class GameFrame extends JFrame {
                     if (reader.remaining() >= 4) playerInt = reader.readInt();
                     if (reader.remaining() >= 4) playerWis = reader.readInt();
                     if (reader.remaining() >= 4) playerCha = reader.readInt();
-                    if (reader.remaining() >= 4) { int mapId = reader.readInt(); }
+                    if (reader.remaining() >= 4) reader.readInt(); // mapId (consumed for packet alignment)
                     if (reader.remaining() >= 4) playerX = reader.readInt();
                     if (reader.remaining() >= 4) playerY = reader.readInt();
                     if (reader.remaining() >= 8) playerAdena = reader.readLong();

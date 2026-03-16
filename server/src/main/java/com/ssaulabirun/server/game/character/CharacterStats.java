@@ -13,7 +13,7 @@ public class CharacterStats {
 
     public static long getExpForLevel(int level) {
         if (level < 1) return 0;
-        if (level >= 100) return EXP_TABLE[100];
+        if (level > 100) return EXP_TABLE[100];
         return EXP_TABLE[level];
     }
 

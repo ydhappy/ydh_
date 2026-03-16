@@ -43,8 +43,9 @@ public class L1PcInstance extends L1Character {
         sp++;
     }
 
+    // TODO: Implement skill usage system
     public void useSkill(int skillId) {
-        // Placeholder for skill usage
+        throw new UnsupportedOperationException("Skill system not yet implemented");
     }
 
     public byte[] toPacketData() {

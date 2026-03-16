@@ -66,15 +66,6 @@ public class DatabaseManager {
         return DriverManager.getConnection(url, user, password);
     }
 
-    public ResultSet executeQuery(String sql, Object... params) throws SQLException {
-        Connection conn = getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        for (int i = 0; i < params.length; i++) {
-            ps.setObject(i + 1, params[i]);
-        }
-        return ps.executeQuery();
-    }
-
     public int executeUpdate(String sql, Object... params) throws SQLException {
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

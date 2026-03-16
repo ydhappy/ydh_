@@ -10,11 +10,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-
 public class CharacterDao {
     private static final Logger logger = LoggerFactory.getLogger(CharacterDao.class);
-    private static final AtomicLong charIdGen = new AtomicLong(1L);
 
     public List<L1PcInstance> findByAccountName(String accountName) {
         List<L1PcInstance> list = new ArrayList<>();

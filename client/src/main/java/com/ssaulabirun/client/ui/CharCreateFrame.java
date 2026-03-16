@@ -123,7 +123,6 @@ public class CharCreateFrame extends JFrame {
     private void updateStats(int index) {
         if (index < 0 || index >= BASE_STATS.length) return;
         int[] stats = BASE_STATS[index];
-        String[] statNames = {"str","dex","con","int","wis","cha"};
         for (int i = 0; i < 6; i++) {
             statLabels[i].setText(String.valueOf(stats[i]));
         }
