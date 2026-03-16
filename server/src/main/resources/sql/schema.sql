@@ -1,0 +1,40 @@
+CREATE TABLE IF NOT EXISTS accounts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(64) NOT NULL,
+    email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS characters (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    account_name VARCHAR(50) NOT NULL,
+    char_name VARCHAR(50) UNIQUE NOT NULL,
+    class_id INT DEFAULT 0,
+    level INT DEFAULT 1,
+    exp BIGINT DEFAULT 0,
+    hp INT DEFAULT 100,
+    mp INT DEFAULT 50,
+    str INT DEFAULT 10,
+    dex INT DEFAULT 10,
+    con INT DEFAULT 10,
+    intel INT DEFAULT 10,
+    wis INT DEFAULT 10,
+    cha INT DEFAULT 10,
+    map_id INT DEFAULT 1,
+    x INT DEFAULT 100,
+    y INT DEFAULT 100,
+    adena BIGINT DEFAULT 0,
+    magic_circle INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS character_items (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    char_id BIGINT NOT NULL,
+    item_id INT NOT NULL,
+    count INT DEFAULT 1,
+    slot INT DEFAULT -1,
+    is_equipped BOOLEAN DEFAULT FALSE
+);
