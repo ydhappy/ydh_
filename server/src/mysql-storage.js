@@ -164,6 +164,21 @@ export async function latestSnapshot() {
   return rowToRecord(rows[0]);
 }
 
+export async function snapshotById(id) {
+  await initMysqlStorage();
+  const db = connection();
+  const [rows] = await db.query(
+    `SELECT id, received_at, schema_version, account_id, account_name,
+            character_id, character_name, class_id, slot_count, level, map_index, snapshot_json
+       FROM ydh_save_snapshots
+      WHERE id = ?
+      LIMIT 1`,
+    [id]
+  );
+  if (!rows.length) return null;
+  return rowToRecord(rows[0]);
+}
+
 export async function health() {
   await initMysqlStorage();
   const db = connection();
