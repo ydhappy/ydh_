@@ -1,15 +1,22 @@
 # Tiled JSON Import
 
-## 22-1 상태
+## 상태
 
-현재 단계는 Tiled JSON을 기존 YDH 문자 타일맵 구조로 변환하는 기반만 추가한 상태입니다.
+현재는 22-1, 22-2까지 완료된 상태입니다.
 
-추가 파일:
+- 22-1: Tiled JSON 샘플맵 + 변환기 추가 완료
+- 22-2: index 로드 연결 + 샘플맵 자동 등록 완료
+- 22-3: 맵 선택/검증 UI 및 다중 Tiled 맵 확장 대기
+
+## 추가 파일
 
 - `data/tiled/moon-gate-sample.json`
 - `data/tiled-map-loader.js`
+- `tiled-map-bootstrap.js`
 
-아직 `index.html`과 `map-engine.js`에는 자동 연결하지 않았습니다. 다음 단계에서 안전하게 연결합니다.
+## 연결 파일
+
+- `index.html`
 
 ## 변환 방식
 
@@ -61,11 +68,27 @@ const map = await window.YDH_TILED_MAP_LOADER.loadFromUrl('data/tiled/moon-gate-
 window.YDH_TILED_MAP_LOADER.appendToYdhMaps(map);
 ```
 
-## 다음 단계
+## 자동 로드 흐름
 
-22-2에서 진행:
+`index.html`은 아래 순서로 로드합니다.
 
-1. `index.html`에 `data/tiled-map-loader.js` 연결
-2. Tiled 샘플맵을 자동 로드하는 bootstrap 추가
-3. 로드 성공/실패 로그 추가
-4. 기존 맵 엔진과 충돌 여부 확인
+```html
+<script src="data/maps.js"></script>
+<script src="data/tiled-map-loader.js"></script>
+<script src="tiled-map-bootstrap.js"></script>
+<script src="map-engine.js"></script>
+```
+
+`map-engine.js`가 시작되기 전에 `tiled-map-bootstrap.js`가 샘플맵을 `YDH_MAPS.maps`에 추가합니다.
+
+로드 실패 시에는 콘솔 경고와 게임 로그 이벤트만 남기고 기존 문자 타일맵은 그대로 유지됩니다.
+
+## 22-3 다음 작업
+
+다음 단계에서 진행합니다.
+
+1. 맵 선택 UI 추가
+2. GM 콘솔에 Tiled source 표시
+3. 다중 Tiled JSON 등록 구조 추가
+4. Tiled 맵 검증 결과 표시
+5. 실패 맵/중복 맵 목록 표시
