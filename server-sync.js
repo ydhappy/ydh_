@@ -14,8 +14,18 @@
     }
   }
 
+  function writeJson(key, value) {
+    if (value === undefined || value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  }
+
   function nowIso() {
     return new Date().toISOString();
+  }
+
+  function endpointUrl(endpoint) {
+    const baseUrl = schema.api.baseUrl || '/api';
+    return `${baseUrl}${endpoint.startsWith('/') ? endpoint.replace(/^\/api/, '') : `/${endpoint}`}`;
   }
 
   function buildSnapshot() {
@@ -45,13 +55,12 @@
   }
 
   function loadStatus() {
-    return readJson(STATUS_KEY) || { mode: 'local-only', lastSyncAt: null, lastError: null };
+    return readJson(STATUS_KEY) || { mode: 'local-only', lastSyncAt: null, lastRestoreAt: null, lastError: null };
   }
 
   async function pushSnapshot(options = {}) {
     const endpoint = options.endpoint || schema.api.endpoints.snapshot;
-    const baseUrl = options.baseUrl || schema.api.baseUrl;
-    const url = `${baseUrl}${endpoint.startsWith('/') ? endpoint.replace(/^\/api/, '') : `/${endpoint}`}`;
+    const url = endpointUrl(endpoint);
     const snapshot = buildSnapshot();
 
     try {
@@ -71,6 +80,52 @@
     }
   }
 
+  async function listServerSaves() {
+    try {
+      saveStatus({ ...loadStatus(), mode: 'listing', lastError: null });
+      const response = await fetch(endpointUrl('/api/save/list'));
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      saveStatus({ ...loadStatus(), mode: 'listed', lastError: null, listCount: result.saves?.length || 0 });
+      return { ok: true, saves: result.saves || [] };
+    } catch (error) {
+      saveStatus({ ...loadStatus(), mode: 'local-only', lastError: error.message });
+      return { ok: false, error: error.message, saves: [] };
+    }
+  }
+
+  async function restoreLatestSnapshot(options = {}) {
+    try {
+      saveStatus({ ...loadStatus(), mode: 'restoring', lastError: null });
+      const response = await fetch(endpointUrl(schema.api.endpoints.restore));
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      const record = result.save;
+      const snapshot = record?.snapshot;
+      if (!snapshot?.saves) throw new Error('Invalid restore payload');
+      applySnapshotToLocalStorage(snapshot);
+      saveStatus({ ...loadStatus(), mode: 'restored', lastRestoreAt: nowIso(), lastError: null, restoredId: record.id });
+      if (options.reload) window.location.reload();
+      return { ok: true, record, snapshot };
+    } catch (error) {
+      saveStatus({ ...loadStatus(), mode: 'local-only', lastError: error.message });
+      return { ok: false, error: error.message };
+    }
+  }
+
+  function applySnapshotToLocalStorage(snapshot) {
+    const keys = schema.localStorageKeys;
+    const saves = snapshot?.saves || {};
+    writeJson(keys.character, saves.character);
+    writeJson(keys.map, saves.map);
+    writeJson(keys.chapterQuests, saves.chapterQuests);
+    writeJson(keys.codexUnlocks, saves.codexUnlocks);
+    if (saves.gmConsoleOpen === undefined || saves.gmConsoleOpen === null) localStorage.removeItem(keys.gmConsoleOpen);
+    else localStorage.setItem(keys.gmConsoleOpen, saves.gmConsoleOpen);
+    window.dispatchEvent(new CustomEvent('ydh-server-restore-applied', { detail: { snapshot } }));
+    return true;
+  }
+
   function exportSnapshot() {
     const snapshot = buildSnapshot();
     const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
@@ -80,13 +135,16 @@
     a.download = `ydh-chronicle-save-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    saveStatus({ mode: 'exported', lastSyncAt: nowIso(), lastError: null });
+    saveStatus({ ...loadStatus(), mode: 'exported', lastSyncAt: nowIso(), lastError: null });
     return snapshot;
   }
 
   window.YDH_SERVER_SYNC = {
     buildSnapshot,
     pushSnapshot,
+    listServerSaves,
+    restoreLatestSnapshot,
+    applySnapshotToLocalStorage,
     exportSnapshot,
     loadStatus,
     saveStatus
