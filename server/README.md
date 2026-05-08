@@ -181,8 +181,22 @@ error
 4. 캐릭터 슬롯 생성 또는 선택
 5. `실시간` 섹션에서 `연결` 클릭
 6. 다른 브라우저/기기에서 같은 서버 접속 후 `연결` 클릭
-7. 맵 이동 시 서로의 위치 카드가 갱신되는지 확인
-8. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
+7. 맵 이동 시 서로의 위치 카드가 갱신되고, 같은 맵이면 타일맵 위에 원격 아바타가 표시되는지 확인
+8. 같은 좌표에 여러 명이 있으면 `+N` 배지가 표시되는지 확인
+9. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
+
+## 실시간 타일맵 원격 아바타 표시
+
+클라이언트는 `ydh-realtime-peers-updated`와 `ydh-map-rendered` 이벤트를 사용해 같은 `mapIndex`에 있는 다른 접속자를 현재 타일맵 위에 표시합니다.
+
+관련 파일:
+
+```text
+realtime-sync.js
+realtime-map-peers.js
+realtime-map-peers.css
+map-engine.js
+```
 
 ## Snapshot 계정/캐릭터 필드
 
@@ -227,8 +241,8 @@ ydh_schema_meta
 
 ## 다음 고도화 후보
 
-1. 실시간 타일맵 위 원격 플레이어 아바타 렌더링
-2. Tiled Map Editor JSON import
-3. 실제 PNG/WebP atlas 교체
-4. 서버 계정 인증 추가
-5. 운영용 관리자 저장 삭제/정리 API
+1. Tiled Map Editor JSON import
+2. 실제 PNG/WebP atlas 교체
+3. 서버 계정 인증 추가
+4. 운영용 관리자 저장 삭제/정리 API
+5. 원격 아바타 클릭 정보창
