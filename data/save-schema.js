@@ -2,6 +2,9 @@ window.YDH_SAVE_SCHEMA = {
   version: 1,
   app: 'YDH Chronicle',
   localStorageKeys: {
+    accountProfile: 'ydh-account-profile-v1',
+    characterSlots: 'ydh-character-slots-v1',
+    selectedCharacter: 'ydh-selected-character-v1',
     character: 'ydh-chronicle-save-v1',
     map: 'ydh-chronicle-map-v1',
     chapterQuests: 'ydh-chapter-quests-v1',
@@ -26,6 +29,15 @@ window.YDH_SAVE_SCHEMA = {
       displayName: 'string',
       createdAt: 'ISO-8601 datetime',
       lastLoginAt: 'ISO-8601 datetime'
+    },
+    characterSlot: {
+      characterId: 'string',
+      accountId: 'string',
+      slot: 'number',
+      name: 'string',
+      classId: 'knight|mage|rogue|priest',
+      createdAt: 'ISO-8601 datetime',
+      lastSelectedAt: 'ISO-8601 datetime'
     },
     character: {
       characterId: 'string',
