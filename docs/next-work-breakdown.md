@@ -125,23 +125,47 @@
 
 ### 22-4: 다중 Tiled JSON 등록/관리 고도화
 
+상태: 완료
+
+작업 파일:
+
+- `data/tiled-map-registry.js`
+- `tiled-map-bootstrap.js`
+- `index.html`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 다중 Tiled JSON URL registry 추가
+- registry URL 순차 로드 처리 추가
+- Tiled JSON 붙여넣기 import textarea 추가
+- 붙여넣기 JSON을 Tiled map으로 변환 후 맵 목록에 등록
+- custom Tiled map을 localStorage에 보존
+- custom map 최대 저장 개수 제한 구조 추가
+- 중복 map id 재등록 방지
+- 검증 실패/로드 실패/중복 상태를 TILED MAP MANAGER에 표시
+- `index.html`에서 `data/tiled-map-registry.js`를 bootstrap 전에 로드하도록 연결
+
+### 22-5: Tiled Object Layer 기반 배치 고도화
+
 상태: 대기
 
 목표:
 
-- 여러 개의 Tiled JSON URL 목록 관리
-- 외부 Tiled JSON 업로드/붙여넣기 import
 - GM 콘솔에 source/sourceUrl 표시
 - 검증 실패 맵 상세 보기
 - Tiled object layer 기반 NPC/몬스터/포탈 배치
+- custom map 내보내기/삭제 UI
+- custom map 서버 저장 연동
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~3단계 완료
+상태: 8차~21차 완료, 22차 1~4단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-4 다중 Tiled JSON 등록/관리 고도화
+1. 22-5 Tiled Object Layer 기반 배치 고도화
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
