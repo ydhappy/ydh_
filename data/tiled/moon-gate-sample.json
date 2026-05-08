@@ -44,6 +44,52 @@
         4,2,2,2,2,2,3,4,
         4,4,4,4,4,4,4,4
       ]
+    },
+    {
+      "name": "Objects",
+      "type": "objectgroup",
+      "objects": [
+        {
+          "id": 1,
+          "name": "달문 수호자",
+          "type": "npc",
+          "x": 384,
+          "y": 192,
+          "width": 64,
+          "height": 64,
+          "properties": [
+            { "name": "ydhKind", "type": "string", "value": "npc" },
+            { "name": "ydhEntityId", "type": "string", "value": "moon-priestess" },
+            { "name": "ydhDialogue", "type": "string", "value": "달문은 준비된 자에게만 열립니다." }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "달그림자 정찰병",
+          "type": "monster",
+          "x": 128,
+          "y": 192,
+          "width": 64,
+          "height": 64,
+          "properties": [
+            { "name": "ydhKind", "type": "string", "value": "monster" },
+            { "name": "ydhEntityId", "type": "string", "value": "moon-stalker" }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "귀환 포탈",
+          "type": "portal",
+          "x": 384,
+          "y": 64,
+          "width": 64,
+          "height": 64,
+          "properties": [
+            { "name": "ydhKind", "type": "string", "value": "portal" },
+            { "name": "ydhTargetMapIndex", "type": "int", "value": 0 }
+          ]
+        }
+      ]
     }
   ]
 }
