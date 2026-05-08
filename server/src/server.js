@@ -1,6 +1,8 @@
 import express from 'express';
+import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { attachRealtimeServer } from './realtime.js';
 import { latestSnapshot, listAccounts, listCharacters, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
 
@@ -11,6 +13,8 @@ const publicDir = process.env.YDH_PUBLIC_DIR || repoRoot;
 const port = Number(process.env.PORT || 3000);
 
 const app = express();
+const httpServer = http.createServer(app);
+const realtime = attachRealtimeServer(httpServer);
 
 app.use(express.json({ limit: '2mb' }));
 app.use((req, res, next) => {
@@ -21,10 +25,14 @@ app.use((req, res, next) => {
 app.get('/api/health', async (req, res, next) => {
   try {
     const storage = await storageHealth();
-    res.json({ ok: true, app: 'YDH Chronicle API', storageMode, storage, now: new Date().toISOString() });
+    res.json({ ok: true, app: 'YDH Chronicle API', storageMode, realtime: realtime.stats(), storage, now: new Date().toISOString() });
   } catch (error) {
     next(error);
   }
+});
+
+app.get('/api/realtime/stats', (req, res) => {
+  res.json({ ok: true, realtime: realtime.stats() });
 });
 
 app.get('/api/accounts', async (req, res, next) => {
@@ -116,8 +124,9 @@ app.use((error, req, res, next) => {
   res.status(500).json({ ok: false, error: error.message || 'Internal server error' });
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`YDH Chronicle server listening on http://localhost:${port}`);
   console.log(`Serving static files from ${publicDir}`);
   console.log(`Storage provider: ${storageMode}`);
+  console.log('WebSocket position path: /ws/position');
 });
