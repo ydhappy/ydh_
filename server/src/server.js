@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { latestSnapshot, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
+import { latestSnapshot, listAccounts, listCharacters, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,6 +22,22 @@ app.get('/api/health', async (req, res, next) => {
   try {
     const storage = await storageHealth();
     res.json({ ok: true, app: 'YDH Chronicle API', storageMode, storage, now: new Date().toISOString() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/accounts', async (req, res, next) => {
+  try {
+    res.json({ ok: true, storageMode, accounts: await listAccounts() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/characters', async (req, res, next) => {
+  try {
+    res.json({ ok: true, storageMode, characters: await listCharacters(req.query.accountId || '') });
   } catch (error) {
     next(error);
   }
