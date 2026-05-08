@@ -23,6 +23,16 @@ export async function snapshotById(id) {
   return provider.snapshotById(id);
 }
 
+export async function listAccounts() {
+  if (typeof provider.listAccounts === 'function') return provider.listAccounts();
+  return [];
+}
+
+export async function listCharacters(accountId) {
+  if (typeof provider.listCharacters === 'function') return provider.listCharacters(accountId);
+  return [];
+}
+
 export async function storageHealth() {
   if (typeof provider.health === 'function') return provider.health();
   return { storage: storageMode };
