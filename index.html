@@ -7,6 +7,7 @@
   <title>YDH Chronicle | 모바일 홈페이지 MMORPG</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="map.css" />
+  <link rel="stylesheet" href="entity-sprites.css" />
 </head>
 <body>
   <div class="site-shell">
@@ -233,7 +234,7 @@
         </p>
         <div class="asset-pipeline-grid">
           <div><strong>Tiles</strong><span>grass, road, water, tree, stone, portal SVG 기본 제공</span></div>
-          <div><strong>Sprites</strong><span>player, slime 기본 SVG 제공. 이후 4방향/8방향 확장</span></div>
+          <div><strong>Sprites</strong><span>player, monster, npc 16방향 SVG 스프라이트시트</span></div>
           <div><strong>Maps</strong><span>말하는 섬, 은빛 숲, 버려진 광산 3개 기본 맵</span></div>
           <div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div>
         </div>
@@ -286,6 +287,7 @@
   </template>
 
   <script src="data/maps.js"></script>
+  <script src="data/entities.js"></script>
   <script src="game-map-bridge.js"></script>
   <script src="map-engine.js"></script>
   <script src="game.js"></script>
