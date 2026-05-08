@@ -147,25 +147,50 @@
 - 검증 실패/로드 실패/중복 상태를 TILED MAP MANAGER에 표시
 - `index.html`에서 `data/tiled-map-registry.js`를 bootstrap 전에 로드하도록 연결
 
-### 22-5: Tiled Object Layer 기반 배치 고도화
+### 22-5: Tiled Object Layer 배치 데이터 추출/표시
+
+상태: 완료
+
+작업 파일:
+
+- `data/tiled-map-loader.js`
+- `data/tiled/moon-gate-sample.json`
+- `gm-console.js`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- Tiled objectgroup layer 탐색 함수 추가
+- Object Layer의 object를 tile 좌표 기반 placement 데이터로 변환
+- object property `ydhKind`, `ydhEntityId`, `ydhName`, `ydhTargetMapId`, `ydhTargetMapIndex`, `ydhDialogue` 지원
+- 변환 결과에 `map.placements`, `map.tiled.objectLayers`, `map.tiled.placementSummary` 추가
+- 샘플 Tiled JSON에 npc/monster/portal object 예시 추가
+- GM 콘솔에 map source/sourceUrl 표시
+- GM 콘솔에 Object 총 개수 및 kind별 요약 표시
+- GM 콘솔에 Object 이름/종류/좌표/entityId 표시
+- GM 콘솔 `Object 강조` 버튼 추가
+- 맵 정보 복사에 Object 목록 포함
+
+### 22-6: Object Layer 실제 배치 적용
 
 상태: 대기
 
 목표:
 
-- GM 콘솔에 source/sourceUrl 표시
-- 검증 실패 맵 상세 보기
-- Tiled object layer 기반 NPC/몬스터/포탈 배치
+- Object Layer의 npc/monster/portal을 실제 맵 타일 코드에 반영
+- Object Layer 포탈 이동 대상 적용
+- Object Layer NPC 대사 적용
 - custom map 내보내기/삭제 UI
 - custom map 서버 저장 연동
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~4단계 완료
+상태: 8차~21차 완료, 22차 1~5단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-5 Tiled Object Layer 기반 배치 고도화
+1. 22-6 Object Layer 실제 배치 적용
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
