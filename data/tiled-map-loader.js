@@ -87,6 +87,41 @@ window.YDH_TILED_MAP_LOADER = (() => {
     return placements;
   }
 
+  function placementTileCode(kind) {
+    const normalized = String(kind || '').toLowerCase();
+    if (normalized === 'npc') return 'N';
+    if (normalized === 'monster' || normalized === 'mob') return 'M';
+    if (normalized === 'portal' || normalized === 'teleport') return 'P';
+    return '';
+  }
+
+  function applyPlacementsToRows(rows, placements = []) {
+    const matrix = rows.map((row) => [...row]);
+    const applied = [];
+    const skipped = [];
+
+    placements.forEach((placement) => {
+      const code = placementTileCode(placement.kind);
+      if (!code) {
+        skipped.push({ ...placement, reason: 'unsupported-kind' });
+        return;
+      }
+      if (!matrix[placement.y] || matrix[placement.y][placement.x] === undefined) {
+        skipped.push({ ...placement, reason: 'out-of-range' });
+        return;
+      }
+      const before = matrix[placement.y][placement.x];
+      matrix[placement.y][placement.x] = code;
+      applied.push({ ...placement, code, before });
+    });
+
+    return {
+      rows: matrix.map((row) => row.join('')),
+      applied,
+      skipped
+    };
+  }
+
   function placementSummary(placements = []) {
     return placements.reduce((summary, placement) => {
       summary[placement.kind] = (summary[placement.kind] || 0) + 1;
@@ -110,6 +145,8 @@ window.YDH_TILED_MAP_LOADER = (() => {
     const startY = Number(propValue(tiledMap.properties || [], 'ydhStartY', options.startY ?? 1));
     const portalTo = Number(propValue(tiledMap.properties || [], 'ydhPortalTo', options.portalTo ?? 0));
     const placements = convertObjects(tiledMap);
+    const baseRows = convertRows(tiledMap, layer, gidToCode);
+    const placementRows = applyPlacementsToRows(baseRows, placements);
 
     return {
       id,
@@ -123,11 +160,16 @@ window.YDH_TILED_MAP_LOADER = (() => {
         version: tiledMap.version || tiledMap.tiledversion || 'unknown',
         tilewidth: tiledMap.tilewidth || 64,
         tileheight: tiledMap.tileheight || 64,
-        objectLayers: objectLayers(tiledMap).map((layer) => layer.name),
-        placementSummary: placementSummary(placements)
+        objectLayers: objectLayers(tiledMap).map((objectLayer) => objectLayer.name),
+        placementSummary: placementSummary(placements),
+        appliedPlacements: placementRows.applied.length,
+        skippedPlacements: placementRows.skipped.length
       },
       placements,
-      rows: convertRows(tiledMap, layer, gidToCode)
+      appliedPlacements: placementRows.applied,
+      skippedPlacements: placementRows.skipped,
+      baseRows,
+      rows: placementRows.rows
     };
   }
 
@@ -153,6 +195,8 @@ window.YDH_TILED_MAP_LOADER = (() => {
     buildGidCodeMap,
     convertObjects,
     objectLayers,
-    placementSummary
+    placementSummary,
+    placementTileCode,
+    applyPlacementsToRows
   };
 })();
