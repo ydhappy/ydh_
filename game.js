@@ -2,8 +2,9 @@
   'use strict';
 
   const SAVE_KEY = 'ydh-chronicle-save-v1';
+  const lore = window.YDH_LORE_CONTENT || {};
 
-  const zones = [
+  const baseZones = [
     { name: '말하는 섬 해안', monsters: [['그림자 늑대', '🐺', 55, 8], ['해골 정찰병', '💀', 62, 9]] },
     { name: '은빛 숲', monsters: [['고블린 약탈자', '👺', 74, 11], ['독버섯 정령', '🍄', 82, 12]] },
     { name: '버려진 광산', monsters: [['동굴 박쥐', '🦇', 92, 14], ['광산 골렘', '🪨', 120, 16]] },
@@ -14,13 +15,41 @@
     { name: '군주의 방', monsters: [['발록의 그림자', '👿', 560, 58], ['봉인된 마룡', '🐲', 720, 68]] }
   ];
 
-  const skills = [
+  const gradeSprite = { normal: '🌘', elite: '🜏', boss: '🌑' };
+  const loreMonsters = (lore.monsters || []).map((monster) => [
+    monster.name,
+    gradeSprite[monster.grade] || '🌘',
+    monster.hp || 120,
+    monster.atk || 18,
+    monster.story || ''
+  ]);
+
+  const loreZones = (lore.maps || []).map((map, index) => {
+    const start = index % Math.max(1, loreMonsters.length);
+    const monsters = loreMonsters.length
+      ? [loreMonsters[start], loreMonsters[(start + 1) % loreMonsters.length]]
+      : [['달그림자 추적자', '🌘', 95, 14]];
+    return { name: map.name, lore: map.story, monsters };
+  });
+
+  const zones = [...baseZones, ...loreZones];
+
+  const baseSkills = [
     { id: 'power', name: '파워 스트라이크', icon: '⚔️', mp: 6, cd: 1500, scale: 1.65, text: 'MP 6 · 강타' },
     { id: 'fire', name: '파이어 볼트', icon: '🔥', mp: 10, cd: 2600, scale: 2.2, text: 'MP 10 · 화염' },
     { id: 'heal', name: '힐', icon: '✨', mp: 12, cd: 5000, heal: 38, text: 'MP 12 · 회복' },
     { id: 'shield', name: '아이언 스킨', icon: '🛡️', mp: 9, cd: 6500, buff: 3, text: 'MP 9 · 방어' },
     { id: 'storm', name: '라이트닝 스톰', icon: '⚡', mp: 18, cd: 9000, scale: 3.1, text: 'MP 18 · 필살' }
   ];
+
+  const loreSkillLabel = { damage: '달마법', drain: '흡혈 표식', guard: '결계', ultimate: '심연기' };
+  const loreSkills = (lore.skills || []).map((skill) => ({
+    ...skill,
+    lore: true,
+    text: `MP ${skill.mp} · ${loreSkillLabel[skill.type] || '소설 스킬'}`
+  }));
+
+  const skills = [...baseSkills, ...loreSkills];
 
   const defaultState = () => ({
     level: 1,
@@ -93,6 +122,7 @@
     return {
       name: base[0],
       sprite: base[1],
+      story: base[4] || zone.lore || '',
       maxHp,
       hp: maxHp,
       atk: Math.round(base[3] * (1 + state.wave * 0.08))
@@ -149,13 +179,15 @@
     const now = Date.now();
     refs.skillGrid.innerHTML = '';
     const template = $('skillTemplate');
-    skills.forEach((skill) => {
+    skills.forEach((skill, index) => {
       const node = template.content.firstElementChild.cloneNode(true);
       const remain = Math.max(0, (state.cooldowns[skill.id] || 0) - now);
       node.querySelector('.skill-icon').textContent = skill.icon;
       node.querySelector('.skill-name').textContent = skill.name;
       node.querySelector('.skill-meta').textContent = remain > 0 ? `쿨타임 ${(remain / 1000).toFixed(1)}초` : skill.text;
       node.querySelector('.cooldown-mask').style.transform = `scaleY(${remain > 0 ? remain / skill.cd : 0})`;
+      node.title = skill.story || skill.text;
+      node.dataset.hotkey = String(index + 1);
       node.disabled = remain > 0 || state.mp < skill.mp || busy;
       node.addEventListener('click', () => useSkill(skill));
       refs.skillGrid.appendChild(node);
@@ -224,25 +256,37 @@
     return performTurn(async () => {
       state.mp -= skill.mp;
       state.cooldowns[skill.id] = now + skill.cd;
+
+      if (skill.buff) {
+        state.shieldTurns = Math.max(state.shieldTurns, skill.buff);
+        flashImpact('DEF+', 'guard');
+        addLog(`${skill.name} 사용. ${skill.buff}턴 방어 강화`, 'good-text');
+        if (!skill.scale) return;
+      }
+
+      if (skill.scale) {
+        const dmg = playerDamage(skill.scale || 1);
+        monster.hp = clamp(monster.hp - dmg, 0, monster.maxHp);
+        shake(refs.monsterUnit);
+        flashImpact(`-${dmg}`, skill.id);
+        addLog(`${skill.name} 명중! ${dmg} 피해${skill.lore ? ` · ${skill.story}` : ''}`, 'good-text');
+
+        if (skill.heal) {
+          const amount = Math.round(skill.heal + state.level * 2);
+          state.hp = clamp(state.hp + amount, 0, state.maxHp);
+          addLog(`${skill.name} 흡수 효과. HP ${amount} 회복`, 'good-text');
+        }
+
+        if (monster.hp <= 0) defeatMonster();
+        return;
+      }
+
       if (skill.heal) {
         const amount = Math.round(skill.heal + state.level * 3);
         state.hp = clamp(state.hp + amount, 0, state.maxHp);
         flashImpact(`+${amount}`, 'heal');
         addLog(`${skill.name} 사용. HP ${amount} 회복`, 'good-text');
-        return;
       }
-      if (skill.buff) {
-        state.shieldTurns = Math.max(state.shieldTurns, skill.buff);
-        flashImpact('DEF+', 'guard');
-        addLog(`${skill.name} 사용. ${skill.buff}턴 방어 강화`, 'good-text');
-        return;
-      }
-      const dmg = playerDamage(skill.scale || 1);
-      monster.hp = clamp(monster.hp - dmg, 0, monster.maxHp);
-      shake(refs.monsterUnit);
-      flashImpact(`-${dmg}`, skill.id);
-      addLog(`${skill.name} 명중! ${dmg} 피해`, 'good-text');
-      if (monster.hp <= 0) defeatMonster();
     });
   }
 
@@ -255,6 +299,7 @@
     state.totalKills += 1;
     state.questKills += 1;
     addLog(`${monster.name} 처치! EXP +${expGain}, Gold +${goldGain}`, 'good-text');
+    if (monster.story) addLog(`기록 해금: ${monster.story}`, 'loot-text');
     maybeDropItem();
     if (state.questKills >= 3) completeQuest();
     while (state.exp >= state.expToNext) levelUp();
@@ -264,19 +309,23 @@
   }
 
   function maybeDropItem() {
-    if (Math.random() > 0.42) return;
-    const drops = [
-      { name: '강철 장검', atk: 1, def: 0 },
-      { name: '마력 반지', atk: 1, def: 1 },
-      { name: '용비늘 갑옷', atk: 0, def: 2 },
-      { name: '기사단 망토', atk: 0, def: 1 },
-      { name: '축복받은 검', atk: 2, def: 0 }
+    if (Math.random() > 0.48) return;
+    const baseDrops = [
+      { name: '강철 장검', atk: 1, def: 0, grade: 'normal' },
+      { name: '마력 반지', atk: 1, def: 1, grade: 'magic' },
+      { name: '용비늘 갑옷', atk: 0, def: 2, grade: 'rare' },
+      { name: '기사단 망토', atk: 0, def: 1, grade: 'normal' },
+      { name: '축복받은 검', atk: 2, def: 0, grade: 'rare' }
     ];
-    const item = randomOf(drops);
-    state.atk += item.atk;
-    state.def += item.def;
-    state.inventory.push(`${item.name}${item.atk ? ` 공격+${item.atk}` : ''}${item.def ? ` 방어+${item.def}` : ''}`);
-    addLog(`아이템 획득: ${item.name}`, 'loot-text');
+    const loreDrops = (lore.items || []).map((item) => ({ ...item, lore: true }));
+    const item = randomOf([...baseDrops, ...loreDrops]);
+    state.atk += item.atk || 0;
+    state.def += item.def || 0;
+    const statText = `${item.atk ? ` 공격+${item.atk}` : ''}${item.def ? ` 방어+${item.def}` : ''}`;
+    const gradeText = item.grade ? `[${item.grade}] ` : '';
+    state.inventory.push(`${gradeText}${item.name}${statText}`);
+    addLog(`아이템 획득: ${gradeText}${item.name}${statText}`, 'loot-text');
+    if (item.story) addLog(`아이템 기록: ${item.story}`, 'loot-text');
   }
 
   function completeQuest() {
@@ -339,6 +388,7 @@
     state.zone = (state.zone + 1) % zones.length;
     monster = createMonster();
     addLog(`${zones[state.zone].name}(으)로 이동했습니다.`, 'loot-text');
+    if (zones[state.zone].lore) addLog(`지역 기록: ${zones[state.zone].lore}`, 'loot-text');
     render();
   }
 
@@ -358,17 +408,18 @@
     refs.nextZoneBtn.addEventListener('click', nextZone);
     refs.resetSaveTop.addEventListener('click', resetSave);
     document.addEventListener('keydown', (event) => {
-      const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4 };
+      const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '8': 7, '9': 8 };
       if (event.code === 'Space') {
         event.preventDefault();
         basicAttack();
       }
-      if (keyMap[event.key] !== undefined) useSkill(skills[keyMap[event.key]]);
+      if (keyMap[event.key] !== undefined && skills[keyMap[event.key]]) useSkill(skills[keyMap[event.key]]);
     });
   }
 
   bindEvents();
   addLog('YDH Chronicle 접속 완료. 스페이스바로 기본 공격 가능.', 'good-text');
+  if (lore.title) addLog(`소설 콘텐츠 활성화: ${lore.title}`, 'loot-text');
   render();
   setInterval(renderSkills, 150);
 })();
