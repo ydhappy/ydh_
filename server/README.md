@@ -46,7 +46,7 @@ curl http://localhost:3000/api/health
 
 ### Save snapshot
 
-브라우저의 `서버연동` 섹션에서 `서버 전송 테스트` 버튼을 누르면 이 API로 POST됩니다.
+브라우저의 `서버연동` 섹션에서 `서버 저장` 버튼을 누르면 이 API로 POST됩니다.
 
 ```bash
 curl -X POST http://localhost:3000/api/save/snapshot \
@@ -56,15 +56,28 @@ curl -X POST http://localhost:3000/api/save/snapshot \
 
 ### Save list
 
+브라우저의 `서버 저장목록` 버튼과 연결됩니다.
+
 ```bash
 curl http://localhost:3000/api/save/list
 ```
 
 ### Restore latest save
 
+브라우저의 `최신 저장 복원`, `복원 후 새로고침` 버튼과 연결됩니다.
+
 ```bash
 curl http://localhost:3000/api/save/restore
 ```
+
+## 브라우저 UI 사용 흐름
+
+1. 서버 실행
+2. `http://localhost:3000/index.html` 접속
+3. 게임 진행
+4. `서버연동` 섹션에서 `서버 저장` 클릭
+5. `서버 저장목록`으로 저장 여부 확인
+6. `최신 저장 복원` 또는 `복원 후 새로고침`으로 서버 저장 데이터를 localStorage에 복원
 
 ## 저장 방식
 
@@ -78,8 +91,8 @@ server/data/saves.json
 
 ## 다음 고도화 후보
 
-1. SQLite 또는 MariaDB 저장소 교체
-2. 계정 로그인 추가
-3. 캐릭터 슬롯 추가
-4. 저장 복원 UI 추가
-5. WebSocket 위치 동기화
+1. 계정 로그인 추가
+2. 캐릭터 슬롯 추가
+3. SQLite 또는 MariaDB 저장소 교체
+4. WebSocket 위치 동기화
+5. Tiled Map Editor JSON import
