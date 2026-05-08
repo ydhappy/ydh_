@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="64" viewBox="0 0 1024 64">
+  <defs>
+    <g id="golem">
+      <path d="M18 18h28l8 17-8 22H18L10 35z" fill="#7b8796" stroke="#3c4653" stroke-width="3"/>
+      <path d="M22 13h20l4 12H18z" fill="#9aa5b5" stroke="#3c4653" stroke-width="3"/>
+      <path d="M10 36L2 46l12 6 6-10M54 36l8 10-12 6-6-10" fill="#657282"/>
+      <circle cx="27" cy="31" r="3" fill="#73a7ff"/>
+      <circle cx="38" cy="31" r="3" fill="#73a7ff"/>
+      <path d="M26 43h13" stroke="#202632" stroke-width="3" stroke-linecap="round"/>
+      <path d="M24 21h18M20 51h24" stroke="#c8d0dc" stroke-width="2" opacity=".45"/>
+    </g>
+  </defs>
+  <rect width="1024" height="64" fill="none"/>
+  <g transform="translate(0 0)"><use href="#golem" transform="rotate(0 32 32)"/></g>
+  <g transform="translate(64 0)"><use href="#golem" transform="rotate(22.5 32 32)"/></g>
+  <g transform="translate(128 0)"><use href="#golem" transform="rotate(45 32 32)"/></g>
+  <g transform="translate(192 0)"><use href="#golem" transform="rotate(67.5 32 32)"/></g>
+  <g transform="translate(256 0)"><use href="#golem" transform="rotate(90 32 32)"/></g>
+  <g transform="translate(320 0)"><use href="#golem" transform="rotate(112.5 32 32)"/></g>
+  <g transform="translate(384 0)"><use href="#golem" transform="rotate(135 32 32)"/></g>
+  <g transform="translate(448 0)"><use href="#golem" transform="rotate(157.5 32 32)"/></g>
+  <g transform="translate(512 0)"><use href="#golem" transform="rotate(180 32 32)"/></g>
+  <g transform="translate(576 0)"><use href="#golem" transform="rotate(202.5 32 32)"/></g>
+  <g transform="translate(640 0)"><use href="#golem" transform="rotate(225 32 32)"/></g>
+  <g transform="translate(704 0)"><use href="#golem" transform="rotate(247.5 32 32)"/></g>
+  <g transform="translate(768 0)"><use href="#golem" transform="rotate(270 32 32)"/></g>
+  <g transform="translate(832 0)"><use href="#golem" transform="rotate(292.5 32 32)"/></g>
+  <g transform="translate(896 0)"><use href="#golem" transform="rotate(315 32 32)"/></g>
+  <g transform="translate(960 0)"><use href="#golem" transform="rotate(337.5 32 32)"/></g>
+</svg>
