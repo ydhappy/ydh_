@@ -8,6 +8,38 @@ CREATE DATABASE IF NOT EXISTS ydh_chronicle
 
 USE ydh_chronicle;
 
+CREATE TABLE IF NOT EXISTS ydh_accounts (
+  account_id VARCHAR(80) NOT NULL,
+  provider VARCHAR(32) NOT NULL DEFAULT 'local',
+  display_name VARCHAR(80) NOT NULL DEFAULT 'YDH Player',
+  created_at DATETIME NOT NULL,
+  last_login_at DATETIME NOT NULL,
+  last_snapshot_at DATETIME DEFAULT NULL,
+  PRIMARY KEY (account_id),
+  KEY idx_display_name (display_name),
+  KEY idx_last_login_at (last_login_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ydh_character_slots (
+  character_id VARCHAR(80) NOT NULL,
+  account_id VARCHAR(80) NOT NULL,
+  slot_no INT NOT NULL DEFAULT 1,
+  character_name VARCHAR(80) NOT NULL DEFAULT '검은 기사',
+  class_id VARCHAR(32) NOT NULL DEFAULT 'knight',
+  level INT NOT NULL DEFAULT 1,
+  map_index INT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL,
+  last_selected_at DATETIME DEFAULT NULL,
+  last_snapshot_at DATETIME DEFAULT NULL,
+  PRIMARY KEY (character_id),
+  UNIQUE KEY uk_account_slot (account_id, slot_no),
+  KEY idx_account_id (account_id),
+  KEY idx_character_name (character_name),
+  CONSTRAINT fk_character_slots_account
+    FOREIGN KEY (account_id) REFERENCES ydh_accounts(account_id)
+    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS ydh_save_snapshots (
   id VARCHAR(64) NOT NULL,
   received_at DATETIME NOT NULL,
@@ -35,5 +67,5 @@ CREATE TABLE IF NOT EXISTS ydh_schema_meta (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO ydh_schema_meta (meta_key, meta_value, updated_at)
-VALUES ('schema_version', '1', NOW())
+VALUES ('schema_version', '2', NOW())
 ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value), updated_at = NOW();
