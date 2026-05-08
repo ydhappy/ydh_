@@ -62,6 +62,13 @@
     render();
   }
 
+  function publishPeers() {
+    window.YDH_REALTIME_PEERS = [...peers.values()];
+    window.dispatchEvent(new CustomEvent('ydh-realtime-peers-updated', {
+      detail: { peers: window.YDH_REALTIME_PEERS, status, clientId }
+    }));
+  }
+
   function send(type, payload = {}) {
     if (!socket || socket.readyState !== WebSocket.OPEN) return false;
     socket.send(JSON.stringify({ type, payload }));
@@ -71,12 +78,14 @@
   function connect() {
     if (socket && [WebSocket.OPEN, WebSocket.CONNECTING].includes(socket.readyState)) return;
     status = 'connecting';
+    publishPeers();
     render();
     try {
       socket = new WebSocket(wsUrl());
     } catch (error) {
       status = 'error';
       addLog(`WebSocket 생성 실패: ${error.message}`);
+      publishPeers();
       return;
     }
 
@@ -84,6 +93,7 @@
       status = 'connected';
       send('hello', currentPayload());
       addLog('실시간 위치 서버에 연결되었습니다.');
+      publishPeers();
       render();
     });
 
@@ -94,12 +104,14 @@
     socket.addEventListener('close', () => {
       status = 'off';
       addLog('실시간 위치 연결이 종료되었습니다.');
+      publishPeers();
       render();
     });
 
     socket.addEventListener('error', () => {
       status = 'error';
       addLog('실시간 위치 연결 오류가 발생했습니다.');
+      publishPeers();
       render();
     });
   }
@@ -109,6 +121,7 @@
     socket = null;
     status = 'off';
     peers.clear();
+    publishPeers();
     render();
   }
 
@@ -123,6 +136,7 @@
 
     if (message.type === 'connected') {
       clientId = message.payload?.clientId || clientId;
+      publishPeers();
       return;
     }
 
@@ -131,6 +145,7 @@
       peers.clear();
       (message.payload?.peers || []).forEach((peer) => peers.set(peer.clientId, peer));
       addLog(`기존 접속자 ${peers.size}명 동기화`);
+      publishPeers();
       render();
       return;
     }
@@ -138,6 +153,7 @@
     if (message.type === 'peer-joined' || message.type === 'peer-position') {
       const peer = message.payload;
       if (peer?.clientId) peers.set(peer.clientId, peer);
+      publishPeers();
       render();
       return;
     }
@@ -145,6 +161,7 @@
     if (message.type === 'peer-left') {
       const id = message.payload?.clientId;
       if (id) peers.delete(id);
+      publishPeers();
       render();
       return;
     }
@@ -224,6 +241,7 @@
     if (serverSync?.parentNode) serverSync.parentNode.insertBefore(section, serverSync.nextSibling);
     else document.querySelector('main')?.appendChild(section);
     render();
+    publishPeers();
     window.addEventListener('ydh-player-moved', (event) => broadcastPosition(event.detail || {}));
   }
 
