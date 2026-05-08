@@ -36,41 +36,44 @@
 
 상태: 완료
 
+## 17차: MySQL 5.5 저장소 고도화
+
+상태: 완료
+
 작업 파일:
 
-- `account-character.css`
-- `account-character.js`
-- `data/save-schema.js`
-- `server-sync.js`
-- `server/src/storage.js`
-- `server/src/validation.js`
+- `server/package.json`
+- `server/sql/mysql55-schema.sql`
+- `server/src/mysql-storage.js`
+- `server/src/storage-provider.js`
+- `server/src/server.js`
 - `server/README.md`
-- `index.html`
 - `docs/next-work-breakdown.md`
 
 완료 내용:
 
-- 로컬 계정 표시 이름 저장 UI 추가
-- 캐릭터 슬롯 3개 구조 추가
-- 기사/마법사/도적/사제 클래스 선택 추가
-- 캐릭터 생성/선택/삭제 UI 추가
-- 캐릭터 선택 시 해당 캐릭터 기준 저장 데이터 준비
-- 저장 스냅샷에 account, selectedCharacter, characterSlots 포함
-- 서버 저장 목록 요약에 accountName, characterName, classId, slotCount 포함
-- 서버 snapshot 검증/요약에 계정/캐릭터 필드 반영
-- 상단 메뉴에 `계정` 링크 추가
+- `mysql2` dependency 추가
+- MySQL 5.5 호환 schema SQL 추가
+- MySQL 5.5 미지원 JSON 타입 대신 `LONGTEXT` JSON 문자열 저장 방식 적용
+- `ydh_save_snapshots` 저장 테이블 추가
+- `ydh_schema_meta` schema version 테이블 추가
+- MySQL 저장 provider 추가
+- 파일 저장소와 MySQL 저장소를 `YDH_STORAGE` 환경변수로 선택 가능하게 구성
+- `/api/health` 응답에 `storageMode` 추가
+- `/api/save/snapshot`, `/api/save/list`, `/api/save/restore`가 선택된 저장소 provider를 사용하도록 변경
+- MySQL 5.5 실행 방법 문서화
 
 ## 전체 상태
 
-상태: 8차~16차 완료
+상태: 8차~17차 완료
 
 현재 남은 고도화 후보:
 
-1. 서버 DB 저장/불러오기 고도화: SQLite 또는 MariaDB
-2. WebSocket 위치 동기화
-3. Tiled Map Editor JSON import
-4. 실제 PNG/WebP atlas 교체
-5. 서버 저장 슬롯 선택 복원 UI
+1. 서버 저장 슬롯 선택 복원 UI
+2. MySQL 계정/캐릭터 정규화 테이블 분리
+3. WebSocket 위치 동기화
+4. Tiled Map Editor JSON import
+5. 실제 PNG/WebP atlas 교체
 6. 서버 계정 인증 추가
 
 ## 원칙
