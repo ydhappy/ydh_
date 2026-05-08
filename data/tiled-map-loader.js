@@ -24,6 +24,10 @@ window.YDH_TILED_MAP_LOADER = (() => {
       || layers.find((layer) => layer.type === 'tilelayer');
   }
 
+  function objectLayers(tiledMap) {
+    return (tiledMap.layers || []).filter((layer) => layer.type === 'objectgroup');
+  }
+
   function convertRows(tiledMap, tileLayer, gidToCode) {
     const width = tileLayer.width || tiledMap.width;
     const height = tileLayer.height || tiledMap.height;
@@ -41,6 +45,55 @@ window.YDH_TILED_MAP_LOADER = (() => {
     return rows;
   }
 
+  function objectKind(object) {
+    return String(propValue(object.properties || [], 'ydhKind', object.type || object.name || 'marker')).toLowerCase();
+  }
+
+  function convertObjects(tiledMap) {
+    const tilewidth = tiledMap.tilewidth || 64;
+    const tileheight = tiledMap.tileheight || 64;
+    const placements = [];
+
+    objectLayers(tiledMap).forEach((layer) => {
+      (layer.objects || []).forEach((object) => {
+        const kind = objectKind(object);
+        const x = Math.max(0, Math.floor((object.x || 0) / tilewidth));
+        const rawY = object.gid ? (object.y || 0) - tileheight : (object.y || 0);
+        const y = Math.max(0, Math.floor(rawY / tileheight));
+        placements.push({
+          id: String(propValue(object.properties || [], 'ydhId', object.name || `${kind}-${object.id}`)),
+          name: String(propValue(object.properties || [], 'ydhName', object.name || kind)),
+          kind,
+          x,
+          y,
+          layer: layer.name,
+          entityId: propValue(object.properties || [], 'ydhEntityId', ''),
+          targetMapId: propValue(object.properties || [], 'ydhTargetMapId', ''),
+          targetMapIndex: propValue(object.properties || [], 'ydhTargetMapIndex', ''),
+          dialogue: propValue(object.properties || [], 'ydhDialogue', ''),
+          raw: {
+            id: object.id,
+            name: object.name || '',
+            type: object.type || '',
+            x: object.x || 0,
+            y: object.y || 0,
+            width: object.width || 0,
+            height: object.height || 0
+          }
+        });
+      });
+    });
+
+    return placements;
+  }
+
+  function placementSummary(placements = []) {
+    return placements.reduce((summary, placement) => {
+      summary[placement.kind] = (summary[placement.kind] || 0) + 1;
+      return summary;
+    }, {});
+  }
+
   function convert(tiledMap, options = {}) {
     if (!tiledMap || tiledMap.type !== 'map') {
       throw new Error('Invalid Tiled map JSON: type must be map');
@@ -56,6 +109,7 @@ window.YDH_TILED_MAP_LOADER = (() => {
     const startX = Number(propValue(tiledMap.properties || [], 'ydhStartX', options.startX ?? 1));
     const startY = Number(propValue(tiledMap.properties || [], 'ydhStartY', options.startY ?? 1));
     const portalTo = Number(propValue(tiledMap.properties || [], 'ydhPortalTo', options.portalTo ?? 0));
+    const placements = convertObjects(tiledMap);
 
     return {
       id,
@@ -64,6 +118,15 @@ window.YDH_TILED_MAP_LOADER = (() => {
       start: { x: startX, y: startY },
       portalTo,
       source: 'tiled-json',
+      sourceUrl: options.sourceUrl || '',
+      tiled: {
+        version: tiledMap.version || tiledMap.tiledversion || 'unknown',
+        tilewidth: tiledMap.tilewidth || 64,
+        tileheight: tiledMap.tileheight || 64,
+        objectLayers: objectLayers(tiledMap).map((layer) => layer.name),
+        placementSummary: placementSummary(placements)
+      },
+      placements,
       rows: convertRows(tiledMap, layer, gidToCode)
     };
   }
@@ -72,7 +135,7 @@ window.YDH_TILED_MAP_LOADER = (() => {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Tiled map fetch failed: HTTP ${response.status}`);
     const tiledMap = await response.json();
-    return convert(tiledMap, options);
+    return convert(tiledMap, { ...options, sourceUrl: url });
   }
 
   function appendToYdhMaps(map) {
@@ -87,6 +150,9 @@ window.YDH_TILED_MAP_LOADER = (() => {
     loadFromUrl,
     appendToYdhMaps,
     propValue,
-    buildGidCodeMap
+    buildGidCodeMap,
+    convertObjects,
+    objectLayers,
+    placementSummary
   };
 })();
