@@ -174,23 +174,50 @@
 
 ### 22-6: Object Layer 실제 배치 적용
 
+상태: 완료
+
+작업 파일:
+
+- `data/tiled-map-loader.js`
+- `map-engine.js`
+- `gm-console.js`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- Object Layer placement를 실제 `rows` 타일 코드에 합성
+- `npc` object를 `N` 타일로 반영
+- `monster` object를 `M` 타일로 반영
+- `portal` object를 `P` 타일로 반영
+- 원본 tilelayer rows를 `baseRows`로 보관
+- 적용된 placement를 `appliedPlacements`로 보관
+- 제외된 placement를 `skippedPlacements`로 보관
+- 맵 엔진에서 Object Layer `ydhEntityId` 기반 NPC/몬스터 스프라이트 선택
+- 맵 엔진에서 Object Layer `ydhDialogue` 기반 NPC 대사 출력
+- 맵 엔진에서 Object Layer `ydhTargetMapIndex`/`ydhTargetMapId` 기반 포탈 이동
+- GM 콘솔에 적용/제외 placement 수 표시
+- GM 콘솔 맵 정보 복사에 applied/skipped placement 포함
+
+### 22-7: custom map 관리 UI/서버 저장 연동
+
 상태: 대기
 
 목표:
 
-- Object Layer의 npc/monster/portal을 실제 맵 타일 코드에 반영
-- Object Layer 포탈 이동 대상 적용
-- Object Layer NPC 대사 적용
 - custom map 내보내기/삭제 UI
 - custom map 서버 저장 연동
+- 검증 실패 맵 상세 보기
+- Object Layer marker 정보창
+- Tiled object layer 기반 퀘스트 트리거
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~5단계 완료
+상태: 8차~21차 완료, 22차 1~6단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-6 Object Layer 실제 배치 적용
+1. 22-7 custom map 관리 UI/서버 저장 연동
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
