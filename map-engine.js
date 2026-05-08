@@ -140,6 +140,10 @@
         const cell = document.createElement('button');
         cell.type = 'button';
         cell.className = `map-tile tile-${code}${tile.passable ? '' : ' blocked'}${state.x === x && state.y === y ? ' player-here' : ''}`;
+        cell.dataset.x = String(x);
+        cell.dataset.y = String(y);
+        cell.dataset.mapIndex = String(state.mapIndex);
+        cell.dataset.mapId = map.id;
         cell.style.backgroundImage = `url(${tile.asset})`;
         cell.title = `${tile.name} (${x}, ${y})`;
         cell.setAttribute('aria-label', `${tile.name} ${x}, ${y}`);
@@ -149,6 +153,10 @@
       });
     });
     saveState();
+    window.YDH_CURRENT_MAP_STATE = { ...state, mapId: map.id, mapName: map.name };
+    window.dispatchEvent(new CustomEvent('ydh-map-rendered', {
+      detail: { state: window.YDH_CURRENT_MAP_STATE }
+    }));
   }
 
   function setEvent(message, type = '') {
