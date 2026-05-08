@@ -5,6 +5,8 @@
   const schema = window.YDH_SAVE_SCHEMA;
   if (!schema) return;
 
+  let cachedServerSaves = [];
+
   function safeJson(value) {
     try {
       return JSON.stringify(value, null, 2);
@@ -17,6 +19,15 @@
     if (!value || typeof value !== 'object') return 0;
     if (Array.isArray(value)) return value.length;
     return Object.keys(value).length;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   function render() {
@@ -35,7 +46,7 @@
         <div>
           <p class="eyebrow">SERVER/API READY</p>
           <h2>저장 데이터 서버 연동</h2>
-          <p>localStorage 저장 데이터를 서버로 보내고, 서버의 최신 저장 데이터를 다시 브라우저로 복원합니다.</p>
+          <p>localStorage 저장 데이터를 서버로 보내고, 서버 저장 목록에서 원하는 슬롯을 선택해 복원합니다.</p>
         </div>
         <div class="sync-status-badge">${status.mode || 'local-only'}<br />${status.lastRestoreAt ? `복원 ${new Date(status.lastRestoreAt).toLocaleTimeString('ko-KR')}` : status.lastSyncAt ? `저장 ${new Date(status.lastSyncAt).toLocaleTimeString('ko-KR')}` : '대기'}</div>
       </div>
@@ -52,8 +63,9 @@
         <button type="button" id="testPushSnapshot">서버 저장</button>
         <button type="button" id="listServerSaves">서버 저장목록</button>
         <button type="button" id="restoreLatestSave">최신 저장 복원</button>
-        <button type="button" id="restoreLatestAndReload">복원 후 새로고침</button>
+        <button type="button" id="restoreLatestAndReload">최신 복원+새로고침</button>
       </div>
+      <div class="sync-save-list" id="syncSaveList">${renderSaveCards(cachedServerSaves)}</div>
       <pre class="sync-output" id="syncOutput"></pre>
     `;
 
@@ -83,12 +95,13 @@
       output.textContent = '서버 저장 중... Node 서버가 실행 중이어야 합니다.';
       const result = await sync().pushSnapshot();
       output.textContent = safeJson(result.ok ? result.result : { error: result.error, note: '서버가 꺼져 있으면 실패합니다.' });
+      await refreshServerSaves(false);
       renderSoon();
     });
 
     document.getElementById('listServerSaves')?.addEventListener('click', async () => {
       output.textContent = '서버 저장 목록 조회 중...';
-      const result = await sync().listServerSaves();
+      const result = await refreshServerSaves(false);
       output.textContent = safeJson(result.ok ? result.saves : { error: result.error, note: '서버가 꺼져 있으면 실패합니다.' });
       renderSoon();
     });
@@ -105,6 +118,50 @@
       const result = await sync().restoreLatestSnapshot({ reload: true });
       if (!result.ok) output.textContent = safeJson({ error: result.error });
     });
+
+    document.querySelectorAll('[data-restore-save-id]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        output.textContent = `선택 저장 복원 중: ${button.dataset.restoreSaveId}`;
+        const result = await sync().restoreSnapshotById(button.dataset.restoreSaveId, { reload: false });
+        output.textContent = safeJson(result.ok ? { restoredId: result.record.id, receivedAt: result.record.receivedAt, characterName: result.record.characterName, note: '선택 저장 복원 완료. 필요하면 새로고침하세요.' } : { error: result.error });
+        renderSoon();
+      });
+    });
+
+    document.querySelectorAll('[data-restore-reload-save-id]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        output.textContent = `선택 저장 복원 후 새로고침 중: ${button.dataset.restoreReloadSaveId}`;
+        const result = await sync().restoreSnapshotById(button.dataset.restoreReloadSaveId, { reload: true });
+        if (!result.ok) output.textContent = safeJson({ error: result.error });
+      });
+    });
+  }
+
+  function renderSaveCards(saves) {
+    if (!saves.length) return '<div class="sync-empty-list">서버 저장목록을 누르면 저장 슬롯이 표시됩니다.</div>';
+    return saves.map((save) => `
+      <article class="sync-save-card">
+        <div>
+          <strong>${escapeHtml(save.characterName || '검은 기사')}</strong>
+          <small>${escapeHtml(save.accountName || 'YDH Player')} · ${escapeHtml(save.classId || 'knight')} · Lv.${save.level || 1}</small>
+          <small>${escapeHtml(save.receivedAt || '')} · map ${save.mapIndex ?? 0}</small>
+        </div>
+        <div class="sync-save-actions">
+          <button type="button" data-restore-save-id="${escapeHtml(save.id)}">복원</button>
+          <button type="button" data-restore-reload-save-id="${escapeHtml(save.id)}">복원+새로고침</button>
+        </div>
+      </article>
+    `).join('');
+  }
+
+  async function refreshServerSaves(updateOutput = true) {
+    const result = await sync().listServerSaves();
+    if (result.ok) cachedServerSaves = result.saves || [];
+    if (updateOutput) {
+      const output = document.getElementById('syncOutput');
+      if (output) output.textContent = safeJson(result.ok ? result.saves : { error: result.error });
+    }
+    return result;
   }
 
   function renderSoon() {
