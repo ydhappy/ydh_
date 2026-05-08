@@ -11,13 +11,14 @@ YDH Chronicle은 `.github/agents/my-agent.agent.md`의 MMORPG Full-Scope Expert 
 - 몬스터 웨이브 전투 루프
 - 3개 기본 타일맵: 말하는 섬, 은빛 숲, 버려진 광산
 - 모바일 방향 버튼, 인접 타일 클릭, PC WASD/방향키 이동
+- 16방향 캐릭터/몬스터/NPC 스프라이트 표시
+- 맵별 몬스터/NPC 스폰 테이블
 - 타일 충돌 처리: 나무/물/벽 이동 불가
 - 포탈 타일을 통한 맵 이동
-- NPC 타일 안내 이벤트
+- NPC 타일 대화 이벤트
 - 몬스터 구역 랜덤 조우 이벤트
 - EXP/레벨업/HP/MP/공격/방어 성장
 - 아이템 드롭 및 자동 인벤토리 기록
-- 3마리 처치 퀘스트와 보상
 - GM 콘솔 스타일 실시간 전투/맵 로그
 - localStorage 기반 자동 저장
 - 모바일/PC 반응형 UI
@@ -25,7 +26,6 @@ YDH Chronicle은 `.github/agents/my-agent.agent.md`의 MMORPG Full-Scope Expert 
 ## 실행 방법
 
 ```bash
-# 저장소를 받은 뒤
 open index.html
 ```
 
@@ -47,9 +47,9 @@ open index.html
 - 모바일: 화면의 `▲ ◀ ▼ ▶` 버튼
 - PC: `WASD` 또는 방향키
 - 마우스/터치: 현재 위치와 인접한 타일 클릭
-- `🌀` 포탈: 다음 맵으로 이동
-- `💬` NPC: 안내 이벤트
-- `👹` 몬스터 구역: 조우 이벤트
+- 포탈 타일: 다음 맵으로 이동
+- NPC 타일: 맵별 NPC 대화 이벤트
+- 몬스터 구역: 맵별 몬스터 조우 이벤트
 
 ## 현재 프로젝트 구조
 
@@ -58,11 +58,13 @@ open index.html
 ├── index.html
 ├── styles.css
 ├── map.css
+├── entity-sprites.css
 ├── game.js
 ├── map-engine.js
 ├── game-map-bridge.js
 ├── data/
-│   └── maps.js
+│   ├── maps.js
+│   └── entities.js
 ├── assets/
 │   ├── README.md
 │   ├── tiles/
@@ -74,25 +76,68 @@ open index.html
 │   │   └── portal.svg
 │   └── sprites/
 │       ├── player.svg
-│       └── slime.svg
+│       ├── slime.svg
+│       ├── player-16dir.svg
+│       ├── monster-wolf-16dir.svg
+│       ├── monster-goblin-16dir.svg
+│       ├── monster-golem-16dir.svg
+│       ├── npc-guide-16dir.svg
+│       ├── npc-merchant-16dir.svg
+│       └── npc-guard-16dir.svg
 └── .github/
     ├── agents/my-agent.agent.md
     └── workflows/pages.yml
 ```
 
-## Assets 개발 기준
+## 16방향 스프라이트 규격
 
-초기 버전은 GitHub Pages에서 빠르게 로딩되도록 **SVG 기반 경량 에셋**을 사용합니다.
-실제 픽셀아트가 준비되면 같은 경로의 파일을 PNG/WebP로 교체하거나 `data/maps.js`의 asset 경로만 변경하면 됩니다.
+현재 엔티티 이미지는 `1024x64` SVG 스프라이트시트입니다.
 
-권장 규격:
+- 프레임 크기: `64x64`
+- 프레임 개수: `16`
+- 전체 크기: `1024x64`
+- 방향 단위: `22.5도`
+- 프레임 인덱스: `0 ~ 15`
 
-| 분류 | 권장 크기 | 포맷 | 설명 |
-| --- | --- | --- | --- |
-| 타일 | 32x32 또는 64x64 | PNG/WebP/SVG | 잔디, 길, 물, 벽, 포탈 등 |
-| 캐릭터 | 64x64 | PNG/WebP/SVG | 4방향/8방향 확장 가능 |
-| 몬스터 | 64x64 | PNG/WebP/SVG | 지역별 몬스터 |
-| UI 아이콘 | 32x32 | SVG/PNG | 스킬, 아이템, 장비 |
+| 인덱스 | 방향 | 각도 |
+| --- | --- | --- |
+| 0 | E | 0 |
+| 1 | ENE | 22.5 |
+| 2 | NE | 45 |
+| 3 | NNE | 67.5 |
+| 4 | N | 90 |
+| 5 | NNW | 112.5 |
+| 6 | NW | 135 |
+| 7 | WNW | 157.5 |
+| 8 | W | 180 |
+| 9 | WSW | 202.5 |
+| 10 | SW | 225 |
+| 11 | SSW | 247.5 |
+| 12 | S | 270 |
+| 13 | SSE | 292.5 |
+| 14 | SE | 315 |
+| 15 | ESE | 337.5 |
+
+## Entity 개발 기준
+
+엔티티 정의는 `data/entities.js`에서 관리합니다.
+
+- `player`: 플레이어 캐릭터
+- `monsters`: 몬스터 풀
+- `npcs`: NPC 풀
+- `spawnTables`: 맵별 몬스터/NPC 배치 테이블
+
+현재 몬스터:
+
+- 그림자 늑대
+- 고블린 약탈자
+- 광산 골렘
+
+현재 NPC:
+
+- 마을 안내인
+- 잡화 상인
+- 경비병
 
 ## Map 개발 기준
 
@@ -116,8 +161,8 @@ rows: [
 | `S` | stone | 가능 | 동굴/광산 바닥 |
 | `T` | tree/wall | 불가 | 충돌 타일 |
 | `W` | water | 불가 | 충돌 타일 |
-| `M` | monster area | 가능 | 높은 확률 조우 |
-| `N` | npc | 가능 | 안내 이벤트 |
+| `M` | monster area | 가능 | 맵별 몬스터 표시/조우 |
+| `N` | npc | 가능 | 맵별 NPC 표시/대화 |
 | `P` | portal | 가능 | 다음 맵 이동 |
 
 ## 파일 설명
@@ -127,26 +172,26 @@ rows: [
 | `index.html` | 홈페이지/게임/맵 화면 구조 |
 | `styles.css` | 전체 반응형 UI, 전투 화면, RPG 테마 스타일 |
 | `map.css` | 모바일 타일맵, 이동 버튼, 맵 이벤트 스타일 |
+| `entity-sprites.css` | 16방향 엔티티 스프라이트 렌더링 스타일 |
 | `game.js` | 전투, 성장, 저장, 스킬, 퀘스트 로직 |
 | `data/maps.js` | 타일 타입과 기본 맵 데이터 |
-| `map-engine.js` | 타일맵 렌더링, 이동, 충돌, 포탈, 조우 처리 |
+| `data/entities.js` | 16방향 방향표, 엔티티 풀, 스폰 테이블 |
+| `map-engine.js` | 타일맵 렌더링, 이동, 충돌, 포탈, NPC/몬스터 처리 |
 | `game-map-bridge.js` | 맵 이벤트를 GM 콘솔 로그에 연결 |
 | `assets/` | 타일/스프라이트 리소스 |
-| `.github/agents/my-agent.agent.md` | MMORPG 개발 전문 에이전트 문서 |
-| `.github/workflows/pages.yml` | GitHub Pages 정적 배포 워크플로 |
 
 ## 향후 확장 후보
 
-1. Tiled Map Editor JSON import
-2. 타일셋 PNG atlas 적용
-3. 캐릭터 4방향/8방향 스프라이트 애니메이션
-4. 몬스터 spawn table 분리
-5. 서버 DB 기반 맵/오브젝트 관리
-6. Java/Node API 서버 연동
-7. WebSocket 위치 동기화
-8. GM 맵/스폰 관리 콘솔
-9. 로봇 AI 사냥 루틴
-10. 실제 게임 런처 페이지
+1. 전투 화면 캐릭터/몬스터도 16방향 이미지로 교체
+2. Tiled Map Editor JSON import
+3. 타일셋 PNG atlas 적용
+4. 걷기 애니메이션 프레임 추가
+5. 몬스터 spawn table 확률/레벨/리젠 시간 분리
+6. 서버 DB 기반 맵/오브젝트 관리
+7. Java/Node API 서버 연동
+8. WebSocket 위치 동기화
+9. GM 맵/스폰 관리 콘솔
+10. 로봇 AI 사냥 루틴
 
 ## 개발 메모
 
