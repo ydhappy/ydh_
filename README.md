@@ -9,6 +9,7 @@ YDH Chronicle은 `.github/agents/my-agent.agent.md`의 MMORPG Full-Scope Expert 
 - 레트로 MMORPG 감성 홈페이지 랜딩 화면
 - 기본 공격, 5종 스킬, 쿨타임, MP 소모
 - 몬스터 웨이브 전투 루프
+- 전투 화면 캐릭터/몬스터 16방향 스프라이트 표시
 - 3개 기본 타일맵: 말하는 섬, 은빛 숲, 버려진 광산
 - 모바일 방향 버튼, 인접 타일 클릭, PC WASD/방향키 이동
 - 16방향 캐릭터/몬스터/NPC 스프라이트 표시
@@ -59,9 +60,11 @@ open index.html
 ├── styles.css
 ├── map.css
 ├── entity-sprites.css
+├── battle-sprites.css
 ├── game.js
 ├── map-engine.js
 ├── game-map-bridge.js
+├── battle-sprites.js
 ├── data/
 │   ├── maps.js
 │   └── entities.js
@@ -139,6 +142,16 @@ open index.html
 - 잡화 상인
 - 경비병
 
+## Battle Sprite 개발 기준
+
+전투 화면은 `battle-sprites.js`와 `battle-sprites.css`가 담당합니다.
+
+- 기존 `game.js`의 전투 계산 로직은 유지합니다.
+- 전투 화면의 플레이어/몬스터 이모지 표시를 16방향 스프라이트 배경으로 교체합니다.
+- 몬스터 이름을 감지해서 늑대/고블린/골렘 이미지 중 적절한 이미지를 선택합니다.
+- 전투 화면의 플레이어는 기본 동쪽 방향, 몬스터는 기본 서쪽 방향으로 마주보게 표시합니다.
+- 추후 공격/피격/사망 모션은 별도 animation frame으로 확장할 수 있습니다.
+
 ## Map 개발 기준
 
 맵은 `data/maps.js`에서 문자 타일 방식으로 관리합니다.
@@ -173,19 +186,21 @@ rows: [
 | `styles.css` | 전체 반응형 UI, 전투 화면, RPG 테마 스타일 |
 | `map.css` | 모바일 타일맵, 이동 버튼, 맵 이벤트 스타일 |
 | `entity-sprites.css` | 16방향 엔티티 스프라이트 렌더링 스타일 |
+| `battle-sprites.css` | 전투 화면 16방향 스프라이트 스타일 |
 | `game.js` | 전투, 성장, 저장, 스킬, 퀘스트 로직 |
 | `data/maps.js` | 타일 타입과 기본 맵 데이터 |
 | `data/entities.js` | 16방향 방향표, 엔티티 풀, 스폰 테이블 |
 | `map-engine.js` | 타일맵 렌더링, 이동, 충돌, 포탈, NPC/몬스터 처리 |
+| `battle-sprites.js` | 전투 화면 캐릭터/몬스터 스프라이트 교체 렌더러 |
 | `game-map-bridge.js` | 맵 이벤트를 GM 콘솔 로그에 연결 |
 | `assets/` | 타일/스프라이트 리소스 |
 
 ## 향후 확장 후보
 
-1. 전투 화면 캐릭터/몬스터도 16방향 이미지로 교체
-2. Tiled Map Editor JSON import
-3. 타일셋 PNG atlas 적용
-4. 걷기 애니메이션 프레임 추가
+1. 걷기 애니메이션 프레임 추가
+2. 공격/피격/사망 전투 모션 추가
+3. Tiled Map Editor JSON import
+4. 타일셋 PNG atlas 적용
 5. 몬스터 spawn table 확률/레벨/리젠 시간 분리
 6. 서버 DB 기반 맵/오브젝트 관리
 7. Java/Node API 서버 연동
