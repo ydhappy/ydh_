@@ -34,10 +34,10 @@
       <div class="server-sync-head">
         <div>
           <p class="eyebrow">SERVER/API READY</p>
-          <h2>저장 데이터 서버 연동 준비</h2>
-          <p>현재 localStorage 저장 데이터를 서버 API로 보낼 수 있는 스냅샷 형태로 묶습니다. 실제 서버가 없으면 로컬 내보내기로 검증합니다.</p>
+          <h2>저장 데이터 서버 연동</h2>
+          <p>localStorage 저장 데이터를 서버로 보내고, 서버의 최신 저장 데이터를 다시 브라우저로 복원합니다.</p>
         </div>
-        <div class="sync-status-badge">${status.mode || 'local-only'}<br />${status.lastSyncAt ? new Date(status.lastSyncAt).toLocaleTimeString('ko-KR') : '대기'}</div>
+        <div class="sync-status-badge">${status.mode || 'local-only'}<br />${status.lastRestoreAt ? `복원 ${new Date(status.lastRestoreAt).toLocaleTimeString('ko-KR')}` : status.lastSyncAt ? `저장 ${new Date(status.lastSyncAt).toLocaleTimeString('ko-KR')}` : '대기'}</div>
       </div>
       <div class="sync-grid">
         <div class="sync-card"><small>캐릭터</small><strong>Lv.${character.level || 1} · ${character.gold || 0}G</strong></div>
@@ -49,18 +49,23 @@
         <button type="button" id="previewSnapshot">스냅샷 보기</button>
         <button type="button" id="exportSnapshot">JSON 내보내기</button>
         <button type="button" id="copySnapshot">클립보드 복사</button>
-        <button type="button" id="testPushSnapshot">서버 전송 테스트</button>
+        <button type="button" id="testPushSnapshot">서버 저장</button>
+        <button type="button" id="listServerSaves">서버 저장목록</button>
+        <button type="button" id="restoreLatestSave">최신 저장 복원</button>
+        <button type="button" id="restoreLatestAndReload">복원 후 새로고침</button>
       </div>
       <pre class="sync-output" id="syncOutput"></pre>
     `;
 
+    const output = document.getElementById('syncOutput');
+
     document.getElementById('previewSnapshot')?.addEventListener('click', () => {
-      document.getElementById('syncOutput').textContent = safeJson(sync().buildSnapshot());
+      output.textContent = safeJson(sync().buildSnapshot());
     });
 
     document.getElementById('exportSnapshot')?.addEventListener('click', () => {
-      const snapshot = sync().exportSnapshot();
-      document.getElementById('syncOutput').textContent = `JSON 내보내기 완료\n${safeJson({ generatedAt: snapshot.generatedAt, schemaVersion: snapshot.schemaVersion })}`;
+      const exported = sync().exportSnapshot();
+      output.textContent = `JSON 내보내기 완료\n${safeJson({ generatedAt: exported.generatedAt, schemaVersion: exported.schemaVersion })}`;
       renderSoon();
     });
 
@@ -68,17 +73,37 @@
       const text = safeJson(sync().buildSnapshot());
       try {
         await navigator.clipboard.writeText(text);
-        document.getElementById('syncOutput').textContent = '스냅샷 클립보드 복사 완료';
+        output.textContent = '스냅샷 클립보드 복사 완료';
       } catch (error) {
-        document.getElementById('syncOutput').textContent = `클립보드 복사 실패: ${error.message}`;
+        output.textContent = `클립보드 복사 실패: ${error.message}`;
       }
     });
 
     document.getElementById('testPushSnapshot')?.addEventListener('click', async () => {
-      document.getElementById('syncOutput').textContent = '서버 전송 테스트 중... 실제 /api/save/snapshot 서버가 없으면 실패하는 것이 정상입니다.';
+      output.textContent = '서버 저장 중... Node 서버가 실행 중이어야 합니다.';
       const result = await sync().pushSnapshot();
-      document.getElementById('syncOutput').textContent = safeJson(result.ok ? result.result : { error: result.error, note: '서버 미구현 상태면 정상적인 실패입니다.' });
+      output.textContent = safeJson(result.ok ? result.result : { error: result.error, note: '서버가 꺼져 있으면 실패합니다.' });
       renderSoon();
+    });
+
+    document.getElementById('listServerSaves')?.addEventListener('click', async () => {
+      output.textContent = '서버 저장 목록 조회 중...';
+      const result = await sync().listServerSaves();
+      output.textContent = safeJson(result.ok ? result.saves : { error: result.error, note: '서버가 꺼져 있으면 실패합니다.' });
+      renderSoon();
+    });
+
+    document.getElementById('restoreLatestSave')?.addEventListener('click', async () => {
+      output.textContent = '최신 저장 복원 중...';
+      const result = await sync().restoreLatestSnapshot({ reload: false });
+      output.textContent = safeJson(result.ok ? { restoredId: result.record.id, receivedAt: result.record.receivedAt, note: '복원 완료. 새로고침하면 모든 화면이 저장 상태로 다시 렌더링됩니다.' } : { error: result.error });
+      renderSoon();
+    });
+
+    document.getElementById('restoreLatestAndReload')?.addEventListener('click', async () => {
+      output.textContent = '최신 저장 복원 후 새로고침 중...';
+      const result = await sync().restoreLatestSnapshot({ reload: true });
+      if (!result.ok) output.textContent = safeJson({ error: result.error });
     });
   }
 
@@ -96,6 +121,7 @@
     else document.querySelector('main')?.appendChild(section);
     render();
     window.addEventListener('ydh-server-sync-status', renderSoon);
+    window.addEventListener('ydh-server-restore-applied', renderSoon);
     setInterval(render, 3000);
   }
 
