@@ -56,36 +56,69 @@
 
 상태: 완료
 
+## 22차: Tiled Map Editor JSON import
+
+상태: 분할 진행 중
+
+### 22-1: Tiled JSON 샘플맵 + 변환기
+
+상태: 완료
+
 작업 파일:
 
-- `map-engine.js`
-- `realtime-sync.js`
-- `realtime-map-peers.css`
-- `realtime-map-peers.js`
+- `data/tiled/moon-gate-sample.json`
+- `data/tiled-map-loader.js`
+- `docs/tiled-json-import.md`
+
+완료 내용:
+
+- 8x6 소형 Tiled JSON 샘플맵 추가
+- Tiled tileset `ydhCode` property 기반 GID → YDH 타일 코드 변환 추가
+- Tiled map property 기반 id/name/description/start/portalTo 변환 추가
+- `loadFromUrl`, `convert`, `appendToYdhMaps` 변환 API 추가
+- Tiled 작성 규칙 문서화
+
+### 22-2: Tiled JSON 자동 로드 연결
+
+상태: 완료
+
+작업 파일:
+
+- `tiled-map-bootstrap.js`
 - `index.html`
-- `server/README.md`
+- `docs/tiled-json-import.md`
 - `docs/next-work-breakdown.md`
 
 완료 내용:
 
-- 맵 타일 DOM에 `data-x`, `data-y`, `data-map-index`, `data-map-id` 좌표 메타데이터 추가
-- 맵 렌더 완료 이벤트 `ydh-map-rendered` 추가
-- 현재 맵 상태 전역값 `window.YDH_CURRENT_MAP_STATE` 추가
-- 실시간 peer 목록 전역값 `window.YDH_REALTIME_PEERS` 추가
-- 실시간 peer 변경 이벤트 `ydh-realtime-peers-updated` 추가
-- 같은 `mapIndex`에 있는 원격 플레이어만 타일맵 위에 표시
-- 원격 플레이어 스프라이트/이름표 표시
-- 같은 타일에 여러 원격 플레이어가 있으면 `+N` 배지 표시
-- 원격 플레이어 타일 강조 스타일 추가
-- README에 원격 아바타 테스트 흐름 문서화
+- `index.html`에 `data/tiled-map-loader.js` 연결
+- `index.html`에 `tiled-map-bootstrap.js` 연결
+- 로드 순서를 `data/maps.js` → `data/tiled-map-loader.js` → `tiled-map-bootstrap.js` → `map-engine.js`로 정리
+- 샘플 Tiled JSON을 `YDH_MAPS.maps`에 안전하게 append
+- 중복 맵은 재추가하지 않도록 처리
+- 로드 실패 시 기존 문자 타일맵 유지
+- Tiled 로드 성공/실패를 게임 로그 이벤트로 전달
+- Assets/Map 설명 문구를 Tiled JSON 지원 기준으로 갱신
+
+### 22-3: Tiled 맵 선택/검증 UI
+
+상태: 대기
+
+목표:
+
+- 맵 선택 UI 추가
+- GM 콘솔에 Tiled source 표시
+- 다중 Tiled JSON 등록 구조 추가
+- Tiled 맵 검증 결과 표시
+- 실패 맵/중복 맵 목록 표시
 
 ## 전체 상태
 
-상태: 8차~21차 완료
+상태: 8차~21차 완료, 22차 1~2단계 완료
 
 현재 남은 고도화 후보:
 
-1. Tiled Map Editor JSON import
+1. 22-3 Tiled 맵 선택/검증 UI
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
