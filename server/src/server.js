@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { latestSnapshot, listSnapshots, saveSnapshot, storageHealth, storageMode } from './storage-provider.js';
+import { latestSnapshot, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -78,6 +78,16 @@ app.get('/api/save/restore', async (req, res, next) => {
     const latest = await latestSnapshot();
     if (!latest) return res.status(404).json({ ok: false, error: 'No save snapshot found' });
     res.json({ ok: true, storageMode, save: latest });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/save/:id', async (req, res, next) => {
+  try {
+    const record = await snapshotById(req.params.id);
+    if (!record) return res.status(404).json({ ok: false, error: 'Save snapshot not found' });
+    res.json({ ok: true, storageMode, save: record });
   } catch (error) {
     next(error);
   }
