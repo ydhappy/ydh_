@@ -100,6 +100,8 @@
     const passable = Object.entries(counts).reduce((sum, [code, count]) => sum + ((mapsData.tileTypes[code]?.passable ? count : 0)), 0);
     const blocked = Object.entries(counts).reduce((sum, [code, count]) => sum + ((mapsData.tileTypes[code]?.passable ? 0 : count)), 0);
     const placements = map.placements || [];
+    const applied = map.appliedPlacements || [];
+    const skipped = map.skippedPlacements || [];
     const placementCounts = placementSummary(map);
 
     panel.innerHTML = `
@@ -109,7 +111,7 @@
         <div class="gm-console-card"><small>현재 맵</small><strong>${escapeHtml(map.name)}</strong></div>
         <div class="gm-console-card"><small>맵 ID</small><strong>${escapeHtml(map.id)}</strong></div>
         <div class="gm-console-card"><small>Source</small><strong>${escapeHtml(sourceLabel(map))}</strong></div>
-        <div class="gm-console-card"><small>Object</small><strong>${placements.length}개</strong></div>
+        <div class="gm-console-card"><small>Object</small><strong>${placements.length}개 · 적용 ${applied.length} · 제외 ${skipped.length}</strong></div>
         <div class="gm-console-card"><small>좌표</small><strong>X:${pos.x} / Y:${pos.y}</strong></div>
         <div class="gm-console-card"><small>방향/스텝</small><strong>DIR:${pos.dir} / STEP:${pos.step}</strong></div>
         <div class="gm-console-card"><small>현재 타일</small><strong>${tile.code} · ${escapeHtml(tile.name)}</strong></div>
@@ -119,7 +121,8 @@
         <h3>Tiled Object 배치</h3>
         <div class="gm-console-list">
           ${Object.entries(placementCounts).map(([kind, count]) => `<span><b>${escapeHtml(kind)}</b>${count}</span>`).join('') || '<span><b>Object</b>없음</span>'}
-          ${placements.slice(0, 8).map((item) => `<span><b>${escapeHtml(item.kind)}</b>${escapeHtml(item.name)} · X:${item.x} Y:${item.y}${item.entityId ? ` · ${escapeHtml(item.entityId)}` : ''}</span>`).join('')}
+          ${applied.slice(0, 8).map((item) => `<span><b>${escapeHtml(item.kind)} → ${item.code}</b>${escapeHtml(item.name)} · X:${item.x} Y:${item.y}${item.entityId ? ` · ${escapeHtml(item.entityId)}` : ''}</span>`).join('')}
+          ${skipped.slice(0, 4).map((item) => `<span><b>제외</b>${escapeHtml(item.name)} · ${escapeHtml(item.reason)}</span>`).join('')}
         </div>
       </div>
       <div class="gm-console-section">
@@ -154,6 +157,8 @@
 
   function copyMapInfo(map, pos, tile, monsters, npcs) {
     const placements = map.placements || [];
+    const applied = map.appliedPlacements || [];
+    const skipped = map.skippedPlacements || [];
     const text = [
       `map=${map.name} (${map.id})`,
       `source=${sourceLabel(map)}`,
@@ -161,7 +166,9 @@
       `tile=${tile.code}/${tile.name}/passable=${tile.passable}/encounter=${tile.encounter || 0}`,
       `monsters=${monsters.join(', ')}`,
       `npcs=${npcs.join(', ')}`,
-      `objects=${placements.map((item) => `${item.kind}:${item.name}@${item.x},${item.y}`).join(', ')}`
+      `objects=${placements.map((item) => `${item.kind}:${item.name}@${item.x},${item.y}`).join(', ')}`,
+      `applied=${applied.map((item) => `${item.kind}:${item.code}@${item.x},${item.y}`).join(', ')}`,
+      `skipped=${skipped.map((item) => `${item.kind}:${item.reason}@${item.x},${item.y}`).join(', ')}`
     ].join('\n');
     navigator.clipboard?.writeText(text);
     window.dispatchEvent(new CustomEvent('ydh-map-event', { detail: { message: 'GM 콘솔: 맵 정보 복사 완료' } }));
@@ -175,7 +182,7 @@
   }
 
   function highlightObjects(map) {
-    (map.placements || []).forEach((item) => {
+    (map.appliedPlacements || map.placements || []).forEach((item) => {
       const tile = document.querySelector(`.map-tile[data-x="${item.x}"][data-y="${item.y}"]`);
       if (!tile) return;
       tile.style.outline = '3px solid rgba(105,221,160,.95)';
