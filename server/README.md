@@ -74,10 +74,36 @@ curl http://localhost:3000/api/save/restore
 
 1. 서버 실행
 2. `http://localhost:3000/index.html` 접속
-3. 게임 진행
-4. `서버연동` 섹션에서 `서버 저장` 클릭
-5. `서버 저장목록`으로 저장 여부 확인
-6. `최신 저장 복원` 또는 `복원 후 새로고침`으로 서버 저장 데이터를 localStorage에 복원
+3. `계정` 섹션에서 로컬 계정명 저장
+4. 캐릭터 슬롯 생성 또는 선택
+5. 게임 진행
+6. `서버연동` 섹션에서 `서버 저장` 클릭
+7. `서버 저장목록`으로 저장 여부 확인
+8. `최신 저장 복원` 또는 `복원 후 새로고침`으로 서버 저장 데이터를 localStorage에 복원
+
+## Snapshot 계정/캐릭터 필드
+
+`/api/save/snapshot`은 기존 저장 데이터 외에 아래 필드를 함께 받을 수 있습니다.
+
+```json
+{
+  "account": {
+    "accountId": "acc_xxx",
+    "provider": "local",
+    "displayName": "YDH Player"
+  },
+  "selectedCharacter": {
+    "characterId": "char_xxx",
+    "accountId": "acc_xxx",
+    "slot": 1,
+    "name": "검은 기사",
+    "classId": "knight"
+  },
+  "characterSlots": []
+}
+```
+
+저장 목록 응답에는 `accountName`, `characterName`, `classId`, `slotCount` 요약값이 포함됩니다.
 
 ## 저장 방식
 
@@ -91,8 +117,8 @@ server/data/saves.json
 
 ## 다음 고도화 후보
 
-1. 계정 로그인 추가
-2. 캐릭터 슬롯 추가
+1. 서버 계정 인증 추가
+2. 캐릭터 슬롯별 개별 복원
 3. SQLite 또는 MariaDB 저장소 교체
 4. WebSocket 위치 동기화
 5. Tiled Map Editor JSON import
