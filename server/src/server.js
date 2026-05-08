@@ -3,6 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attachRealtimeServer } from './realtime.js';
+import { customMapHealth, deleteCustomMap, getCustomMap, listCustomMaps, saveCustomMap } from './map-storage.js';
 import { latestSnapshot, listAccounts, listCharacters, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
 
@@ -16,7 +17,7 @@ const app = express();
 const httpServer = http.createServer(app);
 const realtime = attachRealtimeServer(httpServer);
 
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '3mb' }));
 app.use((req, res, next) => {
   res.setHeader('X-YDH-Server', 'chronicle-save-api');
   next();
@@ -25,7 +26,8 @@ app.use((req, res, next) => {
 app.get('/api/health', async (req, res, next) => {
   try {
     const storage = await storageHealth();
-    res.json({ ok: true, app: 'YDH Chronicle API', storageMode, realtime: realtime.stats(), storage, now: new Date().toISOString() });
+    const customMaps = await customMapHealth();
+    res.json({ ok: true, app: 'YDH Chronicle API', storageMode, realtime: realtime.stats(), customMaps, storage, now: new Date().toISOString() });
   } catch (error) {
     next(error);
   }
@@ -33,6 +35,43 @@ app.get('/api/health', async (req, res, next) => {
 
 app.get('/api/realtime/stats', (req, res) => {
   res.json({ ok: true, realtime: realtime.stats() });
+});
+
+app.get('/api/maps/custom', async (req, res, next) => {
+  try {
+    res.json({ ok: true, maps: await listCustomMaps() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/maps/custom', async (req, res, next) => {
+  try {
+    const record = await saveCustomMap(req.body);
+    res.json({ ok: true, map: record });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/maps/custom/:id', async (req, res, next) => {
+  try {
+    const record = await getCustomMap(req.params.id);
+    if (!record) return res.status(404).json({ ok: false, error: 'Custom map not found' });
+    res.json({ ok: true, map: record });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/maps/custom/:id', async (req, res, next) => {
+  try {
+    const result = await deleteCustomMap(req.params.id);
+    if (!result.deleted) return res.status(404).json({ ok: false, error: 'Custom map not found' });
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.get('/api/accounts', async (req, res, next) => {
@@ -121,7 +160,7 @@ app.use(express.static(publicDir, { extensions: ['html'] }));
 
 app.use((error, req, res, next) => {
   console.error(error);
-  res.status(500).json({ ok: false, error: error.message || 'Internal server error' });
+  res.status(error.statusCode || 500).json({ ok: false, error: error.message || 'Internal server error' });
 });
 
 httpServer.listen(port, () => {
