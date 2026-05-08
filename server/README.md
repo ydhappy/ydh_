@@ -110,6 +110,23 @@ curl http://localhost:3000/api/health
 curl http://localhost:3000/api/health
 ```
 
+### Account list
+
+MySQL 저장소에서 정규화된 계정 목록을 조회합니다.
+
+```bash
+curl http://localhost:3000/api/accounts
+```
+
+### Character list
+
+전체 캐릭터 슬롯 또는 특정 계정의 캐릭터 슬롯을 조회합니다.
+
+```bash
+curl http://localhost:3000/api/characters
+curl "http://localhost:3000/api/characters?accountId=acc_xxx"
+```
+
 ### Save snapshot
 
 브라우저의 `서버연동` 섹션에서 `서버 저장` 버튼을 누르면 이 API로 POST됩니다.
@@ -192,14 +209,18 @@ server/data/saves.json
 MySQL 모드는 아래 테이블을 사용합니다.
 
 ```text
+ydh_accounts
+ydh_character_slots
 ydh_save_snapshots
 ydh_schema_meta
 ```
 
+스냅샷은 `ydh_save_snapshots.snapshot_json`에 원본 그대로 보관하고, 계정/캐릭터 검색용 요약 데이터는 `ydh_accounts`, `ydh_character_slots`에 정규화해서 저장합니다.
+
 ## 다음 고도화 후보
 
 1. 서버 계정 인증 추가
-2. MySQL 계정/캐릭터 정규화 테이블 분리
-3. WebSocket 위치 동기화
-4. Tiled Map Editor JSON import
-5. 실제 PNG/WebP atlas 교체
+2. WebSocket 위치 동기화
+3. Tiled Map Editor JSON import
+4. 실제 PNG/WebP atlas 교체
+5. 운영용 관리자 저장 삭제/정리 API
