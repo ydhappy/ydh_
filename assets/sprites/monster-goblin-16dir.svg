@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="64" viewBox="0 0 1024 64">
+  <defs>
+    <g id="goblin">
+      <circle cx="32" cy="21" r="12" fill="#69b35d"/>
+      <path d="M20 18L6 10l9 17M44 18l14-8-9 17" fill="#4d8c45"/>
+      <path d="M19 58c2-18 7-30 13-30s11 12 13 30z" fill="#7b4d2f"/>
+      <path d="M21 35h22v8H21z" fill="#3a2a1d"/>
+      <circle cx="27" cy="20" r="3" fill="#fbef8a"/>
+      <circle cx="38" cy="20" r="3" fill="#fbef8a"/>
+      <path d="M26 29c5 4 10 4 14 0" stroke="#142014" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M48 28l9 5-9 5" stroke="#cfd5df" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <rect width="1024" height="64" fill="none"/>
+  <g transform="translate(0 0)"><use href="#goblin" transform="rotate(0 32 32)"/></g>
+  <g transform="translate(64 0)"><use href="#goblin" transform="rotate(22.5 32 32)"/></g>
+  <g transform="translate(128 0)"><use href="#goblin" transform="rotate(45 32 32)"/></g>
+  <g transform="translate(192 0)"><use href="#goblin" transform="rotate(67.5 32 32)"/></g>
+  <g transform="translate(256 0)"><use href="#goblin" transform="rotate(90 32 32)"/></g>
+  <g transform="translate(320 0)"><use href="#goblin" transform="rotate(112.5 32 32)"/></g>
+  <g transform="translate(384 0)"><use href="#goblin" transform="rotate(135 32 32)"/></g>
+  <g transform="translate(448 0)"><use href="#goblin" transform="rotate(157.5 32 32)"/></g>
+  <g transform="translate(512 0)"><use href="#goblin" transform="rotate(180 32 32)"/></g>
+  <g transform="translate(576 0)"><use href="#goblin" transform="rotate(202.5 32 32)"/></g>
+  <g transform="translate(640 0)"><use href="#goblin" transform="rotate(225 32 32)"/></g>
+  <g transform="translate(704 0)"><use href="#goblin" transform="rotate(247.5 32 32)"/></g>
+  <g transform="translate(768 0)"><use href="#goblin" transform="rotate(270 32 32)"/></g>
+  <g transform="translate(832 0)"><use href="#goblin" transform="rotate(292.5 32 32)"/></g>
+  <g transform="translate(896 0)"><use href="#goblin" transform="rotate(315 32 32)"/></g>
+  <g transform="translate(960 0)"><use href="#goblin" transform="rotate(337.5 32 32)"/></g>
+</svg>
