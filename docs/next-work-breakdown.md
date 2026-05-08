@@ -44,43 +44,46 @@
 
 상태: 완료
 
+## 19차: MySQL 계정/캐릭터 정규화 테이블 분리
+
+상태: 완료
+
 작업 파일:
 
-- `server/src/storage.js`
+- `server/sql/mysql55-schema.sql`
 - `server/src/mysql-storage.js`
 - `server/src/storage-provider.js`
 - `server/src/server.js`
-- `server-sync.js`
-- `server-sync-panel.js`
-- `server-sync.css`
 - `server/README.md`
 - `docs/next-work-breakdown.md`
 
 완료 내용:
 
-- 파일 저장소에 `snapshotById(id)` 추가
-- MySQL 5.5 저장소에 `snapshotById(id)` 추가
-- 저장소 provider에 ID 기반 조회 함수 추가
-- 서버 API `GET /api/save/:id` 추가
-- 클라이언트 `restoreSnapshotById(id)` 추가
-- 서버 저장목록을 카드형 UI로 표시
-- 각 저장 카드에 `복원`, `복원+새로고침` 버튼 추가
-- 저장 카드에 계정명, 캐릭터명, 클래스, 레벨, 맵 인덱스, 저장 시각 표시
-- 모바일 대응 저장 카드 스타일 추가
-- README에 선택 저장 복원 흐름 문서화
+- MySQL 5.5 호환 `ydh_accounts` 테이블 추가
+- MySQL 5.5 호환 `ydh_character_slots` 테이블 추가
+- 기존 `ydh_save_snapshots` 원본 스냅샷 저장 유지
+- 저장 스냅샷 수신 시 계정 정보를 `ydh_accounts`에 upsert
+- 저장 스냅샷 수신 시 캐릭터 슬롯 정보를 `ydh_character_slots`에 upsert
+- `ydh_accounts.last_snapshot_at` 갱신 처리
+- 선택 캐릭터의 level/map_index 요약을 캐릭터 슬롯 테이블에 반영
+- `/api/accounts` 계정 목록 API 추가
+- `/api/characters` 캐릭터 슬롯 목록 API 추가
+- `/api/characters?accountId=...` 특정 계정 캐릭터 조회 추가
+- `/api/health`에 MySQL 계정/캐릭터 카운트 포함
+- README에 정규화 테이블 및 조회 API 문서화
 
 ## 전체 상태
 
-상태: 8차~18차 완료
+상태: 8차~19차 완료
 
 현재 남은 고도화 후보:
 
-1. MySQL 계정/캐릭터 정규화 테이블 분리
-2. WebSocket 위치 동기화
-3. Tiled Map Editor JSON import
-4. 실제 PNG/WebP atlas 교체
-5. 서버 계정 인증 추가
-6. 운영용 관리자 저장 삭제/정리 API
+1. WebSocket 위치 동기화
+2. Tiled Map Editor JSON import
+3. 실제 PNG/WebP atlas 교체
+4. 서버 계정 인증 추가
+5. 운영용 관리자 저장 삭제/정리 API
+6. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
 
 ## 원칙
 
