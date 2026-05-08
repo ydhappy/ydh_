@@ -228,7 +228,7 @@
         <article class="panel feature-card">
           <span>🗺️</span>
           <h3>타일맵 탐험</h3>
-          <p>문자 기반 맵 데이터를 SVG 타일로 렌더링하고 충돌/포탈/조우를 처리합니다.</p>
+          <p>문자 기반 맵 데이터와 Tiled JSON 변환 맵을 SVG 타일로 렌더링합니다.</p>
         </article>
         <article class="panel feature-card">
           <span>🎒</span>
@@ -247,12 +247,12 @@
         <h2>Assets와 Map 개발 기준</h2>
         <p>
           초기 버전은 경량 SVG 에셋과 <code>data/maps.js</code> 문자 타일맵으로 구성했습니다.
-          실제 픽셀아트 PNG/WebP가 준비되면 같은 경로로 교체하거나 asset table만 바꾸면 됩니다.
+          Tiled JSON은 <code>data/tiled-map-loader.js</code>로 기존 문자 타일맵 구조에 안전하게 추가됩니다.
         </p>
         <div class="asset-pipeline-grid">
           <div><strong>Tiles</strong><span>grass, road, water, tree, stone, portal SVG 기본 제공</span></div>
           <div><strong>Sprites</strong><span>player, monster, npc 16방향 SVG 스프라이트시트</span></div>
-          <div><strong>Maps</strong><span>말하는 섬, 은빛 숲, 버려진 광산 3개 기본 맵</span></div>
+          <div><strong>Maps</strong><span>기본 맵 + Tiled JSON 샘플맵 자동 로드</span></div>
           <div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div>
         </div>
       </section>
@@ -275,7 +275,7 @@
           <p class="eyebrow">NEXT PATCH</p>
           <h2>다음 확장 후보</h2>
           <p>
-            이후 Tiled JSON, 타일셋 atlas, 서버 API, 계정 로그인, 실제 DB, 맵 에디터,
+            이후 Tiled JSON 대량 import, 타일셋 atlas, 서버 API, 계정 로그인, 실제 DB, 맵 에디터,
             로봇 AI 사냥 루틴을 붙이면 홈페이지형 프로토타입에서 경량 MMORPG 런처로 확장할 수 있습니다.
           </p>
         </div>
@@ -309,10 +309,12 @@
   <script src="data/codex-unlocks.js"></script>
   <script src="data/save-schema.js"></script>
   <script src="data/maps.js"></script>
+  <script src="data/tiled-map-loader.js"></script>
   <script src="data/entities.js"></script>
   <script src="data/animations.js"></script>
   <script src="data/combat-motions.js"></script>
   <script src="game-map-bridge.js"></script>
+  <script src="tiled-map-bootstrap.js"></script>
   <script src="map-engine.js"></script>
   <script src="walk-animations.js"></script>
   <script src="game.js"></script>
