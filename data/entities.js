@@ -17,37 +17,107 @@ window.YDH_DIRECTIONS_16 = [
   { id: 15, key: 'ESE', name: '동남동', angle: 337.5, dx: 1, dy: 0.5 }
 ];
 
+const YDH_FRAME_16 = {
+  frameWidth: 64,
+  frameHeight: 64,
+  directions: 16
+};
+
 window.YDH_ENTITIES = {
   player: {
+    ...YDH_FRAME_16,
     id: 'player',
     name: '검은 기사',
     role: 'player',
     sheet: 'assets/sprites/player-16dir.svg',
-    frameWidth: 64,
-    frameHeight: 64,
-    directions: 16,
     defaultDirection: 12
   },
-  monster: {
-    id: 'monster-wolf',
-    name: '그림자 늑대',
-    role: 'monster',
-    sheet: 'assets/sprites/monster-wolf-16dir.svg',
-    frameWidth: 64,
-    frameHeight: 64,
-    directions: 16,
-    defaultDirection: 8
+
+  monsters: {
+    wolf: {
+      ...YDH_FRAME_16,
+      id: 'monster-wolf',
+      name: '그림자 늑대',
+      role: 'monster',
+      sheet: 'assets/sprites/monster-wolf-16dir.svg',
+      defaultDirection: 8,
+      grade: 'normal'
+    },
+    goblin: {
+      ...YDH_FRAME_16,
+      id: 'monster-goblin',
+      name: '고블린 약탈자',
+      role: 'monster',
+      sheet: 'assets/sprites/monster-goblin-16dir.svg',
+      defaultDirection: 8,
+      grade: 'normal'
+    },
+    golem: {
+      ...YDH_FRAME_16,
+      id: 'monster-golem',
+      name: '광산 골렘',
+      role: 'monster',
+      sheet: 'assets/sprites/monster-golem-16dir.svg',
+      defaultDirection: 8,
+      grade: 'elite'
+    }
   },
-  npc: {
-    id: 'npc-guide',
-    name: '마을 안내인',
-    role: 'npc',
-    sheet: 'assets/sprites/npc-guide-16dir.svg',
-    frameWidth: 64,
-    frameHeight: 64,
-    directions: 16,
-    defaultDirection: 12
+
+  npcs: {
+    guide: {
+      ...YDH_FRAME_16,
+      id: 'npc-guide',
+      name: '마을 안내인',
+      role: 'npc',
+      sheet: 'assets/sprites/npc-guide-16dir.svg',
+      defaultDirection: 12,
+      dialogue: '사냥터는 위험합니다. 물약과 마나를 관리하세요.'
+    },
+    merchant: {
+      ...YDH_FRAME_16,
+      id: 'npc-merchant',
+      name: '잡화 상인',
+      role: 'npc',
+      sheet: 'assets/sprites/npc-merchant-16dir.svg',
+      defaultDirection: 12,
+      dialogue: '귀환 주문서와 물약은 항상 넉넉히 챙기세요.'
+    },
+    guard: {
+      ...YDH_FRAME_16,
+      id: 'npc-guard',
+      name: '경비병',
+      role: 'npc',
+      sheet: 'assets/sprites/npc-guard-16dir.svg',
+      defaultDirection: 12,
+      dialogue: '포탈 너머에는 더 강한 몬스터가 있습니다.'
+    }
+  },
+
+  spawnTables: {
+    'talking-island': {
+      monsters: ['wolf', 'goblin'],
+      npcs: ['guide', 'merchant']
+    },
+    'silver-forest': {
+      monsters: ['wolf', 'goblin'],
+      npcs: ['guide', 'guard']
+    },
+    'ancient-cave': {
+      monsters: ['golem', 'goblin'],
+      npcs: ['guard', 'merchant']
+    }
   }
+};
+
+window.YDH_ENTITIES.monster = window.YDH_ENTITIES.monsters.wolf;
+window.YDH_ENTITIES.npc = window.YDH_ENTITIES.npcs.guide;
+
+window.YDH_pickEntityForMap = function pickEntityForMap(mapId, type, x, y) {
+  const table = window.YDH_ENTITIES.spawnTables[mapId] || window.YDH_ENTITIES.spawnTables['talking-island'];
+  const source = type === 'npc' ? window.YDH_ENTITIES.npcs : window.YDH_ENTITIES.monsters;
+  const ids = type === 'npc' ? table.npcs : table.monsters;
+  const seed = Math.abs((x * 73856093) ^ (y * 19349663) ^ mapId.length) % ids.length;
+  return source[ids[seed]] || Object.values(source)[0];
 };
 
 window.YDH_getDirection16 = function getDirection16(dx, dy) {
