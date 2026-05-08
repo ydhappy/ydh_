@@ -116,6 +116,26 @@
     }
   }
 
+  async function restoreSnapshotById(id, options = {}) {
+    try {
+      if (!id) throw new Error('Save id is required');
+      saveStatus({ ...loadStatus(), mode: 'restoring-selected', lastError: null });
+      const response = await fetch(endpointUrl(`/api/save/${encodeURIComponent(id)}`));
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const result = await response.json();
+      const record = result.save;
+      const snapshot = record?.snapshot;
+      if (!snapshot?.saves) throw new Error('Invalid restore payload');
+      applySnapshotToLocalStorage(snapshot);
+      saveStatus({ ...loadStatus(), mode: 'restored-selected', lastRestoreAt: nowIso(), lastError: null, restoredId: record.id });
+      if (options.reload) window.location.reload();
+      return { ok: true, record, snapshot };
+    } catch (error) {
+      saveStatus({ ...loadStatus(), mode: 'local-only', lastError: error.message });
+      return { ok: false, error: error.message };
+    }
+  }
+
   function applySnapshotToLocalStorage(snapshot) {
     const keys = schema.localStorageKeys;
     const saves = snapshot?.saves || {};
@@ -150,6 +170,7 @@
     pushSnapshot,
     listServerSaves,
     restoreLatestSnapshot,
+    restoreSnapshotById,
     applySnapshotToLocalStorage,
     exportSnapshot,
     loadStatus,
