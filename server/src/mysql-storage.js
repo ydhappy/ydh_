@@ -38,9 +38,11 @@ function recordFromSnapshot(snapshot) {
     schemaVersion: snapshot.schemaVersion,
     accountId: snapshot.account?.accountId || selected.accountId || character.accountId || 'local',
     accountName: snapshot.account?.displayName || 'YDH Player',
+    provider: snapshot.account?.provider || 'local',
     characterId: selected.characterId || character.characterId || 'default',
     characterName: selected.name || character.name || '검은 기사',
     classId: selected.classId || character.classId || 'knight',
+    slotNo: selected.slot || 1,
     slotCount: Array.isArray(snapshot.characterSlots) ? snapshot.characterSlots.length : 0,
     level: character.level || 1,
     mapIndex: snapshot.saves?.map?.mapIndex ?? 0,
@@ -51,6 +53,40 @@ function recordFromSnapshot(snapshot) {
 async function initMysqlStorage() {
   if (initialized) return;
   const db = connection();
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS ydh_accounts (
+      account_id VARCHAR(80) NOT NULL,
+      provider VARCHAR(32) NOT NULL DEFAULT 'local',
+      display_name VARCHAR(80) NOT NULL DEFAULT 'YDH Player',
+      created_at DATETIME NOT NULL,
+      last_login_at DATETIME NOT NULL,
+      last_snapshot_at DATETIME DEFAULT NULL,
+      PRIMARY KEY (account_id),
+      KEY idx_display_name (display_name),
+      KEY idx_last_login_at (last_login_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  `);
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS ydh_character_slots (
+      character_id VARCHAR(80) NOT NULL,
+      account_id VARCHAR(80) NOT NULL,
+      slot_no INT NOT NULL DEFAULT 1,
+      character_name VARCHAR(80) NOT NULL DEFAULT '검은 기사',
+      class_id VARCHAR(32) NOT NULL DEFAULT 'knight',
+      level INT NOT NULL DEFAULT 1,
+      map_index INT NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL,
+      last_selected_at DATETIME DEFAULT NULL,
+      last_snapshot_at DATETIME DEFAULT NULL,
+      PRIMARY KEY (character_id),
+      UNIQUE KEY uk_account_slot (account_id, slot_no),
+      KEY idx_account_id (account_id),
+      KEY idx_character_name (character_name),
+      CONSTRAINT fk_character_slots_account
+        FOREIGN KEY (account_id) REFERENCES ydh_accounts(account_id)
+        ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  `);
   await db.query(`
     CREATE TABLE IF NOT EXISTS ydh_save_snapshots (
       id VARCHAR(64) NOT NULL,
@@ -81,7 +117,7 @@ async function initMysqlStorage() {
   `);
   await db.query(`
     INSERT INTO ydh_schema_meta (meta_key, meta_value, updated_at)
-    VALUES ('schema_version', '1', NOW())
+    VALUES ('schema_version', '2', NOW())
     ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value), updated_at = NOW()
   `);
   initialized = true;
@@ -110,10 +146,68 @@ function rowToRecord(row) {
   };
 }
 
+async function syncAccountAndCharacters(db, snapshot, record) {
+  await db.query(
+    `INSERT INTO ydh_accounts (
+      account_id, provider, display_name, created_at, last_login_at, last_snapshot_at
+    ) VALUES (?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      provider = VALUES(provider),
+      display_name = VALUES(display_name),
+      last_login_at = VALUES(last_login_at),
+      last_snapshot_at = VALUES(last_snapshot_at)`,
+    [record.accountId, record.provider, record.accountName, record.receivedAt, record.receivedAt, record.receivedAt]
+  );
+
+  const slots = Array.isArray(snapshot.characterSlots) && snapshot.characterSlots.length
+    ? snapshot.characterSlots
+    : [{
+        characterId: record.characterId,
+        accountId: record.accountId,
+        slot: record.slotNo,
+        name: record.characterName,
+        classId: record.classId,
+        createdAt: record.receivedAt,
+        lastSelectedAt: record.receivedAt
+      }];
+
+  for (const slot of slots) {
+    const isSelected = slot.characterId === record.characterId;
+    await db.query(
+      `INSERT INTO ydh_character_slots (
+        character_id, account_id, slot_no, character_name, class_id,
+        level, map_index, created_at, last_selected_at, last_snapshot_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        account_id = VALUES(account_id),
+        slot_no = VALUES(slot_no),
+        character_name = VALUES(character_name),
+        class_id = VALUES(class_id),
+        level = VALUES(level),
+        map_index = VALUES(map_index),
+        last_selected_at = VALUES(last_selected_at),
+        last_snapshot_at = VALUES(last_snapshot_at)`,
+      [
+        slot.characterId || record.characterId,
+        slot.accountId || record.accountId,
+        slot.slot || record.slotNo,
+        slot.name || record.characterName,
+        slot.classId || record.classId,
+        isSelected ? record.level : 1,
+        isSelected ? record.mapIndex : 0,
+        toMysqlDate(slot.createdAt || record.receivedAt),
+        toMysqlDate(slot.lastSelectedAt || record.receivedAt),
+        isSelected ? record.receivedAt : null
+      ]
+    );
+  }
+}
+
 export async function saveSnapshot(snapshot) {
   await initMysqlStorage();
   const db = connection();
   const record = recordFromSnapshot(snapshot);
+  await syncAccountAndCharacters(db, snapshot, record);
   await db.query(
     `INSERT INTO ydh_save_snapshots (
       id, received_at, schema_version, account_id, account_name,
@@ -179,9 +273,51 @@ export async function snapshotById(id) {
   return rowToRecord(rows[0]);
 }
 
+export async function listAccounts() {
+  await initMysqlStorage();
+  const db = connection();
+  const [rows] = await db.query(
+    `SELECT account_id AS accountId, provider, display_name AS displayName,
+            created_at AS createdAt, last_login_at AS lastLoginAt, last_snapshot_at AS lastSnapshotAt
+       FROM ydh_accounts
+      ORDER BY last_snapshot_at DESC, last_login_at DESC
+      LIMIT 100`
+  );
+  return rows;
+}
+
+export async function listCharacters(accountId) {
+  await initMysqlStorage();
+  const db = connection();
+  const params = [];
+  let where = '';
+  if (accountId) {
+    where = 'WHERE account_id = ?';
+    params.push(accountId);
+  }
+  const [rows] = await db.query(
+    `SELECT character_id AS characterId, account_id AS accountId, slot_no AS slot,
+            character_name AS name, class_id AS classId, level, map_index AS mapIndex,
+            created_at AS createdAt, last_selected_at AS lastSelectedAt, last_snapshot_at AS lastSnapshotAt
+       FROM ydh_character_slots
+       ${where}
+      ORDER BY account_id ASC, slot_no ASC
+      LIMIT 300`,
+    params
+  );
+  return rows;
+}
+
 export async function health() {
   await initMysqlStorage();
   const db = connection();
-  const [rows] = await db.query('SELECT COUNT(*) AS count FROM ydh_save_snapshots');
-  return { storage: 'mysql', count: rows[0]?.count || 0 };
+  const [snapshotRows] = await db.query('SELECT COUNT(*) AS count FROM ydh_save_snapshots');
+  const [accountRows] = await db.query('SELECT COUNT(*) AS count FROM ydh_accounts');
+  const [characterRows] = await db.query('SELECT COUNT(*) AS count FROM ydh_character_slots');
+  return {
+    storage: 'mysql',
+    count: snapshotRows[0]?.count || 0,
+    accounts: accountRows[0]?.count || 0,
+    characters: characterRows[0]?.count || 0
+  };
 }
