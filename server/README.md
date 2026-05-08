@@ -22,7 +22,7 @@ npm run dev
 http://localhost:3000
 ```
 
-서버는 저장 API와 함께 저장소 루트의 정적 파일도 제공합니다.
+서버는 저장 API, WebSocket 위치 동기화, 정적 파일 제공을 함께 처리합니다.
 
 ```text
 http://localhost:3000/index.html
@@ -87,21 +87,6 @@ $env:MYSQL_DATABASE="ydh_chronicle"
 npm start
 ```
 
-### 3. 확인
-
-```bash
-curl http://localhost:3000/api/health
-```
-
-응답에 아래처럼 표시되면 MySQL 저장소가 활성화된 것입니다.
-
-```json
-{
-  "ok": true,
-  "storageMode": "mysql"
-}
-```
-
 ## API
 
 ### Health check
@@ -110,9 +95,15 @@ curl http://localhost:3000/api/health
 curl http://localhost:3000/api/health
 ```
 
-### Account list
+응답에는 저장소 상태와 실시간 접속자 통계가 포함됩니다.
 
-MySQL 저장소에서 정규화된 계정 목록을 조회합니다.
+### Realtime stats
+
+```bash
+curl http://localhost:3000/api/realtime/stats
+```
+
+### Account list
 
 ```bash
 curl http://localhost:3000/api/accounts
@@ -120,16 +111,12 @@ curl http://localhost:3000/api/accounts
 
 ### Character list
 
-전체 캐릭터 슬롯 또는 특정 계정의 캐릭터 슬롯을 조회합니다.
-
 ```bash
 curl http://localhost:3000/api/characters
 curl "http://localhost:3000/api/characters?accountId=acc_xxx"
 ```
 
 ### Save snapshot
-
-브라우저의 `서버연동` 섹션에서 `서버 저장` 버튼을 누르면 이 API로 POST됩니다.
 
 ```bash
 curl -X POST http://localhost:3000/api/save/snapshot \
@@ -139,15 +126,11 @@ curl -X POST http://localhost:3000/api/save/snapshot \
 
 ### Save list
 
-브라우저의 `서버 저장목록` 버튼과 연결됩니다.
-
 ```bash
 curl http://localhost:3000/api/save/list
 ```
 
 ### Restore latest save
-
-브라우저의 `최신 저장 복원`, `최신 복원+새로고침` 버튼과 연결됩니다.
 
 ```bash
 curl http://localhost:3000/api/save/restore
@@ -155,13 +138,40 @@ curl http://localhost:3000/api/save/restore
 
 ### Restore selected save
 
-저장 목록에서 특정 저장 ID를 선택 복원할 때 사용합니다.
-
 ```bash
 curl http://localhost:3000/api/save/save_1234567890_abcd
 ```
 
-브라우저 `서버연동` 섹션에서는 `서버 저장목록`을 누른 뒤 각 저장 카드의 `복원`, `복원+새로고침` 버튼으로 호출됩니다.
+## WebSocket 위치 동기화
+
+WebSocket endpoint:
+
+```text
+ws://localhost:3000/ws/position
+```
+
+브라우저에서는 `실시간` 섹션에서 `연결` 버튼을 누르면 연결됩니다. 이동할 때마다 클라이언트가 현재 위치를 서버로 보내고, 서버는 다른 접속자에게 위치를 브로드캐스트합니다.
+
+지원 메시지:
+
+```json
+{ "type": "hello", "payload": { "accountName": "YDH Player", "characterName": "검은 기사", "mapIndex": 0, "x": 1, "y": 1, "direction": 12 } }
+```
+
+```json
+{ "type": "position", "payload": { "mapIndex": 0, "x": 2, "y": 1, "direction": 0 } }
+```
+
+서버 응답 메시지:
+
+```text
+connected
+welcome
+peer-joined
+peer-position
+peer-left
+error
+```
 
 ## 브라우저 UI 사용 흐름
 
@@ -169,10 +179,10 @@ curl http://localhost:3000/api/save/save_1234567890_abcd
 2. `http://localhost:3000/index.html` 접속
 3. `계정` 섹션에서 로컬 계정명 저장
 4. 캐릭터 슬롯 생성 또는 선택
-5. 게임 진행
-6. `서버연동` 섹션에서 `서버 저장` 클릭
-7. `서버 저장목록`으로 저장 카드 확인
-8. 원하는 저장 카드에서 `복원` 또는 `복원+새로고침` 클릭
+5. `실시간` 섹션에서 `연결` 클릭
+6. 다른 브라우저/기기에서 같은 서버 접속 후 `연결` 클릭
+7. 맵 이동 시 서로의 위치 카드가 갱신되는지 확인
+8. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
 
 ## Snapshot 계정/캐릭터 필드
 
@@ -196,8 +206,6 @@ curl http://localhost:3000/api/save/save_1234567890_abcd
 }
 ```
 
-저장 목록 응답에는 `accountName`, `characterName`, `classId`, `slotCount` 요약값이 포함됩니다.
-
 ## 저장 방식
 
 기본은 파일 저장입니다.
@@ -219,8 +227,8 @@ ydh_schema_meta
 
 ## 다음 고도화 후보
 
-1. 서버 계정 인증 추가
-2. WebSocket 위치 동기화
-3. Tiled Map Editor JSON import
-4. 실제 PNG/WebP atlas 교체
+1. 실시간 타일맵 위 원격 플레이어 아바타 렌더링
+2. Tiled Map Editor JSON import
+3. 실제 PNG/WebP atlas 교체
+4. 서버 계정 인증 추가
 5. 운영용 관리자 저장 삭제/정리 API
