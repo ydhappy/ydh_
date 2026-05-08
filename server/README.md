@@ -130,11 +130,21 @@ curl http://localhost:3000/api/save/list
 
 ### Restore latest save
 
-브라우저의 `최신 저장 복원`, `복원 후 새로고침` 버튼과 연결됩니다.
+브라우저의 `최신 저장 복원`, `최신 복원+새로고침` 버튼과 연결됩니다.
 
 ```bash
 curl http://localhost:3000/api/save/restore
 ```
+
+### Restore selected save
+
+저장 목록에서 특정 저장 ID를 선택 복원할 때 사용합니다.
+
+```bash
+curl http://localhost:3000/api/save/save_1234567890_abcd
+```
+
+브라우저 `서버연동` 섹션에서는 `서버 저장목록`을 누른 뒤 각 저장 카드의 `복원`, `복원+새로고침` 버튼으로 호출됩니다.
 
 ## 브라우저 UI 사용 흐름
 
@@ -144,8 +154,8 @@ curl http://localhost:3000/api/save/restore
 4. 캐릭터 슬롯 생성 또는 선택
 5. 게임 진행
 6. `서버연동` 섹션에서 `서버 저장` 클릭
-7. `서버 저장목록`으로 저장 여부 확인
-8. `최신 저장 복원` 또는 `복원 후 새로고침`으로 서버 저장 데이터를 localStorage에 복원
+7. `서버 저장목록`으로 저장 카드 확인
+8. 원하는 저장 카드에서 `복원` 또는 `복원+새로고침` 클릭
 
 ## Snapshot 계정/캐릭터 필드
 
@@ -189,7 +199,7 @@ ydh_schema_meta
 ## 다음 고도화 후보
 
 1. 서버 계정 인증 추가
-2. 캐릭터 슬롯별 개별 복원
-3. MySQL 계정/캐릭터 정규화 테이블 분리
-4. WebSocket 위치 동기화
-5. Tiled Map Editor JSON import
+2. MySQL 계정/캐릭터 정규화 테이블 분리
+3. WebSocket 위치 동기화
+4. Tiled Map Editor JSON import
+5. 실제 PNG/WebP atlas 교체
