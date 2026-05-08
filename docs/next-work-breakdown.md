@@ -102,23 +102,46 @@
 
 ### 22-3: Tiled 맵 선택/검증 UI
 
+상태: 완료
+
+작업 파일:
+
+- `tiled-map-bootstrap.js`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- Tiled 인라인 fallback 맵 동기 등록 추가
+- fetch 기반 Tiled JSON 로드 검증 추가
+- Tiled 맵 선택 카드 UI 추가
+- 선택한 맵의 시작 좌표로 이동 후 새로고침 기능 추가
+- 전체 맵/Tiled 맵 개수 배지 추가
+- 타일 코드 검증 추가
+- 시작 좌표 범위/이동 가능 여부 검증 추가
+- 중복 맵 ID 목록 표시 추가
+- 실패 맵 목록 표시 추가
+- 기존 문자 타일맵 유지
+
+### 22-4: 다중 Tiled JSON 등록/관리 고도화
+
 상태: 대기
 
 목표:
 
-- 맵 선택 UI 추가
-- GM 콘솔에 Tiled source 표시
-- 다중 Tiled JSON 등록 구조 추가
-- Tiled 맵 검증 결과 표시
-- 실패 맵/중복 맵 목록 표시
+- 여러 개의 Tiled JSON URL 목록 관리
+- 외부 Tiled JSON 업로드/붙여넣기 import
+- GM 콘솔에 source/sourceUrl 표시
+- 검증 실패 맵 상세 보기
+- Tiled object layer 기반 NPC/몬스터/포탈 배치
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~2단계 완료
+상태: 8차~21차 완료, 22차 1~3단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-3 Tiled 맵 선택/검증 UI
+1. 22-4 다중 Tiled JSON 등록/관리 고도화
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
