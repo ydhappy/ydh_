@@ -56,3 +56,13 @@ export async function latestSnapshot() {
   const store = await readStore();
   return store.snapshots?.[0] || null;
 }
+
+export async function snapshotById(id) {
+  const store = await readStore();
+  return (store.snapshots || []).find((snapshot) => snapshot.id === id) || null;
+}
+
+export async function health() {
+  const store = await readStore();
+  return { storage: 'file', count: store.snapshots?.length || 0 };
+}
