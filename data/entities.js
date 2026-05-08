@@ -66,7 +66,7 @@ window.YDH_ENTITIES = {
       id: 'monster-moon-stalker',
       name: '달그림자 추적자',
       role: 'monster',
-      sheet: 'assets/sprites/monster-wolf-16dir.svg',
+      sheet: 'assets/sprites/monster-moon-stalker-16dir.svg',
       defaultDirection: 8,
       grade: 'normal',
       story: '빛보다 그림자를 먼저 물어뜯는 추적자.'
@@ -76,7 +76,7 @@ window.YDH_ENTITIES = {
       id: 'monster-ink-wraith',
       name: '잉크 망령',
       role: 'monster',
-      sheet: 'assets/sprites/monster-goblin-16dir.svg',
+      sheet: 'assets/sprites/monster-ink-wraith-16dir.svg',
       defaultDirection: 8,
       grade: 'normal',
       story: '기록관에서 지워진 이름들이 뭉쳐 태어난 망령.'
@@ -86,7 +86,7 @@ window.YDH_ENTITIES = {
       id: 'monster-mirror-witch',
       name: '반사 마녀',
       role: 'monster',
-      sheet: 'assets/sprites/monster-goblin-16dir.svg',
+      sheet: 'assets/sprites/monster-mirror-witch-16dir.svg',
       defaultDirection: 8,
       grade: 'elite',
       story: '상대의 공격을 미래의 상처로 되돌려 보내는 마녀.'
@@ -96,7 +96,7 @@ window.YDH_ENTITIES = {
       id: 'monster-abyss-knight',
       name: '심연 기사',
       role: 'monster',
-      sheet: 'assets/sprites/monster-golem-16dir.svg',
+      sheet: 'assets/sprites/monster-abyss-knight-16dir.svg',
       defaultDirection: 8,
       grade: 'elite',
       story: '검은 왕좌를 지키기 위해 이름을 버린 기사.'
@@ -106,7 +106,7 @@ window.YDH_ENTITIES = {
       id: 'monster-black-moon-lord',
       name: '검은 달의 군주',
       role: 'monster',
-      sheet: 'assets/sprites/monster-golem-16dir.svg',
+      sheet: 'assets/sprites/monster-black-moon-lord-16dir.svg',
       defaultDirection: 8,
       grade: 'boss',
       story: '모든 포탈을 하나의 밤으로 접으려는 최종 적.'
@@ -146,7 +146,7 @@ window.YDH_ENTITIES = {
       id: 'npc-raven-archivist',
       name: '까마귀 기록자',
       role: 'npc',
-      sheet: 'assets/sprites/npc-guide-16dir.svg',
+      sheet: 'assets/sprites/npc-raven-archivist-16dir.svg',
       defaultDirection: 12,
       dialogue: '이름을 잃은 자는 기록에 남지 못한다. 네 이름을 지켜라.'
     },
@@ -155,7 +155,7 @@ window.YDH_ENTITIES = {
       id: 'npc-moon-priestess',
       name: '달무녀 세리아',
       role: 'npc',
-      sheet: 'assets/sprites/npc-guide-16dir.svg',
+      sheet: 'assets/sprites/npc-moon-priestess-16dir.svg',
       defaultDirection: 12,
       dialogue: '검은 달은 저주가 아니라 문이다. 열쇠를 찾으면 닫을 수도 있다.'
     },
@@ -164,7 +164,7 @@ window.YDH_ENTITIES = {
       id: 'npc-broken-smith',
       name: '부서진 대장장이 로한',
       role: 'npc',
-      sheet: 'assets/sprites/npc-merchant-16dir.svg',
+      sheet: 'assets/sprites/npc-broken-smith-16dir.svg',
       defaultDirection: 12,
       dialogue: '심연핵을 가져오면 달검의 금을 다시 이을 수 있다.'
     },
@@ -173,7 +173,7 @@ window.YDH_ENTITIES = {
       id: 'npc-silent-porter',
       name: '침묵의 짐꾼',
       role: 'npc',
-      sheet: 'assets/sprites/npc-guard-16dir.svg',
+      sheet: 'assets/sprites/npc-silent-porter-16dir.svg',
       defaultDirection: 12,
       dialogue: '말은 하지 않지만 가장 위험한 포탈을 알고 있다.'
     }
