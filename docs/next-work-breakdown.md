@@ -134,13 +134,40 @@
 
 ## 13차: 서버/API 연동 준비
 
-상태: 대기
+상태: 완료
 
-목표:
+작업 파일:
 
-- 현재 localStorage 저장 구조를 서버 저장 구조로 옮길 수 있게 어댑터화
-- 계정/캐릭터/인벤토리/퀘스트/위치 저장 모델 설계
-- Java/Node API 연결 후보 문서화
+- `data/save-schema.js`
+- `server-sync.js`
+- `server-sync.css`
+- `server-sync-panel.js`
+- `docs/server-api-integration.md`
+- `index.html`
+
+완료 내용:
+
+- localStorage 저장 키를 서버 모델 기준으로 정리
+- 캐릭터/맵/퀘스트/도감 저장 스냅샷 생성 어댑터 추가
+- `/api/save/snapshot` 전송 테스트 함수 추가
+- JSON 스냅샷 보기/내보내기/클립보드 복사 UI 추가
+- 서버 전송 테스트 UI 추가
+- Java/Spring Boot record 예시 문서화
+- Node/Express endpoint 예시 문서화
+- DB 테이블 후보 문서화
+
+## 전체 상태
+
+상태: 8차~13차 완료
+
+현재 남은 고도화 후보:
+
+1. 실제 서버 구현: Java Spring Boot 또는 Node/Express
+2. 계정 로그인/캐릭터 선택 화면
+3. 서버 DB 저장/불러오기
+4. WebSocket 위치 동기화
+5. Tiled Map Editor JSON import
+6. 실제 PNG/WebP atlas 교체
 
 ## 원칙
 
