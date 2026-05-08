@@ -1,7 +1,7 @@
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { latestSnapshot, listSnapshots, saveSnapshot } from './storage.js';
+import { latestSnapshot, listSnapshots, saveSnapshot, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,8 +18,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true, app: 'YDH Chronicle API', now: new Date().toISOString() });
+app.get('/api/health', async (req, res, next) => {
+  try {
+    const storage = await storageHealth();
+    res.json({ ok: true, app: 'YDH Chronicle API', storageMode, storage, now: new Date().toISOString() });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.post('/api/save/snapshot', async (req, res, next) => {
@@ -33,6 +38,7 @@ app.post('/api/save/snapshot', async (req, res, next) => {
       ok: true,
       savedAt: record.receivedAt,
       id: record.id,
+      storageMode,
       summary: summarizeSnapshot(req.body)
     });
   } catch (error) {
@@ -47,10 +53,13 @@ app.post('/api/save/character', async (req, res, next) => {
       app: 'YDH Chronicle',
       generatedAt: new Date().toISOString(),
       client: { source: 'character-endpoint' },
+      account: null,
+      selectedCharacter: null,
+      characterSlots: [],
       saves: { character: req.body, map: null, chapterQuests: null, codexUnlocks: null, gmConsoleOpen: null }
     };
     const record = await saveSnapshot(snapshot);
-    res.json({ ok: true, id: record.id, savedAt: record.receivedAt });
+    res.json({ ok: true, id: record.id, savedAt: record.receivedAt, storageMode });
   } catch (error) {
     next(error);
   }
@@ -58,7 +67,7 @@ app.post('/api/save/character', async (req, res, next) => {
 
 app.get('/api/save/list', async (req, res, next) => {
   try {
-    res.json({ ok: true, saves: await listSnapshots() });
+    res.json({ ok: true, storageMode, saves: await listSnapshots() });
   } catch (error) {
     next(error);
   }
@@ -68,7 +77,7 @@ app.get('/api/save/restore', async (req, res, next) => {
   try {
     const latest = await latestSnapshot();
     if (!latest) return res.status(404).json({ ok: false, error: 'No save snapshot found' });
-    res.json({ ok: true, save: latest });
+    res.json({ ok: true, storageMode, save: latest });
   } catch (error) {
     next(error);
   }
@@ -84,4 +93,5 @@ app.use((error, req, res, next) => {
 app.listen(port, () => {
   console.log(`YDH Chronicle server listening on http://localhost:${port}`);
   console.log(`Serving static files from ${publicDir}`);
+  console.log(`Storage provider: ${storageMode}`);
 });
