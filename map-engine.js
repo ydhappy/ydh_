@@ -167,6 +167,7 @@
   }
 
   function move(dx, dy) {
+    const from = { x: state.x, y: state.y, mapIndex: state.mapIndex };
     const nx = state.x + dx;
     const ny = state.y + dy;
     const tile = getTile(nx, ny);
@@ -186,6 +187,7 @@
     state.steps += 1;
     handleTile(tile, nx, ny);
     render();
+    notifyMove(from, { x: state.x, y: state.y, mapIndex: state.mapIndex }, dx, dy);
   }
 
   function handleTile(tile, x, y) {
@@ -227,6 +229,19 @@
 
   function notifyGame(message) {
     window.dispatchEvent(new CustomEvent('ydh-map-event', { detail: { message } }));
+  }
+
+  function notifyMove(from, to, dx, dy) {
+    window.dispatchEvent(new CustomEvent('ydh-player-moved', {
+      detail: {
+        from,
+        to,
+        dx,
+        dy,
+        direction: state.direction,
+        duration: window.YDH_ANIMATIONS?.timings?.walkMs || 320
+      }
+    }));
   }
 
   function bind() {
