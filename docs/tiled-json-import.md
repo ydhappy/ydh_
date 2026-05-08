@@ -2,14 +2,15 @@
 
 ## 상태
 
-현재는 22-1 ~ 22-5까지 완료된 상태입니다.
+현재는 22-1 ~ 22-6까지 완료된 상태입니다.
 
 - 22-1: Tiled JSON 샘플맵 + 변환기 추가 완료
 - 22-2: index 로드 연결 + 샘플맵 자동 등록 완료
 - 22-3: 맵 선택/검증 UI 완료
 - 22-4: 다중 Tiled JSON 등록/붙여넣기 import 완료
 - 22-5: Object Layer 배치 데이터 추출 + GM 콘솔 표시 완료
-- 22-6: Object Layer 기반 실제 배치 적용 대기
+- 22-6: Object Layer 기반 실제 배치 적용 완료
+- 22-7: custom map 관리 UI/서버 저장 연동 대기
 
 ## 추가 파일
 
@@ -22,6 +23,7 @@
 
 - `index.html`
 - `gm-console.js`
+- `map-engine.js`
 
 ## 변환 방식
 
@@ -136,20 +138,48 @@ GM 콘솔 표시 항목:
 - Object 타일 강조 버튼
 - 맵 정보 복사 시 object 목록 포함
 
+## 22-6 Object Layer 실제 배치 적용
+
+추가된 변환 결과 필드:
+
+```js
+map.baseRows
+map.rows
+map.appliedPlacements
+map.skippedPlacements
+map.tiled.appliedPlacements
+map.tiled.skippedPlacements
+```
+
+적용 방식:
+
+1. Tiled tilelayer를 `baseRows`로 변환
+2. Object Layer placement를 분석
+3. `npc`는 `N`, `monster`는 `M`, `portal`은 `P`로 rows에 합성
+4. 범위 밖 object 또는 지원하지 않는 kind는 `skippedPlacements`로 분리
+5. 최종 `rows`를 기존 `map-engine.js`가 그대로 렌더링
+
+맵 엔진 반영 내용:
+
+- Object Layer npc의 `ydhEntityId` 기반 NPC 스프라이트 선택
+- Object Layer npc의 `ydhDialogue` 기반 대사 출력
+- Object Layer monster의 `ydhEntityId` 기반 몬스터 스프라이트 선택
+- Object Layer portal의 `ydhTargetMapIndex` / `ydhTargetMapId` 기반 포탈 이동
+- GM 콘솔에 적용/제외 placement 수 표시
+
 ## 안정성 기준
 
-- Tiled JSON fetch가 늦거나 실패해도 인라인 fallback 맵이 먼저 등록됩니다.
-- 알 수 없는 타일 코드가 있으면 해당 맵은 실패 목록에 기록됩니다.
 - 기존 문자 타일맵은 제거하지 않습니다.
-- 기존 맵 엔진의 이동/전투/스폰 처리는 그대로 유지합니다.
-- 22-5는 Object Layer 데이터를 추출/표시만 하며 실제 NPC/몬스터/포탈 스폰 로직은 아직 변경하지 않습니다.
+- Object Layer는 Tiled 맵에만 적용됩니다.
+- 적용 불가능한 Object는 게임을 중단하지 않고 `skippedPlacements`에 기록합니다.
+- 기존 맵 엔진의 기본 M/N/P 처리 흐름은 유지합니다.
 
-## 22-6 다음 작업
+## 22-7 다음 작업
 
 다음 단계에서 진행합니다.
 
-1. Object Layer의 npc/monster/portal을 실제 맵 타일 코드에 반영
-2. Object Layer 포탈 이동 대상 적용
-3. Object Layer NPC 대사 적용
-4. custom map 내보내기/삭제 UI
-5. custom map 서버 저장 연동
+1. custom map 내보내기/삭제 UI
+2. custom map 서버 저장 연동
+3. 검증 실패 맵 상세 보기
+4. Object Layer marker 정보창
+5. Tiled object layer 기반 퀘스트 트리거
