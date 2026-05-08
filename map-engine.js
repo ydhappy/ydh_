@@ -4,6 +4,7 @@
   const MAP_SAVE_KEY = 'ydh-chronicle-map-v1';
   const data = window.YDH_MAPS;
   const entities = window.YDH_ENTITIES || {};
+  const pickEntityForMap = window.YDH_pickEntityForMap || (() => null);
   const getDirection16 = window.YDH_getDirection16 || ((dx, dy) => {
     if (dx === 0 && dy === 0) return 12;
     const angle = (Math.atan2(-dy, dx) * 180 / Math.PI + 360) % 360;
@@ -38,6 +39,7 @@
       if (saved && data.maps[saved.mapIndex]) {
         return {
           direction: entities.player?.defaultDirection ?? 12,
+          lastTarget: null,
           ...saved
         };
       }
@@ -45,7 +47,7 @@
       console.warn('Map save load failed:', error);
     }
     const start = data.maps[0].start;
-    return { mapIndex: 0, x: start.x, y: start.y, steps: 0, direction: entities.player?.defaultDirection ?? 12 };
+    return { mapIndex: 0, x: start.x, y: start.y, steps: 0, direction: entities.player?.defaultDirection ?? 12, lastTarget: null };
   }
 
   function saveState() {
@@ -61,6 +63,13 @@
     if (!map.rows[y] || x < 0 || x >= map.rows[y].length) return null;
     const code = map.rows[y][x];
     return { code, ...(data.tileTypes[code] || data.tileTypes.G) };
+  }
+
+  function getMapEntity(type, x, y) {
+    const map = currentMap();
+    const picked = pickEntityForMap(map.id, type, x, y);
+    if (picked) return picked;
+    return type === 'npc' ? entities.npc : entities.monster;
   }
 
   function spriteBackground(entity, direction) {
@@ -101,12 +110,14 @@
     }
 
     if (code === 'M') {
-      appendEntitySprite(cell, entities.monster, nearestDirectionToPlayer(x, y), entities.monster?.name || 'Monster');
+      const monster = getMapEntity('monster', x, y);
+      appendEntitySprite(cell, monster, nearestDirectionToPlayer(x, y), monster?.name || 'Monster');
       return;
     }
 
     if (code === 'N') {
-      appendEntitySprite(cell, entities.npc, nearestDirectionToPlayer(x, y), entities.npc?.name || 'NPC');
+      const npc = getMapEntity('npc', x, y);
+      appendEntitySprite(cell, npc, nearestDirectionToPlayer(x, y), npc?.name || 'NPC');
       return;
     }
 
@@ -173,11 +184,11 @@
     state.x = nx;
     state.y = ny;
     state.steps += 1;
-    handleTile(tile);
+    handleTile(tile, nx, ny);
     render();
   }
 
-  function handleTile(tile) {
+  function handleTile(tile, x, y) {
     if (tile.code === 'P') {
       const map = currentMap();
       state.mapIndex = map.portalTo ?? ((state.mapIndex + 1) % data.maps.length);
@@ -186,21 +197,26 @@
       state.x = next.start.x;
       state.y = next.start.y;
       state.direction = entities.player?.defaultDirection ?? 12;
+      state.lastTarget = null;
       setEvent(`${next.name}(으)로 이동했습니다.`, 'good');
       notifyGame(`포탈 이동: ${next.name}`);
       return;
     }
 
     if (tile.code === 'N') {
-      setEvent('NPC: 사냥터는 위험합니다. 물약과 마나를 관리하세요.', 'good');
-      notifyGame('NPC 안내를 받았습니다. 퀘스트 동선이 갱신되었습니다.');
+      const npc = getMapEntity('npc', x, y);
+      state.lastTarget = { type: 'npc', id: npc.id, name: npc.name };
+      setEvent(`${npc.name}: ${npc.dialogue || '어서 오세요.'}`, 'good');
+      notifyGame(`${npc.name} 대화: ${npc.dialogue || '어서 오세요.'}`);
       return;
     }
 
     const chance = tile.encounter || 0;
     if (Math.random() < chance) {
-      setEvent(`${tile.name}에서 몬스터와 조우했습니다. 전투 화면에서 공격하세요.`, 'danger');
-      notifyGame('맵 조우 이벤트 발생! 기본 공격 또는 스킬을 사용하세요.');
+      const monster = getMapEntity('monster', x, y);
+      state.lastTarget = { type: 'monster', id: monster.id, name: monster.name };
+      setEvent(`${monster.name} 조우! 전투 화면에서 공격하세요.`, 'danger');
+      notifyGame(`맵 조우 이벤트: ${monster.name} 출현`);
       const attackButton = document.getElementById('attackBtn');
       attackButton?.focus();
       return;
