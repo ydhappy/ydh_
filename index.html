@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="YDH MMORPG 홈페이지형 미니게임 - 브라우저에서 바로 즐기는 레트로 판타지 RPG" />
+  <title>YDH Chronicle | 홈페이지 MMORPG 미니게임</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <header class="hero-section" id="top">
+      <nav class="top-nav" aria-label="주요 메뉴">
+        <a class="brand" href="#top" aria-label="YDH Chronicle 홈">
+          <span class="brand-mark">Y</span>
+          <span>
+            <strong>YDH Chronicle</strong>
+            <small>Homepage MMORPG</small>
+          </span>
+        </a>
+        <div class="nav-links">
+          <a href="#game">게임시작</a>
+          <a href="#systems">시스템</a>
+          <a href="#ranking">랭킹</a>
+          <a href="#roadmap">로드맵</a>
+        </div>
+      </nav>
+
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">RETRO FANTASY · BROWSER RPG · NO INSTALL</p>
+          <h1>홈페이지 자체가 게임이 되는<br />YDH 레트로 MMORPG 실험장</h1>
+          <p class="hero-desc">
+            에이전트 문서의 MMORPG 방향성에 맞춰 클라이언트, 전투, 퀘스트, 인벤토리,
+            GM 로그 감성을 하나의 정적 웹 페이지로 구현했습니다. 접속 즉시 플레이하고,
+            진행도는 브라우저에 자동 저장됩니다.
+          </p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#game">바로 전투 시작</a>
+            <button class="btn ghost" type="button" id="resetSaveTop">저장 초기화</button>
+          </div>
+          <div class="hero-stats" aria-label="게임 요약">
+            <span><strong>5</strong> Skills</span>
+            <span><strong>8</strong> Zones</span>
+            <span><strong>∞</strong> Waves</span>
+          </div>
+        </div>
+        <div class="hero-card" aria-label="게임 월드 미리보기">
+          <div class="moon"></div>
+          <div class="castle">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="hero-avatar" title="기사">⚔️</div>
+          <div class="monster-avatar" title="몬스터">🐉</div>
+          <div class="portal"></div>
+          <p>아덴 외곽 균열 발생<br /><strong>용사 호출 대기중</strong></p>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section class="panel intro-panel">
+        <div>
+          <p class="eyebrow">SERVER NOTICE</p>
+          <h2>오늘의 서버 상황</h2>
+          <p>
+            마을 방어선이 흔들리고 있습니다. 필드 몬스터를 처치해 골드와 장비를 획득하고,
+            스킬 쿨타임을 관리해 최대 웨이브를 돌파하세요.
+          </p>
+        </div>
+        <div class="notice-list">
+          <span>✅ 자동 저장</span>
+          <span>✅ 반응형 UI</span>
+          <span>✅ 순수 HTML/CSS/JS</span>
+          <span>✅ 설치/빌드 불필요</span>
+        </div>
+      </section>
+
+      <section class="game-layout" id="game">
+        <aside class="panel character-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">CHARACTER</p>
+            <h2 id="playerName">검은 기사</h2>
+          </div>
+
+          <div class="portrait-wrap">
+            <div class="portrait" id="playerSprite">🛡️</div>
+            <div class="level-badge">Lv.<span id="level">1</span></div>
+          </div>
+
+          <div class="bar-group">
+            <div class="bar-line">
+              <span>HP</span><strong id="hpText">100 / 100</strong>
+            </div>
+            <div class="bar"><i id="hpBar"></i></div>
+          </div>
+          <div class="bar-group">
+            <div class="bar-line">
+              <span>MP</span><strong id="mpText">40 / 40</strong>
+            </div>
+            <div class="bar mana"><i id="mpBar"></i></div>
+          </div>
+          <div class="bar-group">
+            <div class="bar-line">
+              <span>EXP</span><strong id="expText">0 / 80</strong>
+            </div>
+            <div class="bar exp"><i id="expBar"></i></div>
+          </div>
+
+          <div class="stat-grid">
+            <span>공격 <strong id="atkStat">12</strong></span>
+            <span>방어 <strong id="defStat">4</strong></span>
+            <span>골드 <strong id="goldStat">0</strong></span>
+            <span>웨이브 <strong id="waveStat">1</strong></span>
+          </div>
+
+          <div class="inventory">
+            <h3>인벤토리</h3>
+            <ul id="inventoryList"></ul>
+          </div>
+        </aside>
+
+        <section class="panel battle-panel" aria-label="전투 화면">
+          <div class="battle-topline">
+            <div>
+              <p class="eyebrow">FIELD</p>
+              <h2 id="zoneName">말하는 섬 해안</h2>
+            </div>
+            <button class="btn small" type="button" id="nextZoneBtn">지역 이동</button>
+          </div>
+
+          <div class="battlefield" id="battlefield">
+            <div class="weather"></div>
+            <div class="unit player-unit" id="playerUnit">
+              <span class="unit-sprite">🧝</span>
+              <small>YDH</small>
+            </div>
+            <div class="impact" id="impact"></div>
+            <div class="unit monster-unit" id="monsterUnit">
+              <span class="unit-sprite" id="monsterSprite">🐺</span>
+              <small id="monsterName">그림자 늑대</small>
+            </div>
+            <div class="ground"></div>
+          </div>
+
+          <div class="monster-card">
+            <div>
+              <span id="monsterTitle">그림자 늑대</span>
+              <strong id="monsterHpText">55 / 55</strong>
+            </div>
+            <div class="bar danger"><i id="monsterHpBar"></i></div>
+          </div>
+
+          <div class="skill-grid" id="skillGrid" aria-label="스킬 목록"></div>
+
+          <div class="combat-actions">
+            <button class="btn primary" type="button" id="attackBtn">기본 공격</button>
+            <button class="btn" type="button" id="potionBtn">물약 사용</button>
+            <button class="btn" type="button" id="restBtn">마을 휴식</button>
+          </div>
+        </section>
+
+        <aside class="panel log-panel">
+          <div class="panel-heading">
+            <p class="eyebrow">GM CONSOLE</p>
+            <h2>실시간 로그</h2>
+          </div>
+          <div class="quest-box">
+            <h3>현재 퀘스트</h3>
+            <p id="questText">몬스터 3마리 처치</p>
+            <div class="bar quest"><i id="questBar"></i></div>
+          </div>
+          <ol class="log-list" id="logList"></ol>
+        </aside>
+      </section>
+
+      <section class="systems" id="systems">
+        <article class="panel feature-card">
+          <span>⚔️</span>
+          <h3>전투 루프</h3>
+          <p>공격, 스킬, 피격, 처치, 보상, 웨이브 증가까지 한 화면에서 순환합니다.</p>
+        </article>
+        <article class="panel feature-card">
+          <span>🎒</span>
+          <h3>장비 파밍</h3>
+          <p>몬스터 처치 시 공격/방어 보너스 아이템이 드롭되고 자동 장착됩니다.</p>
+        </article>
+        <article class="panel feature-card">
+          <span>🧭</span>
+          <h3>지역 탐험</h3>
+          <p>해안, 숲, 동굴, 사막, 용의 계곡 등 지역별 몬스터가 등장합니다.</p>
+        </article>
+        <article class="panel feature-card">
+          <span>💾</span>
+          <h3>자동 저장</h3>
+          <p>레벨, 골드, 웨이브, 인벤토리가 브라우저 localStorage에 저장됩니다.</p>
+        </article>
+      </section>
+
+      <section class="panel ranking-panel" id="ranking">
+        <div>
+          <p class="eyebrow">HALL OF HEROES</p>
+          <h2>내 최고 기록</h2>
+          <p>현재 브라우저 기준으로 저장되는 개인 랭킹입니다.</p>
+        </div>
+        <div class="rank-grid">
+          <span>최고 레벨 <strong id="bestLevel">1</strong></span>
+          <span>최고 웨이브 <strong id="bestWave">1</strong></span>
+          <span>누적 처치 <strong id="totalKills">0</strong></span>
+        </div>
+      </section>
+
+      <section class="roadmap" id="roadmap">
+        <div class="panel roadmap-copy">
+          <p class="eyebrow">NEXT PATCH</p>
+          <h2>다음 확장 후보</h2>
+          <p>
+            이후 서버 API, 계정 로그인, 실제 DB, 맵 에디터, 로봇 AI 사냥 루틴을 붙이면
+            홈페이지형 프로토타입에서 경량 MMORPG 런처로 확장할 수 있습니다.
+          </p>
+        </div>
+        <div class="timeline">
+          <div><strong>1</strong><span>로그인/캐릭터 선택</span></div>
+          <div><strong>2</strong><span>SQLite 또는 MySQL 저장소</span></div>
+          <div><strong>3</strong><span>웹소켓 전투 로그</span></div>
+          <div><strong>4</strong><span>GM 운영자 콘솔</span></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© YDH Chronicle</span>
+      <a href="#top">상단으로</a>
+    </footer>
+  </div>
+
+  <template id="skillTemplate">
+    <button class="skill-card" type="button">
+      <span class="skill-icon"></span>
+      <strong class="skill-name"></strong>
+      <small class="skill-meta"></small>
+      <i class="cooldown-mask"></i>
+    </button>
+  </template>
+
+  <script src="game.js"></script>
+</body>
+</html>
