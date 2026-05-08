@@ -39,6 +39,9 @@
         language: navigator.language,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown'
       },
+      account: readJson(keys.accountProfile),
+      selectedCharacter: readJson(keys.selectedCharacter),
+      characterSlots: readJson(keys.characterSlots) || [],
       saves: {
         character: readJson(keys.character),
         map: readJson(keys.map),
@@ -116,6 +119,9 @@
   function applySnapshotToLocalStorage(snapshot) {
     const keys = schema.localStorageKeys;
     const saves = snapshot?.saves || {};
+    writeJson(keys.accountProfile, snapshot.account);
+    writeJson(keys.selectedCharacter, snapshot.selectedCharacter);
+    writeJson(keys.characterSlots, snapshot.characterSlots || []);
     writeJson(keys.character, saves.character);
     writeJson(keys.map, saves.map);
     writeJson(keys.chapterQuests, saves.chapterQuests);
