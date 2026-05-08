@@ -4,8 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="YDH MMORPG 홈페이지형 미니게임 - 브라우저에서 바로 즐기는 레트로 판타지 RPG" />
-  <title>YDH Chronicle | 홈페이지 MMORPG 미니게임</title>
+  <title>YDH Chronicle | 모바일 홈페이지 MMORPG</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="map.css" />
 </head>
 <body>
   <div class="site-shell">
@@ -15,12 +16,13 @@
           <span class="brand-mark">Y</span>
           <span>
             <strong>YDH Chronicle</strong>
-            <small>Homepage MMORPG</small>
+            <small>Mobile Homepage MMORPG</small>
           </span>
         </a>
         <div class="nav-links">
           <a href="#game">게임시작</a>
           <a href="#systems">시스템</a>
+          <a href="#assets">Assets/Map</a>
           <a href="#ranking">랭킹</a>
           <a href="#roadmap">로드맵</a>
         </div>
@@ -28,12 +30,11 @@
 
       <section class="hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">RETRO FANTASY · BROWSER RPG · NO INSTALL</p>
+          <p class="eyebrow">RETRO FANTASY · MOBILE MAP · NO INSTALL</p>
           <h1>홈페이지 자체가 게임이 되는<br />YDH 레트로 MMORPG 실험장</h1>
           <p class="hero-desc">
-            에이전트 문서의 MMORPG 방향성에 맞춰 클라이언트, 전투, 퀘스트, 인벤토리,
-            GM 로그 감성을 하나의 정적 웹 페이지로 구현했습니다. 접속 즉시 플레이하고,
-            진행도는 브라우저에 자동 저장됩니다.
+            에이전트 문서의 MMORPG 방향성에 맞춰 클라이언트, 전투, 타일맵, 퀘스트, 인벤토리,
+            GM 로그 감성을 하나의 정적 웹 페이지로 구현했습니다. 모바일 터치와 PC 키보드 모두 지원합니다.
           </p>
           <div class="hero-actions">
             <a class="btn primary" href="#game">바로 전투 시작</a>
@@ -41,7 +42,8 @@
           </div>
           <div class="hero-stats" aria-label="게임 요약">
             <span><strong>5</strong> Skills</span>
-            <span><strong>8</strong> Zones</span>
+            <span><strong>3</strong> Maps</span>
+            <span><strong>8+</strong> Assets</span>
             <span><strong>∞</strong> Waves</span>
           </div>
         </div>
@@ -53,7 +55,7 @@
           <div class="hero-avatar" title="기사">⚔️</div>
           <div class="monster-avatar" title="몬스터">🐉</div>
           <div class="portal"></div>
-          <p>아덴 외곽 균열 발생<br /><strong>용사 호출 대기중</strong></p>
+          <p>아덴 외곽 균열 발생<br /><strong>타일맵 탐험 가능</strong></p>
         </div>
       </section>
     </header>
@@ -64,15 +66,15 @@
           <p class="eyebrow">SERVER NOTICE</p>
           <h2>오늘의 서버 상황</h2>
           <p>
-            마을 방어선이 흔들리고 있습니다. 필드 몬스터를 처치해 골드와 장비를 획득하고,
-            스킬 쿨타임을 관리해 최대 웨이브를 돌파하세요.
+            마을 방어선이 흔들리고 있습니다. 맵을 이동하면서 몬스터 구역, NPC, 포탈을 확인하고,
+            전투 화면에서 골드와 장비를 획득하세요.
           </p>
         </div>
         <div class="notice-list">
           <span>✅ 자동 저장</span>
-          <span>✅ 반응형 UI</span>
-          <span>✅ 순수 HTML/CSS/JS</span>
-          <span>✅ 설치/빌드 불필요</span>
+          <span>✅ 모바일 터치</span>
+          <span>✅ SVG Assets</span>
+          <span>✅ 타일맵 구조</span>
         </div>
       </section>
 
@@ -126,7 +128,7 @@
               <p class="eyebrow">FIELD</p>
               <h2 id="zoneName">말하는 섬 해안</h2>
             </div>
-            <button class="btn small" type="button" id="nextZoneBtn">지역 이동</button>
+            <button class="btn small" type="button" id="nextZoneBtn">전투 지역 이동</button>
           </div>
 
           <div class="battlefield" id="battlefield">
@@ -142,6 +144,31 @@
             </div>
             <div class="ground"></div>
           </div>
+
+          <section class="map-panel" aria-label="타일맵 탐험">
+            <div class="map-head">
+              <div>
+                <p class="eyebrow">WORLD MAP</p>
+                <h3 id="mapTitle">말하는 섬 해안</h3>
+                <p id="mapDesc">맵 데이터를 불러오는 중입니다.</p>
+              </div>
+              <span class="map-position" id="mapPosition">X:0 / Y:0</span>
+            </div>
+            <div class="tile-map" id="tileMap" role="grid" aria-label="이동 가능한 타일맵"></div>
+            <div class="map-controls" aria-label="모바일 이동 버튼">
+              <button type="button" id="moveNorth" aria-label="위로 이동">▲</button>
+              <button type="button" id="moveWest" aria-label="왼쪽 이동">◀</button>
+              <button type="button" id="moveSouth" aria-label="아래로 이동">▼</button>
+              <button type="button" id="moveEast" aria-label="오른쪽 이동">▶</button>
+            </div>
+            <p class="map-event" id="mapEvent">방향키, WASD, 터치 버튼, 인접 타일 클릭으로 이동합니다.</p>
+            <div class="mobile-help">
+              <span>모바일: 방향 버튼</span>
+              <span>PC: WASD/방향키</span>
+              <span>포탈: 다음 맵</span>
+              <span>👹: 조우 구역</span>
+            </div>
+          </section>
 
           <div class="monster-card">
             <div>
@@ -181,20 +208,35 @@
           <p>공격, 스킬, 피격, 처치, 보상, 웨이브 증가까지 한 화면에서 순환합니다.</p>
         </article>
         <article class="panel feature-card">
+          <span>🗺️</span>
+          <h3>타일맵 탐험</h3>
+          <p>문자 기반 맵 데이터를 SVG 타일로 렌더링하고 충돌/포탈/조우를 처리합니다.</p>
+        </article>
+        <article class="panel feature-card">
           <span>🎒</span>
           <h3>장비 파밍</h3>
           <p>몬스터 처치 시 공격/방어 보너스 아이템이 드롭되고 자동 장착됩니다.</p>
         </article>
         <article class="panel feature-card">
-          <span>🧭</span>
-          <h3>지역 탐험</h3>
-          <p>해안, 숲, 동굴, 사막, 용의 계곡 등 지역별 몬스터가 등장합니다.</p>
+          <span>📱</span>
+          <h3>모바일 지원</h3>
+          <p>작은 화면에서도 터치 버튼, 반응형 레이아웃, 가벼운 SVG 에셋으로 동작합니다.</p>
         </article>
-        <article class="panel feature-card">
-          <span>💾</span>
-          <h3>자동 저장</h3>
-          <p>레벨, 골드, 웨이브, 인벤토리가 브라우저 localStorage에 저장됩니다.</p>
-        </article>
+      </section>
+
+      <section class="panel asset-pipeline" id="assets">
+        <p class="eyebrow">ASSETS & MAP PIPELINE</p>
+        <h2>Assets와 Map 개발 기준</h2>
+        <p>
+          초기 버전은 경량 SVG 에셋과 <code>data/maps.js</code> 문자 타일맵으로 구성했습니다.
+          실제 픽셀아트 PNG/WebP가 준비되면 같은 경로로 교체하거나 asset table만 바꾸면 됩니다.
+        </p>
+        <div class="asset-pipeline-grid">
+          <div><strong>Tiles</strong><span>grass, road, water, tree, stone, portal SVG 기본 제공</span></div>
+          <div><strong>Sprites</strong><span>player, slime 기본 SVG 제공. 이후 4방향/8방향 확장</span></div>
+          <div><strong>Maps</strong><span>말하는 섬, 은빛 숲, 버려진 광산 3개 기본 맵</span></div>
+          <div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div>
+        </div>
       </section>
 
       <section class="panel ranking-panel" id="ranking">
@@ -215,15 +257,15 @@
           <p class="eyebrow">NEXT PATCH</p>
           <h2>다음 확장 후보</h2>
           <p>
-            이후 서버 API, 계정 로그인, 실제 DB, 맵 에디터, 로봇 AI 사냥 루틴을 붙이면
-            홈페이지형 프로토타입에서 경량 MMORPG 런처로 확장할 수 있습니다.
+            이후 Tiled JSON, 타일셋 atlas, 서버 API, 계정 로그인, 실제 DB, 맵 에디터,
+            로봇 AI 사냥 루틴을 붙이면 홈페이지형 프로토타입에서 경량 MMORPG 런처로 확장할 수 있습니다.
           </p>
         </div>
         <div class="timeline">
-          <div><strong>1</strong><span>로그인/캐릭터 선택</span></div>
-          <div><strong>2</strong><span>SQLite 또는 MySQL 저장소</span></div>
-          <div><strong>3</strong><span>웹소켓 전투 로그</span></div>
-          <div><strong>4</strong><span>GM 운영자 콘솔</span></div>
+          <div><strong>1</strong><span>Tiled Map Editor JSON import</span></div>
+          <div><strong>2</strong><span>타일셋 PNG atlas</span></div>
+          <div><strong>3</strong><span>WebSocket 위치 동기화</span></div>
+          <div><strong>4</strong><span>GM 맵/스폰 콘솔</span></div>
         </div>
       </section>
     </main>
@@ -243,6 +285,8 @@
     </button>
   </template>
 
+  <script src="data/maps.js"></script>
+  <script src="map-engine.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
