@@ -12,6 +12,7 @@ YDH Chronicle은 `.github/agents/my-agent.agent.md`의 MMORPG Full-Scope Expert 
 - 전투 화면 캐릭터/몬스터 16방향 스프라이트 표시
 - 3개 기본 타일맵: 말하는 섬, 은빛 숲, 버려진 광산
 - 모바일 방향 버튼, 인접 타일 클릭, PC WASD/방향키 이동
+- 이동 이벤트 기반 걷기 애니메이션 상태 처리
 - 16방향 캐릭터/몬스터/NPC 스프라이트 표시
 - 맵별 몬스터/NPC 스폰 테이블
 - 타일 충돌 처리: 나무/물/벽 이동 불가
@@ -61,13 +62,16 @@ open index.html
 ├── map.css
 ├── entity-sprites.css
 ├── battle-sprites.css
+├── walk-animations.css
 ├── game.js
 ├── map-engine.js
 ├── game-map-bridge.js
 ├── battle-sprites.js
+├── walk-animations.js
 ├── data/
 │   ├── maps.js
-│   └── entities.js
+│   ├── entities.js
+│   └── animations.js
 ├── assets/
 │   ├── README.md
 │   ├── tiles/
@@ -142,6 +146,33 @@ open index.html
 - 잡화 상인
 - 경비병
 
+## Animation 개발 기준
+
+애니메이션 설정은 `data/animations.js`에서 관리합니다.
+
+현재 방식:
+
+- 실제 다중 프레임 PNG 시트가 아니라 CSS 기반 절차적 걷기 모션입니다.
+- `map-engine.js`가 이동 성공 후 `ydh-player-moved` 이벤트를 발행합니다.
+- `walk-animations.js`가 이벤트를 받아 플레이어 스프라이트에 `is-walking` 상태를 부여합니다.
+- `walk-animations.css`가 걷기 흔들림, 발걸음 먼지, 이동 타일 강조 효과를 처리합니다.
+
+향후 교체 가능한 목표 구조:
+
+```text
+sheet-16dir-x-4walk
+방향 16개 x 걷기 4프레임
+프레임 64x64 기준 전체 4096x64 또는 1024x256 atlas
+```
+
+현재 animation metadata:
+
+- idle: 1 frame
+- walk: 4 frames 목표
+- attack: 4 frames 목표
+- hit: 2 frames 목표
+- death: 6 frames 목표
+
 ## Battle Sprite 개발 기준
 
 전투 화면은 `battle-sprites.js`와 `battle-sprites.css`가 담당합니다.
@@ -187,17 +218,20 @@ rows: [
 | `map.css` | 모바일 타일맵, 이동 버튼, 맵 이벤트 스타일 |
 | `entity-sprites.css` | 16방향 엔티티 스프라이트 렌더링 스타일 |
 | `battle-sprites.css` | 전투 화면 16방향 스프라이트 스타일 |
+| `walk-animations.css` | 맵 이동 걷기 모션/먼지/타일 강조 스타일 |
 | `game.js` | 전투, 성장, 저장, 스킬, 퀘스트 로직 |
 | `data/maps.js` | 타일 타입과 기본 맵 데이터 |
 | `data/entities.js` | 16방향 방향표, 엔티티 풀, 스폰 테이블 |
+| `data/animations.js` | 애니메이션 상태/타이밍/목표 프레임 구조 |
 | `map-engine.js` | 타일맵 렌더링, 이동, 충돌, 포탈, NPC/몬스터 처리 |
+| `walk-animations.js` | 플레이어 이동 이벤트 기반 걷기 애니메이션 컨트롤러 |
 | `battle-sprites.js` | 전투 화면 캐릭터/몬스터 스프라이트 교체 렌더러 |
 | `game-map-bridge.js` | 맵 이벤트를 GM 콘솔 로그에 연결 |
 | `assets/` | 타일/스프라이트 리소스 |
 
 ## 향후 확장 후보
 
-1. 걷기 애니메이션 프레임 추가
+1. 실제 `16방향 x 걷기 4프레임` 이미지 atlas 추가
 2. 공격/피격/사망 전투 모션 추가
 3. Tiled Map Editor JSON import
 4. 타일셋 PNG atlas 적용
