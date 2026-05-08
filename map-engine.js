@@ -65,7 +65,36 @@
     return { code, ...(data.tileTypes[code] || data.tileTypes.G) };
   }
 
+  function placementAt(x, y, kind = '') {
+    const map = currentMap();
+    return (map.placements || []).find((placement) => {
+      const kindMatched = !kind || placement.kind === kind;
+      return kindMatched && Number(placement.x) === Number(x) && Number(placement.y) === Number(y);
+    }) || null;
+  }
+
+  function normalizeEntityId(id = '') {
+    return String(id).replace(/^(npc|monster)-/, '').replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+  }
+
+  function entityFromPlacement(type, placement) {
+    if (!placement?.entityId) return null;
+    const source = type === 'npc' ? entities.npcs : entities.monsters;
+    const direct = source?.[placement.entityId];
+    if (direct) return direct;
+    return source?.[normalizeEntityId(placement.entityId)] || null;
+  }
+
   function getMapEntity(type, x, y) {
+    const placement = placementAt(x, y, type);
+    const placedEntity = entityFromPlacement(type, placement);
+    if (placedEntity) {
+      return {
+        ...placedEntity,
+        name: placement.name || placedEntity.name,
+        dialogue: placement.dialogue || placedEntity.dialogue
+      };
+    }
     const map = currentMap();
     const picked = pickEntityForMap(map.id, type, x, y);
     if (picked) return picked;
@@ -198,33 +227,48 @@
     notifyMove(from, { x: state.x, y: state.y, mapIndex: state.mapIndex }, dx, dy);
   }
 
+  function portalTargetIndex(placement) {
+    if (!placement) return null;
+    const targetIndex = Number(placement.targetMapIndex);
+    if (Number.isFinite(targetIndex) && data.maps[targetIndex]) return targetIndex;
+    if (placement.targetMapId) {
+      const found = data.maps.findIndex((map) => map.id === placement.targetMapId);
+      if (found >= 0) return found;
+    }
+    return null;
+  }
+
   function handleTile(tile, x, y) {
     if (tile.code === 'P') {
       const map = currentMap();
-      state.mapIndex = map.portalTo ?? ((state.mapIndex + 1) % data.maps.length);
+      const placement = placementAt(x, y, 'portal');
+      const target = portalTargetIndex(placement);
+      state.mapIndex = target ?? map.portalTo ?? ((state.mapIndex + 1) % data.maps.length);
       if (!data.maps[state.mapIndex]) state.mapIndex = 0;
       const next = currentMap();
       state.x = next.start.x;
       state.y = next.start.y;
       state.direction = entities.player?.defaultDirection ?? 12;
-      state.lastTarget = null;
+      state.lastTarget = placement ? { type: 'portal', id: placement.id, name: placement.name } : null;
       setEvent(`${next.name}(으)로 이동했습니다.`, 'good');
-      notifyGame(`포탈 이동: ${next.name}`);
+      notifyGame(`포탈 이동: ${placement?.name ? `${placement.name} → ` : ''}${next.name}`);
       return;
     }
 
     if (tile.code === 'N') {
+      const placement = placementAt(x, y, 'npc');
       const npc = getMapEntity('npc', x, y);
-      state.lastTarget = { type: 'npc', id: npc.id, name: npc.name };
-      setEvent(`${npc.name}: ${npc.dialogue || '어서 오세요.'}`, 'good');
-      notifyGame(`${npc.name} 대화: ${npc.dialogue || '어서 오세요.'}`);
+      state.lastTarget = { type: 'npc', id: npc.id || placement?.id, name: npc.name };
+      setEvent(`${npc.name}: ${placement?.dialogue || npc.dialogue || '어서 오세요.'}`, 'good');
+      notifyGame(`${npc.name} 대화: ${placement?.dialogue || npc.dialogue || '어서 오세요.'}`);
       return;
     }
 
     const chance = tile.encounter || 0;
     if (Math.random() < chance) {
+      const placement = placementAt(x, y, 'monster');
       const monster = getMapEntity('monster', x, y);
-      state.lastTarget = { type: 'monster', id: monster.id, name: monster.name };
+      state.lastTarget = { type: 'monster', id: monster.id || placement?.id, name: monster.name };
       setEvent(`${monster.name} 조우! 전투 화면에서 공격하세요.`, 'danger');
       notifyGame(`맵 조우 이벤트: ${monster.name} 출현`);
       const attackButton = document.getElementById('attackBtn');
