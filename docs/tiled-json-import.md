@@ -2,11 +2,12 @@
 
 ## 상태
 
-현재는 22-1, 22-2까지 완료된 상태입니다.
+현재는 22-1, 22-2, 22-3까지 완료된 상태입니다.
 
 - 22-1: Tiled JSON 샘플맵 + 변환기 추가 완료
 - 22-2: index 로드 연결 + 샘플맵 자동 등록 완료
-- 22-3: 맵 선택/검증 UI 및 다중 Tiled 맵 확장 대기
+- 22-3: 맵 선택/검증 UI 완료
+- 22-4: 다중 Tiled JSON 등록/관리 고도화 대기
 
 ## 추가 파일
 
@@ -81,14 +82,45 @@ window.YDH_TILED_MAP_LOADER.appendToYdhMaps(map);
 
 `map-engine.js`가 시작되기 전에 `tiled-map-bootstrap.js`가 샘플맵을 `YDH_MAPS.maps`에 추가합니다.
 
-로드 실패 시에는 콘솔 경고와 게임 로그 이벤트만 남기고 기존 문자 타일맵은 그대로 유지됩니다.
+## 22-3 맵 선택/검증 UI
 
-## 22-3 다음 작업
+`tiled-map-bootstrap.js`는 이제 아래 기능을 함께 제공합니다.
+
+1. 인라인 fallback Tiled 변환맵 동기 등록
+2. fetch 기반 Tiled JSON 로드 검증
+3. 중복 맵 ID 감지
+4. 타일 코드 검증
+5. 시작 좌표 검증
+6. 맵 선택 카드 UI 표시
+7. 선택한 맵의 시작 좌표로 이동 후 새로고침
+
+자동 생성 UI:
+
+```text
+TILED MAP MANAGER
+```
+
+표시 위치:
+
+```text
+Assets/Map 섹션 바로 아래
+```
+
+맵 카드에서 `이 맵으로 이동`을 누르면 `ydh-chronicle-map-v1` 저장값을 해당 맵 index와 시작 좌표로 변경한 뒤 페이지를 새로고침합니다.
+
+## 안정성 기준
+
+- Tiled JSON fetch가 늦거나 실패해도 인라인 fallback 맵이 먼저 등록됩니다.
+- 알 수 없는 타일 코드가 있으면 해당 맵은 실패 목록에 기록됩니다.
+- 기존 문자 타일맵은 제거하지 않습니다.
+- 기존 맵 엔진의 이동/전투/스폰 처리는 그대로 유지합니다.
+
+## 22-4 다음 작업
 
 다음 단계에서 진행합니다.
 
-1. 맵 선택 UI 추가
-2. GM 콘솔에 Tiled source 표시
-3. 다중 Tiled JSON 등록 구조 추가
-4. Tiled 맵 검증 결과 표시
-5. 실패 맵/중복 맵 목록 표시
+1. 여러 개의 Tiled JSON URL 목록 관리
+2. 외부 Tiled JSON 업로드/붙여넣기 import
+3. GM 콘솔에 source/sourceUrl 표시
+4. 검증 실패 맵 상세 보기
+5. Tiled object layer 기반 NPC/몬스터/포탈 배치
