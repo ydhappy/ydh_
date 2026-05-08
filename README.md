@@ -10,6 +10,7 @@ YDH Chronicle은 `.github/agents/my-agent.agent.md`의 MMORPG Full-Scope Expert 
 - 기본 공격, 5종 스킬, 쿨타임, MP 소모
 - 몬스터 웨이브 전투 루프
 - 전투 화면 캐릭터/몬스터 16방향 스프라이트 표시
+- 공격/피격/사망/캐스팅/회복/방어 전투 모션 이벤트
 - 3개 기본 타일맵: 말하는 섬, 은빛 숲, 버려진 광산
 - 모바일 방향 버튼, 인접 타일 클릭, PC WASD/방향키 이동
 - 이동 이벤트 기반 걷기 애니메이션 상태 처리
@@ -62,16 +63,19 @@ open index.html
 ├── map.css
 ├── entity-sprites.css
 ├── battle-sprites.css
+├── battle-motions.css
 ├── walk-animations.css
 ├── game.js
 ├── map-engine.js
 ├── game-map-bridge.js
 ├── battle-sprites.js
+├── battle-motions.js
 ├── walk-animations.js
 ├── data/
 │   ├── maps.js
 │   ├── entities.js
-│   └── animations.js
+│   ├── animations.js
+│   └── combat-motions.js
 ├── assets/
 │   ├── README.md
 │   ├── tiles/
@@ -181,7 +185,34 @@ sheet-16dir-x-4walk
 - 전투 화면의 플레이어/몬스터 이모지 표시를 16방향 스프라이트 배경으로 교체합니다.
 - 몬스터 이름을 감지해서 늑대/고블린/골렘 이미지 중 적절한 이미지를 선택합니다.
 - 전투 화면의 플레이어는 기본 동쪽 방향, 몬스터는 기본 서쪽 방향으로 마주보게 표시합니다.
-- 추후 공격/피격/사망 모션은 별도 animation frame으로 확장할 수 있습니다.
+
+## Battle Motion 개발 기준
+
+전투 모션은 `data/combat-motions.js`, `battle-motions.css`, `battle-motions.js`가 담당합니다.
+
+- 기존 `game.js`의 전투 계산 로직은 유지합니다.
+- HP 텍스트와 몬스터 이름 변화를 감지해서 모션 이벤트를 자동 발생시킵니다.
+- `ydh-battle-motion` 이벤트로 공격/피격/사망/캐스팅/회복/방어 모션을 실행합니다.
+- `ydh-battle-motion-resolved` 이벤트로 모션 종료를 알립니다.
+- 기본 공격 버튼 클릭 시 공격 모션을 즉시 실행합니다.
+- 스킬 카드 클릭 시 스킬명에 따라 캐스팅/회복/방어 모션을 실행합니다.
+
+지원 모션:
+
+- `attack`: 공격 돌진
+- `hit`: 피격 흔들림/붉은 플래시
+- `death`: 사망 페이드/기울어짐
+- `cast`: 마법 캐스팅
+- `heal`: 회복 이펙트
+- `guard`: 방어 이펙트
+
+향후 교체 가능한 목표 구조:
+
+```text
+sheet-16dir-x-actions
+idle / walk / attack / cast / hit / death rows
+방향 16개 x 액션별 프레임
+```
 
 ## Map 개발 기준
 
@@ -218,21 +249,24 @@ rows: [
 | `map.css` | 모바일 타일맵, 이동 버튼, 맵 이벤트 스타일 |
 | `entity-sprites.css` | 16방향 엔티티 스프라이트 렌더링 스타일 |
 | `battle-sprites.css` | 전투 화면 16방향 스프라이트 스타일 |
+| `battle-motions.css` | 전투 공격/피격/사망/캐스팅/회복/방어 모션 스타일 |
 | `walk-animations.css` | 맵 이동 걷기 모션/먼지/타일 강조 스타일 |
 | `game.js` | 전투, 성장, 저장, 스킬, 퀘스트 로직 |
 | `data/maps.js` | 타일 타입과 기본 맵 데이터 |
 | `data/entities.js` | 16방향 방향표, 엔티티 풀, 스폰 테이블 |
 | `data/animations.js` | 애니메이션 상태/타이밍/목표 프레임 구조 |
+| `data/combat-motions.js` | 전투 모션 상태/타이밍/이벤트/목표 프레임 구조 |
 | `map-engine.js` | 타일맵 렌더링, 이동, 충돌, 포탈, NPC/몬스터 처리 |
 | `walk-animations.js` | 플레이어 이동 이벤트 기반 걷기 애니메이션 컨트롤러 |
 | `battle-sprites.js` | 전투 화면 캐릭터/몬스터 스프라이트 교체 렌더러 |
+| `battle-motions.js` | 전투 모션 이벤트 컨트롤러 |
 | `game-map-bridge.js` | 맵 이벤트를 GM 콘솔 로그에 연결 |
 | `assets/` | 타일/스프라이트 리소스 |
 
 ## 향후 확장 후보
 
 1. 실제 `16방향 x 걷기 4프레임` 이미지 atlas 추가
-2. 공격/피격/사망 전투 모션 추가
+2. 실제 `16방향 x 공격/피격/사망` 이미지 atlas 추가
 3. Tiled Map Editor JSON import
 4. 타일셋 PNG atlas 적용
 5. 몬스터 spawn table 확률/레벨/리젠 시간 분리
