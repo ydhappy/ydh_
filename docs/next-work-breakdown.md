@@ -48,37 +48,44 @@
 
 상태: 완료
 
+## 20차: WebSocket 위치 동기화
+
+상태: 완료
+
 작업 파일:
 
-- `server/sql/mysql55-schema.sql`
-- `server/src/mysql-storage.js`
-- `server/src/storage-provider.js`
+- `server/package.json`
+- `server/src/realtime.js`
 - `server/src/server.js`
+- `realtime-sync.css`
+- `realtime-sync.js`
+- `index.html`
 - `server/README.md`
 - `docs/next-work-breakdown.md`
 
 완료 내용:
 
-- MySQL 5.5 호환 `ydh_accounts` 테이블 추가
-- MySQL 5.5 호환 `ydh_character_slots` 테이블 추가
-- 기존 `ydh_save_snapshots` 원본 스냅샷 저장 유지
-- 저장 스냅샷 수신 시 계정 정보를 `ydh_accounts`에 upsert
-- 저장 스냅샷 수신 시 캐릭터 슬롯 정보를 `ydh_character_slots`에 upsert
-- `ydh_accounts.last_snapshot_at` 갱신 처리
-- 선택 캐릭터의 level/map_index 요약을 캐릭터 슬롯 테이블에 반영
-- `/api/accounts` 계정 목록 API 추가
-- `/api/characters` 캐릭터 슬롯 목록 API 추가
-- `/api/characters?accountId=...` 특정 계정 캐릭터 조회 추가
-- `/api/health`에 MySQL 계정/캐릭터 카운트 포함
-- README에 정규화 테이블 및 조회 API 문서화
+- `ws` dependency 추가
+- Express 서버를 `http.createServer(app)` 기반으로 변경
+- WebSocket endpoint `/ws/position` 추가
+- 실시간 접속자 peer registry 추가
+- `hello`, `position`, `ping` 메시지 처리 추가
+- `connected`, `welcome`, `peer-joined`, `peer-position`, `peer-left`, `error` 응답 메시지 정의
+- `/api/realtime/stats` 실시간 접속자 현황 API 추가
+- `/api/health` 응답에 realtime 통계 포함
+- 클라이언트 `실시간` 섹션 추가
+- WebSocket 연결/해제/현재 위치 송신 UI 추가
+- `ydh-player-moved` 이벤트 기반 위치 자동 송신 추가
+- 다른 접속자의 계정명/캐릭터명/클래스/맵/좌표 표시 카드 추가
+- README에 WebSocket 테스트 흐름 문서화
 
 ## 전체 상태
 
-상태: 8차~19차 완료
+상태: 8차~20차 완료
 
 현재 남은 고도화 후보:
 
-1. WebSocket 위치 동기화
+1. 실시간 타일맵 위 원격 플레이어 아바타 렌더링
 2. Tiled Map Editor JSON import
 3. 실제 PNG/WebP atlas 교체
 4. 서버 계정 인증 추가
