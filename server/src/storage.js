@@ -26,12 +26,19 @@ export async function writeStore(store) {
 
 export async function saveSnapshot(snapshot) {
   const store = await readStore();
+  const selected = snapshot.selectedCharacter || {};
+  const character = snapshot.saves?.character || {};
   const record = {
     id: `save_${Date.now()}_${Math.random().toString(16).slice(2)}`,
     receivedAt: new Date().toISOString(),
     schemaVersion: snapshot.schemaVersion,
-    characterName: snapshot.saves?.character?.name || '검은 기사',
-    level: snapshot.saves?.character?.level || 1,
+    accountId: snapshot.account?.accountId || selected.accountId || character.accountId || 'local',
+    accountName: snapshot.account?.displayName || 'YDH Player',
+    characterId: selected.characterId || character.characterId || 'default',
+    characterName: selected.name || character.name || '검은 기사',
+    classId: selected.classId || character.classId || 'knight',
+    slotCount: Array.isArray(snapshot.characterSlots) ? snapshot.characterSlots.length : 0,
+    level: character.level || 1,
     mapIndex: snapshot.saves?.map?.mapIndex ?? 0,
     snapshot
   };
