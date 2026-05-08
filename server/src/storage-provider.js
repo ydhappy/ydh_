@@ -18,6 +18,11 @@ export async function latestSnapshot() {
   return provider.latestSnapshot();
 }
 
+export async function snapshotById(id) {
+  if (typeof provider.snapshotById !== 'function') return null;
+  return provider.snapshotById(id);
+}
+
 export async function storageHealth() {
   if (typeof provider.health === 'function') return provider.health();
   return { storage: storageMode };
