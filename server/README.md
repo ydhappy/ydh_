@@ -33,8 +33,74 @@ http://localhost:3000/index.html
 | 변수 | 기본값 | 설명 |
 | --- | --- | --- |
 | `PORT` | `3000` | 서버 포트 |
-| `YDH_DATA_DIR` | `server/data` | 저장 파일 위치 |
+| `YDH_DATA_DIR` | `server/data` | 파일 저장 위치 |
 | `YDH_PUBLIC_DIR` | repository root | 정적 파일 제공 위치 |
+| `YDH_STORAGE` | `file` | `file` 또는 `mysql` |
+| `MYSQL_HOST` | `127.0.0.1` | MySQL 호스트 |
+| `MYSQL_PORT` | `3306` | MySQL 포트 |
+| `MYSQL_USER` | `root` | MySQL 계정 |
+| `MYSQL_PASSWORD` | empty | MySQL 비밀번호 |
+| `MYSQL_DATABASE` | `ydh_chronicle` | MySQL DB명 |
+| `MYSQL_CONNECTION_LIMIT` | `5` | MySQL connection pool 크기 |
+
+## MySQL 5.5 저장소 사용
+
+MySQL 5.5는 `JSON` 타입이 없으므로 저장 스냅샷은 `LONGTEXT` 컬럼에 JSON 문자열로 저장합니다.
+
+### 1. DB/테이블 생성
+
+```bash
+mysql -u root -p < server/sql/mysql55-schema.sql
+```
+
+또는 MySQL 접속 후 직접 실행:
+
+```sql
+SOURCE server/sql/mysql55-schema.sql;
+```
+
+### 2. 서버 실행
+
+Linux/macOS:
+
+```bash
+cd server
+YDH_STORAGE=mysql \
+MYSQL_HOST=127.0.0.1 \
+MYSQL_PORT=3306 \
+MYSQL_USER=root \
+MYSQL_PASSWORD=your_password \
+MYSQL_DATABASE=ydh_chronicle \
+npm start
+```
+
+Windows PowerShell:
+
+```powershell
+cd server
+$env:YDH_STORAGE="mysql"
+$env:MYSQL_HOST="127.0.0.1"
+$env:MYSQL_PORT="3306"
+$env:MYSQL_USER="root"
+$env:MYSQL_PASSWORD="your_password"
+$env:MYSQL_DATABASE="ydh_chronicle"
+npm start
+```
+
+### 3. 확인
+
+```bash
+curl http://localhost:3000/api/health
+```
+
+응답에 아래처럼 표시되면 MySQL 저장소가 활성화된 것입니다.
+
+```json
+{
+  "ok": true,
+  "storageMode": "mysql"
+}
+```
 
 ## API
 
@@ -107,18 +173,23 @@ curl http://localhost:3000/api/save/restore
 
 ## 저장 방식
 
-초기 구현은 DB가 아니라 파일 저장입니다.
+기본은 파일 저장입니다.
 
 ```text
 server/data/saves.json
 ```
 
-최근 50개 스냅샷만 보관합니다.
+MySQL 모드는 아래 테이블을 사용합니다.
+
+```text
+ydh_save_snapshots
+ydh_schema_meta
+```
 
 ## 다음 고도화 후보
 
 1. 서버 계정 인증 추가
 2. 캐릭터 슬롯별 개별 복원
-3. SQLite 또는 MariaDB 저장소 교체
+3. MySQL 계정/캐릭터 정규화 테이블 분리
 4. WebSocket 위치 동기화
 5. Tiled Map Editor JSON import
