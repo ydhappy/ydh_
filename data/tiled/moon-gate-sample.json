@@ -1,0 +1,49 @@
+{
+  "type": "map",
+  "tiledversion": "1.10.2",
+  "orientation": "orthogonal",
+  "width": 8,
+  "height": 6,
+  "tilewidth": 64,
+  "tileheight": 64,
+  "properties": [
+    { "name": "ydhId", "type": "string", "value": "moon-gate-yard" },
+    { "name": "ydhName", "type": "string", "value": "달문 광장" },
+    { "name": "ydhDescription", "type": "string", "value": "Tiled JSON에서 변환된 소형 테스트 맵입니다." },
+    { "name": "ydhStartX", "type": "int", "value": 1 },
+    { "name": "ydhStartY", "type": "int", "value": 4 },
+    { "name": "ydhPortalTo", "type": "int", "value": 0 }
+  ],
+  "tilesets": [
+    {
+      "firstgid": 1,
+      "name": "ydh-basic-tiles",
+      "tiles": [
+        { "id": 0, "properties": [{ "name": "ydhCode", "type": "string", "value": "G" }] },
+        { "id": 1, "properties": [{ "name": "ydhCode", "type": "string", "value": "R" }] },
+        { "id": 2, "properties": [{ "name": "ydhCode", "type": "string", "value": "S" }] },
+        { "id": 3, "properties": [{ "name": "ydhCode", "type": "string", "value": "T" }] },
+        { "id": 4, "properties": [{ "name": "ydhCode", "type": "string", "value": "W" }] },
+        { "id": 5, "properties": [{ "name": "ydhCode", "type": "string", "value": "M" }] },
+        { "id": 6, "properties": [{ "name": "ydhCode", "type": "string", "value": "N" }] },
+        { "id": 7, "properties": [{ "name": "ydhCode", "type": "string", "value": "P" }] }
+      ]
+    }
+  ],
+  "layers": [
+    {
+      "name": "Ground",
+      "type": "tilelayer",
+      "width": 8,
+      "height": 6,
+      "data": [
+        4,4,4,4,4,4,4,4,
+        4,3,3,3,3,6,8,4,
+        4,3,4,2,3,3,3,4,
+        4,3,6,2,3,7,3,4,
+        4,2,2,2,2,2,3,4,
+        4,4,4,4,4,4,4,4
+      ]
+    }
+  ]
+}
