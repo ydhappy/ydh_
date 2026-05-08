@@ -104,13 +104,33 @@
 
 ## 12차: 전용 소설 NPC/몬스터 16방향 SVG 제작
 
-상태: 대기
+상태: 완료
 
-목표:
+작업 파일:
 
-- 현재 재사용 중인 스프라이트를 전용 이미지로 교체
-- 까마귀 기록자, 달무녀, 심연 기사, 검은 달의 군주 등 전용화
-- 기존 `entities.js` 경로만 교체 가능하게 유지
+- `assets/sprites/npc-raven-archivist-16dir.svg`
+- `assets/sprites/npc-moon-priestess-16dir.svg`
+- `assets/sprites/npc-broken-smith-16dir.svg`
+- `assets/sprites/npc-silent-porter-16dir.svg`
+- `assets/sprites/monster-moon-stalker-16dir.svg`
+- `assets/sprites/monster-ink-wraith-16dir.svg`
+- `assets/sprites/monster-mirror-witch-16dir.svg`
+- `assets/sprites/monster-abyss-knight-16dir.svg`
+- `assets/sprites/monster-black-moon-lord-16dir.svg`
+- `data/entities.js`
+
+완료 내용:
+
+- 까마귀 기록자 전용 16방향 SVG 추가
+- 달무녀 세리아 전용 16방향 SVG 추가
+- 부서진 대장장이 로한 전용 16방향 SVG 추가
+- 침묵의 짐꾼 전용 16방향 SVG 추가
+- 달그림자 추적자 전용 16방향 SVG 추가
+- 잉크 망령 전용 16방향 SVG 추가
+- 반사 마녀 전용 16방향 SVG 추가
+- 심연 기사 전용 16방향 SVG 추가
+- 검은 달의 군주 전용 16방향 SVG 추가
+- `data/entities.js`에서 재사용 스프라이트 경로를 전용 경로로 교체
 
 ## 13차: 서버/API 연동 준비
 
