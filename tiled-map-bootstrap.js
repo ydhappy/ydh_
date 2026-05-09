@@ -28,6 +28,39 @@
     else console.info?.(`[YDH Tiled] ${message}`);
   }
 
+  function readJson(key, fallback = null) {
+    try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback; }
+    catch { return fallback; }
+  }
+
+  function currentScope() {
+    const keys = window.YDH_SAVE_SCHEMA?.localStorageKeys || {};
+    const account = readJson(keys.accountProfile || 'ydh-account-profile-v1', null);
+    const selected = readJson(keys.selectedCharacter || 'ydh-selected-character-v1', null);
+    return {
+      accountId: selected?.accountId || account?.accountId || '',
+      characterId: selected?.characterId || ''
+    };
+  }
+
+  function scopeQuery() {
+    const scope = currentScope();
+    const query = new URLSearchParams();
+    if (scope.accountId) query.set('accountId', scope.accountId);
+    if (scope.characterId) query.set('characterId', scope.characterId);
+    const text = query.toString();
+    return text ? `?${text}` : '';
+  }
+
+  function scopedMap(map) {
+    const scope = currentScope();
+    return {
+      ...map,
+      accountId: map.accountId || scope.accountId || 'global',
+      characterId: map.characterId || scope.characterId || 'global'
+    };
+  }
+
   function readCustomMaps() {
     try {
       const list = JSON.parse(localStorage.getItem(registry.localStorageKey) || '[]');
@@ -67,21 +100,22 @@
 
   function appendMap(map, origin = 'runtime') {
     if (!window.YDH_MAPS?.maps) return { ok: false, reason: 'YDH_MAPS.maps not ready', map };
-    const validation = validateMap(map);
+    const normalized = scopedMap(map);
+    const validation = validateMap(normalized);
     status.validation = status.validation.filter((item) => item.id !== validation.id);
     status.validation.push(validation);
     if (!validation.ok) {
-      status.failed.push({ url: map.sourceUrl || origin, error: validation.errors.join(', '), map });
-      return { ok: false, reason: validation.errors.join(', '), map };
+      status.failed.push({ url: normalized.sourceUrl || origin, error: validation.errors.join(', '), map: normalized });
+      return { ok: false, reason: validation.errors.join(', '), map: normalized };
     }
-    const existed = maps().some((item) => item.id === map.id);
+    const existed = maps().some((item) => item.id === normalized.id);
     if (existed) {
-      if (!status.duplicates.some((item) => item.id === map.id)) status.duplicates.push({ id: map.id, name: map.name, origin });
-      return { ok: true, existed: true, map };
+      if (!status.duplicates.some((item) => item.id === normalized.id)) status.duplicates.push({ id: normalized.id, name: normalized.name, origin });
+      return { ok: true, existed: true, map: normalized };
     }
-    window.YDH_MAPS.maps.push(map);
-    status.registered.push({ id: map.id, name: map.name, origin });
-    return { ok: true, existed: false, map };
+    window.YDH_MAPS.maps.push(normalized);
+    status.registered.push({ id: normalized.id, name: normalized.name, origin });
+    return { ok: true, existed: false, map: normalized };
   }
 
   function registerInlineMaps() {
@@ -117,7 +151,7 @@
   function loadCustomMaps() {
     const custom = readCustomMaps();
     status.custom = custom.map((item) => ({ id: item.id, name: item.name, savedAt: item.savedAt }));
-    custom.forEach((item) => appendMap({ ...item.map, source: 'tiled-json', sourceUrl: 'localStorage' }, 'localStorage'));
+    custom.forEach((item) => appendMap({ ...item.map, source: 'tiled-json', sourceUrl: item.map?.sourceUrl || 'localStorage' }, 'localStorage'));
   }
 
   function convertPastedJson(text) {
@@ -127,12 +161,13 @@
     const map = loader.convert(parsed, { id: propValue(parsed.properties || [], 'ydhId', `custom-tiled-${Date.now()}`) });
     map.source = 'tiled-json';
     map.sourceUrl = 'pasted-json';
-    return map;
+    return scopedMap(map);
   }
 
   function saveCustomMap(map) {
-    const list = readCustomMaps().filter((item) => item.id !== map.id);
-    list.unshift({ id: map.id, name: map.name, savedAt: new Date().toISOString(), map });
+    const normalized = scopedMap(map);
+    const list = readCustomMaps().filter((item) => item.id !== normalized.id);
+    list.unshift({ id: normalized.id, name: normalized.name, savedAt: new Date().toISOString(), map: normalized });
     writeCustomMaps(list);
     status.custom = list.map((item) => ({ id: item.id, name: item.name, savedAt: item.savedAt }));
   }
@@ -160,20 +195,21 @@
   }
 
   async function saveMapToServer(map) {
-    const response = await fetch('/api/maps/custom', {
+    const scoped = scopedMap(map);
+    const response = await fetch(`/api/maps/custom${scopeQuery()}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ map })
+      body: JSON.stringify({ ...currentScope(), map: scoped })
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !result.ok) throw new Error(result.error || `HTTP ${response.status}`);
-    status.server = status.server.filter((item) => item.id !== map.id);
-    status.server.unshift({ id: map.id, name: map.name, savedAt: result.map?.updatedAt || new Date().toISOString() });
+    status.server = status.server.filter((item) => item.id !== scoped.id);
+    status.server.unshift({ id: scoped.id, name: scoped.name, accountId: scoped.accountId, characterId: scoped.characterId, savedAt: result.map?.updatedAt || new Date().toISOString() });
     return result;
   }
 
   async function listServerMaps() {
-    const response = await fetch('/api/maps/custom');
+    const response = await fetch(`/api/maps/custom${scopeQuery()}`);
     const result = await response.json().catch(() => ({}));
     if (!response.ok || !result.ok) throw new Error(result.error || `HTTP ${response.status}`);
     status.server = result.maps || [];
@@ -181,7 +217,7 @@
   }
 
   function publish() {
-    window.YDH_TILED_BOOTSTRAP = { registered: [...status.registered], duplicates: [...status.duplicates], failed: [...status.failed], validation: [...status.validation], custom: [...status.custom], server: [...status.server], urls: [...(registry.urls || [])], loadedAt: new Date().toISOString() };
+    window.YDH_TILED_BOOTSTRAP = { registered: [...status.registered], duplicates: [...status.duplicates], failed: [...status.failed], validation: [...status.validation], custom: [...status.custom], server: [...status.server], urls: [...(registry.urls || [])], loadedAt: new Date().toISOString(), scope: currentScope() };
     window.dispatchEvent(new CustomEvent('ydh-tiled-maps-loaded', { detail: window.YDH_TILED_BOOTSTRAP }));
   }
 
@@ -207,7 +243,8 @@
     }
     const allMaps = maps();
     const tiledCount = allMaps.filter((map) => map.source === 'tiled-json').length;
-    section.innerHTML = `<div class="tiled-manager-head"><div><p class="eyebrow">TILED MAP MANAGER</p><h2>Tiled JSON 맵 선택/검증</h2><p>custom map을 localStorage, JSON 파일, 서버 API로 관리합니다.</p></div><div class="tiled-manager-badge">전체 ${allMaps.length}개<br />Tiled ${tiledCount}개</div></div><div class="tiled-import-box"><textarea id="tiledJsonPaste" placeholder="Tiled JSON 내용을 여기에 붙여넣고 등록하세요."></textarea><div class="tiled-import-actions"><button type="button" id="importTiledJson">붙여넣기 JSON 등록</button><button type="button" id="refreshServerMaps">서버 맵 목록</button></div></div><div class="tiled-map-grid">${allMaps.map((map, index) => renderMapCard(map, index)).join('')}</div><div class="tiled-validation">${renderValidation()}</div>`;
+    const scope = currentScope();
+    section.innerHTML = `<div class="tiled-manager-head"><div><p class="eyebrow">TILED MAP MANAGER</p><h2>Tiled JSON 맵 선택/검증</h2><p>custom map을 localStorage, JSON 파일, 서버 API로 관리합니다. Scope: ${escapeHtml(scope.accountId || 'global')} / ${escapeHtml(scope.characterId || 'global')}</p></div><div class="tiled-manager-badge">전체 ${allMaps.length}개<br />Tiled ${tiledCount}개</div></div><div class="tiled-import-box"><textarea id="tiledJsonPaste" placeholder="Tiled JSON 내용을 여기에 붙여넣고 등록하세요."></textarea><div class="tiled-import-actions"><button type="button" id="importTiledJson">붙여넣기 JSON 등록</button><button type="button" id="refreshServerMaps">서버 맵 목록</button></div></div><div class="tiled-map-grid">${allMaps.map((map, index) => renderMapCard(map, index)).join('')}</div><div class="tiled-validation">${renderValidation()}</div>`;
     section.querySelectorAll('[data-select-map-index]').forEach((button) => button.addEventListener('click', () => selectMap(Number(button.dataset.selectMapIndex))));
     section.querySelectorAll('[data-export-map-id]').forEach((button) => button.addEventListener('click', () => exportById(button.dataset.exportMapId)));
     section.querySelectorAll('[data-delete-custom-map-id]').forEach((button) => button.addEventListener('click', () => deleteById(button.dataset.deleteCustomMapId)));
@@ -220,7 +257,7 @@
     const isCustom = !!customRecordFor(map.id);
     const source = map.source === 'tiled-json' ? `Tiled JSON${map.sourceUrl ? ` · ${map.sourceUrl}` : ''}` : '기본 문자맵';
     const server = status.server.find((item) => item.id === map.id);
-    return `<article class="tiled-map-card ${map.source === 'tiled-json' ? 'tiled' : ''} ${isCustom ? 'custom' : ''}"><strong>${escapeHtml(map.name)}</strong><small>${escapeHtml(source)} · ${escapeHtml(map.id)} · ${map.rows?.[0]?.length || 0}x${map.rows?.length || 0}</small><small>시작 X:${map.start?.x ?? 0} Y:${map.start?.y ?? 0} · 포탈:${map.portalTo ?? '-'}${server ? ` · 서버저장 ${escapeHtml(server.updatedAt || server.savedAt || '')}` : ''}</small><div class="tiled-map-actions"><button type="button" data-select-map-index="${index}">이 맵으로 이동</button><button type="button" data-export-map-id="${escapeHtml(map.id)}">내보내기</button>${isCustom ? `<button type="button" data-delete-custom-map-id="${escapeHtml(map.id)}">삭제</button><button type="button" data-save-server-map-id="${escapeHtml(map.id)}">서버저장</button>` : ''}</div></article>`;
+    return `<article class="tiled-map-card ${map.source === 'tiled-json' ? 'tiled' : ''} ${isCustom ? 'custom' : ''}"><strong>${escapeHtml(map.name)}</strong><small>${escapeHtml(source)} · ${escapeHtml(map.id)} · ${map.rows?.[0]?.length || 0}x${map.rows?.length || 0}</small><small>Scope ${escapeHtml(map.accountId || 'global')} / ${escapeHtml(map.characterId || 'global')} · 시작 X:${map.start?.x ?? 0} Y:${map.start?.y ?? 0}${server ? ` · 서버저장 ${escapeHtml(server.updatedAt || server.savedAt || '')}` : ''}</small><div class="tiled-map-actions"><button type="button" data-select-map-index="${index}">이 맵으로 이동</button><button type="button" data-export-map-id="${escapeHtml(map.id)}">내보내기</button>${isCustom ? `<button type="button" data-delete-custom-map-id="${escapeHtml(map.id)}">삭제</button><button type="button" data-save-server-map-id="${escapeHtml(map.id)}">서버저장</button>` : ''}</div></article>`;
   }
 
   function renderValidation() {
@@ -241,8 +278,8 @@
       const map = convertPastedJson(textarea?.value || '');
       const result = appendMap(map, 'pasted-json');
       if (!result.ok) throw new Error(result.reason);
-      saveCustomMap(map);
-      log(`붙여넣기 맵 등록: ${map.name}`);
+      saveCustomMap(result.map);
+      log(`붙여넣기 맵 등록: ${result.map.name}`);
       publish();
       renderManager();
     } catch (error) {
@@ -319,6 +356,7 @@
     await loadRegistryUrls();
     publish();
     renderManager();
+    window.addEventListener('ydh-character-selected', renderManager);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
