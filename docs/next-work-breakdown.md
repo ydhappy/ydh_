@@ -248,13 +248,36 @@
 - `DELETE /api/maps/custom/:id` 호출 후 서버 목록에서 제거
 - 검증 실패/서버 API 실패를 `실패 상세 보기`로 표시
 
-### 22-8B: Object Layer marker/퀘스트 트리거
+### 22-8B-1: Object Layer marker 정보창
+
+상태: 완료
+
+작업 파일:
+
+- `map-engine.js`
+- `map.css`
+- `data/tiled/moon-gate-sample.json`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- Object Layer `ydhKind=marker` 배치 탐색 추가
+- marker를 rows 타일 코드로 합성하지 않고 별도 UI 배지로 표시
+- marker 타일 우측 상단 `ⓘ` 아이콘 표시
+- marker 클릭 시 `map-marker-info` 정보창 표시
+- 정보창에 marker 이름, 좌표, layer, kind, id, dialogue 표시
+- marker 클릭 시 타일 이동 이벤트가 발생하지 않도록 분리
+- 모바일 대응 정보창 스타일 추가
+- 샘플 Tiled JSON에 `달문 석비` marker object 추가
+
+### 22-8B-2: Tiled object layer 기반 퀘스트 트리거
 
 상태: 대기
 
 목표:
 
-- Object Layer marker 정보창
+- marker 기반 퀘스트 시작/완료 조건
 - Tiled object layer 기반 퀘스트 트리거
 - 서버 custom map 자동 동기화 옵션
 - 서버 custom map을 계정/캐릭터별로 분리 저장
@@ -262,11 +285,11 @@
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~8A단계 완료
+상태: 8차~21차 완료, 22차 1~8B-1단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-8B Object Layer marker/퀘스트 트리거
+1. 22-8B-2 Tiled object layer 기반 퀘스트 트리거
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
