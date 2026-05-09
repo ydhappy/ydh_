@@ -58,7 +58,7 @@
 
 ## 22차: Tiled Map Editor JSON import
 
-상태: 분할 진행 중
+상태: 완료
 
 ### 22-1: Tiled JSON 샘플맵 + 변환기
 
@@ -273,28 +273,43 @@
 
 ### 22-8B-2: Tiled object layer 기반 퀘스트 트리거
 
-상태: 대기
+상태: 완료
 
-목표:
+작업 파일:
 
-- marker 기반 퀘스트 시작/완료 조건
-- Tiled object layer 기반 퀘스트 트리거
-- 서버 custom map 자동 동기화 옵션
-- 서버 custom map을 계정/캐릭터별로 분리 저장
-- custom map MySQL 저장소 연동
+- `data/tiled-map-loader.js`
+- `map-engine.js`
+- `chapter-quests.js`
+- `data/chapter-quests.js`
+- `data/tiled/moon-gate-sample.json`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- Tiled object property `ydhQuestType`, `ydhQuestTarget`, `ydhQuestAmount`, `ydhQuestTrigger` 보존
+- marker 클릭 시 `ydh-tiled-quest-trigger` 이벤트 발행
+- 이벤트 detail에 type/target/amount/placement/map/state 포함
+- `chapter-quests.js`에서 `ydh-tiled-quest-trigger` 처리 추가
+- 기존 `progress(type, target, amount)` 퀘스트 진행 구조 재사용
+- 샘플 marker `달문 석비`에 quest trigger property 추가
+- 신규 챕터 퀘스트 `달문 석비의 경고` 추가
+- objective type `inspectMarker` 추가
+- 달문 광장 방문 `visitMap` 매핑 추가
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~8B-1단계 완료
+상태: 8차~22차 완료
 
 현재 남은 고도화 후보:
 
-1. 22-8B-2 Tiled object layer 기반 퀘스트 트리거
-2. 실제 PNG/WebP atlas 교체
-3. 서버 계정 인증 추가
-4. 운영용 관리자 저장 삭제/정리 API
-5. 원격 아바타 클릭 정보창
-6. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
+1. 서버 custom map 자동 동기화 옵션
+2. 서버 custom map을 계정/캐릭터별로 분리 저장
+3. custom map MySQL 저장소 연동
+4. 실제 PNG/WebP atlas 교체
+5. 서버 계정 인증 추가
+6. 원격 아바타 클릭 정보창
+7. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
 
 ## 원칙
 
