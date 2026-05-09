@@ -29,8 +29,10 @@ http://localhost:3000
 | `YDH_STORAGE` | `file` | `file` 또는 `mysql` |
 | `YDH_AUTH_REQUIRED` | `false` | `true`이면 주요 API에 Bearer token 필요 |
 | `YDH_AUTH_SHARED_SECRET` | empty | 로그인 시 요구할 공유 secret |
-| `YDH_AUTH_SECRET` | `YDH_AUTH_SHARED_SECRET` 또는 개발 기본값 | HMAC token 서명 secret |
-| `YDH_AUTH_TOKEN_TTL_SECONDS` | `604800` | token 만료 시간 |
+| `YDH_AUTH_SECRET` | `YDH_AUTH_SHARED_SECRET` 또는 개발 기본값 | HMAC access token 서명 secret |
+| `YDH_AUTH_TOKEN_TTL_SECONDS` | `900` | access token 만료 시간 |
+| `YDH_AUTH_REFRESH_TTL_SECONDS` | `2592000` | refresh token/session 만료 시간 |
+| `YDH_AUTH_MAX_SESSIONS` | `2000` | 파일 세션 최대 보관 개수 |
 | `MYSQL_HOST` | `127.0.0.1` | MySQL 호스트 |
 | `MYSQL_PORT` | `3306` | MySQL 포트 |
 | `MYSQL_USER` | `root` | MySQL 계정 |
@@ -56,16 +58,6 @@ YDH_AUTH_SECRET=server-signing-secret \
 npm start
 ```
 
-Windows PowerShell:
-
-```powershell
-cd server
-$env:YDH_AUTH_REQUIRED="true"
-$env:YDH_AUTH_SHARED_SECRET="change-me"
-$env:YDH_AUTH_SECRET="server-signing-secret"
-npm start
-```
-
 보호 대상:
 
 ```text
@@ -81,6 +73,8 @@ npm start
 /api/health
 /api/auth/status
 /api/auth/login
+/api/auth/refresh
+/api/auth/logout
 /api/realtime/stats
 정적 파일
 WebSocket 위치 동기화
@@ -94,7 +88,7 @@ WebSocket 위치 동기화
 curl http://localhost:3000/api/auth/status
 ```
 
-### 로그인/token 발급
+### 로그인/access token + refresh token 발급
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
@@ -102,14 +96,67 @@ curl -X POST http://localhost:3000/api/auth/login \
   -d '{"accountId":"acc_demo","displayName":"YDH Player","secret":"change-me"}'
 ```
 
-응답의 `token`을 Bearer token으로 사용합니다.
+응답:
+
+```text
+token
+refreshToken
+auth
+session
+```
+
+### access token 확인
 
 ```bash
 curl http://localhost:3000/api/auth/me \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
-브라우저에서는 `SERVER AUTH` 패널에서 로그인하면 token이 localStorage에 저장되고 `/api/*` 요청에 자동으로 `Authorization: Bearer ...`가 붙습니다.
+### refresh token 회전/access token 재발급
+
+```bash
+curl -X POST http://localhost:3000/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"YOUR_REFRESH_TOKEN"}'
+```
+
+refresh는 성공 시 새 access token과 새 refresh token을 반환합니다. 기존 refresh token hash는 새 hash로 회전됩니다.
+
+### 로그아웃/session 폐기
+
+```bash
+curl -X POST http://localhost:3000/api/auth/logout \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"YOUR_REFRESH_TOKEN"}'
+```
+
+## Refresh session 저장소
+
+파일 모드 세션 저장소:
+
+```text
+server/data/auth-sessions.json
+```
+
+저장 내용:
+
+```text
+sessionId
+refresh token hash
+accountId
+displayName
+roles
+createdAt
+lastUsedAt
+expiresAt
+revokedAt
+userAgent
+ip
+```
+
+원본 refresh token은 서버 파일에 저장하지 않고 SHA-256 hash만 저장합니다.
+
+브라우저에서는 `SERVER AUTH` 패널에서 로그인하면 access token과 refresh token이 localStorage에 저장됩니다. `/api/*` 요청이 401이면 refresh token으로 access token을 재발급하고 요청을 한 번 재시도합니다.
 
 ## MySQL 5.5 저장소 사용
 
@@ -140,7 +187,7 @@ npm start
 curl http://localhost:3000/api/health
 ```
 
-응답에는 저장소 상태, 인증 상태, custom map 저장 상태, 실시간 접속자 통계가 포함됩니다.
+응답에는 저장소 상태, 인증 상태, refresh session 상태, custom map 저장 상태, 실시간 접속자 통계가 포함됩니다.
 
 ### Custom Tiled map list
 
@@ -173,11 +220,12 @@ curl -X POST http://localhost:3000/api/save/snapshot \
 2. `http://localhost:3000/index.html` 접속
 3. `계정` 섹션에서 로컬 계정명 저장
 4. `SERVER AUTH` 패널에서 로그인
-5. 캐릭터 슬롯 생성 또는 선택
-6. `TILED MAP MANAGER`에서 custom Tiled JSON 붙여넣기 또는 기존 맵 선택
-7. custom map 카드에서 `서버저장` 사용
-8. `SERVER CUSTOM MAP SYNC`에서 `지금 동기화` 또는 `자동 동기화` 사용
-9. `서버연동` 섹션에서 저장/복원 사용
+5. access token / refresh token / session 상태 확인
+6. 캐릭터 슬롯 생성 또는 선택
+7. `TILED MAP MANAGER`에서 custom Tiled JSON 붙여넣기 또는 기존 맵 선택
+8. custom map 카드에서 `서버저장` 사용
+9. `SERVER CUSTOM MAP SYNC`에서 `지금 동기화` 또는 `자동 동기화` 사용
+10. `서버연동` 섹션에서 저장/복원 사용
 
 ## 저장 방식
 
@@ -186,6 +234,7 @@ curl -X POST http://localhost:3000/api/save/snapshot \
 ```text
 server/data/saves.json
 server/data/custom-maps.json
+server/data/auth-sessions.json
 ```
 
 MySQL 모드:
@@ -202,7 +251,7 @@ ydh_schema_meta
 
 ## 다음 고도화 후보
 
-1. 운영용 관리자 저장 삭제/정리 API
-2. 원격 아바타 클릭 정보창
-3. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
-4. refresh token / 세션 저장소
+1. refresh session MySQL 저장소
+2. 운영용 관리자 저장 삭제/정리 API
+3. 원격 아바타 클릭 정보창
+4. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
