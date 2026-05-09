@@ -1,10 +1,12 @@
 {
   "name": "ydh-chronicle",
-  "version": "0.27.2",
+  "version": "0.28.0",
   "private": true,
-  "description": "YDH Chronicle mobile homepage MMORPG web app with Android APK packaging support.",
+  "description": "YDH Chronicle mobile MMORPG web app with Android APK packaging support.",
   "type": "module",
   "scripts": {
+    "mmo:server": "node server/mobile-mmo-server.js",
+    "mmo:start": "node server/mobile-mmo-server.js",
     "android:generate": "node tools/create-android-project.mjs",
     "android:branding": "node tools/apply-android-branding.mjs",
     "android:webview-debug-apk": "node tools/create-android-project.mjs && gradle app:assembleDebug",
@@ -18,7 +20,8 @@
   },
   "dependencies": {
     "@capacitor/android": "latest",
-    "@capacitor/core": "latest"
+    "@capacitor/core": "latest",
+    "ws": "latest"
   },
   "devDependencies": {
     "@capacitor/cli": "latest"
