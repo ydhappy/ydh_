@@ -4,6 +4,7 @@ import path from 'node:path';
 const DATA_DIR = process.env.YDH_DATA_DIR || path.resolve(process.cwd(), 'data');
 const CUSTOM_MAP_FILE = path.join(DATA_DIR, 'custom-maps.json');
 const MAX_CUSTOM_MAPS = Number(process.env.YDH_MAX_CUSTOM_MAPS || 100);
+const GLOBAL_SCOPE = 'global';
 
 async function ensureStore() {
   await mkdir(DATA_DIR, { recursive: true });
@@ -17,12 +18,53 @@ async function ensureStore() {
 async function readStore() {
   await ensureStore();
   const raw = await readFile(CUSTOM_MAP_FILE, 'utf8');
-  return JSON.parse(raw || '{"maps":[]}');
+  const parsed = JSON.parse(raw || '{"maps":[]}');
+  parsed.maps = (parsed.maps || []).map(normalizeRecord);
+  return parsed;
 }
 
 async function writeStore(store) {
   await ensureStore();
   await writeFile(CUSTOM_MAP_FILE, JSON.stringify(store, null, 2), 'utf8');
+}
+
+function cleanScopeValue(value) {
+  const text = String(value || '').trim();
+  return text || GLOBAL_SCOPE;
+}
+
+function scopeFrom(input = {}) {
+  return {
+    accountId: cleanScopeValue(input.accountId),
+    characterId: cleanScopeValue(input.characterId)
+  };
+}
+
+function scopeKey(scope = {}) {
+  const normalized = scopeFrom(scope);
+  return `${normalized.accountId}::${normalized.characterId}`;
+}
+
+function recordKey(record) {
+  return `${scopeKey(record)}::${record.id}`;
+}
+
+function normalizeRecord(record) {
+  const scope = scopeFrom(record);
+  return {
+    ...record,
+    accountId: scope.accountId,
+    characterId: scope.characterId,
+    scopeKey: scopeKey(scope),
+    map: record.map
+  };
+}
+
+function validationScope(payload = {}) {
+  return scopeFrom({
+    accountId: payload.accountId || payload.map?.accountId,
+    characterId: payload.characterId || payload.map?.characterId
+  });
 }
 
 function validateCustomMapPayload(payload) {
@@ -33,19 +75,31 @@ function validateCustomMapPayload(payload) {
   if (!map?.name) errors.push('map.name is required');
   if (!Array.isArray(map?.rows) || !map.rows.length) errors.push('map.rows is required');
   if (map?.rows?.some((row) => typeof row !== 'string')) errors.push('map.rows must be string array');
-  return { ok: errors.length === 0, errors, map };
+  return { ok: errors.length === 0, errors, map, scope: validationScope(payload) };
+}
+
+function matchesScope(record, scope = {}) {
+  const normalized = normalizeRecord(record);
+  const wanted = scopeFrom(scope);
+  const accountMatches = wanted.accountId === GLOBAL_SCOPE || normalized.accountId === wanted.accountId;
+  const characterMatches = wanted.characterId === GLOBAL_SCOPE || normalized.characterId === wanted.characterId;
+  return accountMatches && characterMatches;
 }
 
 function summary(record) {
+  const normalized = normalizeRecord(record);
   return {
-    id: record.id,
-    name: record.name,
-    source: record.source,
-    sourceUrl: record.sourceUrl,
-    width: record.width,
-    height: record.height,
-    savedAt: record.savedAt,
-    updatedAt: record.updatedAt
+    id: normalized.id,
+    name: normalized.name,
+    accountId: normalized.accountId,
+    characterId: normalized.characterId,
+    scopeKey: normalized.scopeKey,
+    source: normalized.source,
+    sourceUrl: normalized.sourceUrl,
+    width: normalized.width,
+    height: normalized.height,
+    savedAt: normalized.savedAt,
+    updatedAt: normalized.updatedAt
   };
 }
 
@@ -58,40 +112,51 @@ export async function saveCustomMap(payload) {
   }
 
   const map = validation.map;
+  const scope = validation.scope;
   const store = await readStore();
   const now = new Date().toISOString();
-  const existing = (store.maps || []).find((item) => item.id === map.id);
-  const record = {
+  const lookup = `${scopeKey(scope)}::${map.id}`;
+  const existing = (store.maps || []).find((item) => recordKey(item) === lookup);
+  const record = normalizeRecord({
     id: map.id,
     name: map.name,
+    accountId: scope.accountId,
+    characterId: scope.characterId,
     source: map.source || 'tiled-json',
     sourceUrl: map.sourceUrl || 'server-custom',
     width: map.rows?.[0]?.length || 0,
     height: map.rows?.length || 0,
     savedAt: existing?.savedAt || now,
     updatedAt: now,
-    map
-  };
+    map: {
+      ...map,
+      accountId: scope.accountId,
+      characterId: scope.characterId
+    }
+  });
 
-  store.maps = [record, ...(store.maps || []).filter((item) => item.id !== map.id)].slice(0, MAX_CUSTOM_MAPS);
+  store.maps = [record, ...(store.maps || []).filter((item) => recordKey(item) !== lookup)].slice(0, MAX_CUSTOM_MAPS);
   await writeStore(store);
   return record;
 }
 
-export async function listCustomMaps() {
+export async function listCustomMaps(scope = {}) {
   const store = await readStore();
-  return (store.maps || []).map(summary);
+  return (store.maps || []).filter((item) => matchesScope(item, scope)).map(summary);
 }
 
-export async function getCustomMap(id) {
+export async function getCustomMap(id, scope = {}) {
   const store = await readStore();
-  return (store.maps || []).find((item) => item.id === id) || null;
+  const matches = (store.maps || []).filter((item) => item.id === id && matchesScope(item, scope));
+  if (!matches.length) return null;
+  const exactScope = scopeFrom(scope);
+  return matches.find((item) => item.accountId === exactScope.accountId && item.characterId === exactScope.characterId) || matches[0];
 }
 
-export async function deleteCustomMap(id) {
+export async function deleteCustomMap(id, scope = {}) {
   const store = await readStore();
   const before = store.maps || [];
-  const after = before.filter((item) => item.id !== id);
+  const after = before.filter((item) => !(item.id === id && matchesScope(item, scope)));
   store.maps = after;
   await writeStore(store);
   return { deleted: before.length !== after.length, count: after.length };
@@ -99,5 +164,9 @@ export async function deleteCustomMap(id) {
 
 export async function customMapHealth() {
   const store = await readStore();
-  return { count: store.maps?.length || 0, max: MAX_CUSTOM_MAPS };
+  const maps = store.maps || [];
+  const scopes = Array.from(new Set(maps.map((item) => normalizeRecord(item).scopeKey)));
+  return { count: maps.length, max: MAX_CUSTOM_MAPS, scopes: scopes.length };
 }
+
+export const customMapScope = { GLOBAL_SCOPE, scopeFrom, scopeKey };
