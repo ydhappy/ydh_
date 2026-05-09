@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="768" viewBox="0 0 768 768" role="img" aria-label="Dark fantasy item and skill icon atlas">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7c85f"/><stop offset="1" stop-color="#ff835f"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#73a7ff"/><stop offset="1" stop-color="#143b84"/></linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#69dda0"/><stop offset="1" stop-color="#145c38"/></linearGradient>
+    <linearGradient id="violet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ad82ff"/><stop offset="1" stop-color="#3a176a"/></linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff6b6b"/><stop offset="1" stop-color="#681818"/></linearGradient>
+    <filter id="s"><feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".55"/></filter>
+  </defs>
+  <rect width="768" height="768" fill="#080d15"/>
+  <g id="cells" fill="#121927" stroke="#27344b" stroke-width="2">
+    <script type="application/ecmascript"><![CDATA[]]></script>
+    <g>
+      <rect x="8" y="8" width="112" height="112" rx="18"/><rect x="136" y="8" width="112" height="112" rx="18"/><rect x="264" y="8" width="112" height="112" rx="18"/><rect x="392" y="8" width="112" height="112" rx="18"/><rect x="520" y="8" width="112" height="112" rx="18"/><rect x="648" y="8" width="112" height="112" rx="18"/>
+      <rect x="8" y="136" width="112" height="112" rx="18"/><rect x="136" y="136" width="112" height="112" rx="18"/><rect x="264" y="136" width="112" height="112" rx="18"/><rect x="392" y="136" width="112" height="112" rx="18"/><rect x="520" y="136" width="112" height="112" rx="18"/><rect x="648" y="136" width="112" height="112" rx="18"/>
+      <rect x="8" y="264" width="112" height="112" rx="18"/><rect x="136" y="264" width="112" height="112" rx="18"/><rect x="264" y="264" width="112" height="112" rx="18"/><rect x="392" y="264" width="112" height="112" rx="18"/><rect x="520" y="264" width="112" height="112" rx="18"/><rect x="648" y="264" width="112" height="112" rx="18"/>
+      <rect x="8" y="392" width="112" height="112" rx="18"/><rect x="136" y="392" width="112" height="112" rx="18"/><rect x="264" y="392" width="112" height="112" rx="18"/><rect x="392" y="392" width="112" height="112" rx="18"/><rect x="520" y="392" width="112" height="112" rx="18"/><rect x="648" y="392" width="112" height="112" rx="18"/>
+      <rect x="8" y="520" width="112" height="112" rx="18"/><rect x="136" y="520" width="112" height="112" rx="18"/><rect x="264" y="520" width="112" height="112" rx="18"/><rect x="392" y="520" width="112" height="112" rx="18"/><rect x="520" y="520" width="112" height="112" rx="18"/><rect x="648" y="520" width="112" height="112" rx="18"/>
+      <rect x="8" y="648" width="112" height="112" rx="18"/><rect x="136" y="648" width="112" height="112" rx="18"/><rect x="264" y="648" width="112" height="112" rx="18"/><rect x="392" y="648" width="112" height="112" rx="18"/><rect x="520" y="648" width="112" height="112" rx="18"/><rect x="648" y="648" width="112" height="112" rx="18"/>
+    </g>
+  </g>
+  <g filter="url(#s)" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(64 64)"><path d="M0-38 14-8 44-2 20 16 26 46 0 30-26 46-20 16-44-2-14-8Z" fill="url(#gold)" stroke="#ffe7a2" stroke-width="4"/></g>
+    <g transform="translate(192 64)"><path d="M-8-42h16l8 62-16 28-16-28Z" fill="url(#blue)" stroke="#dbe9ff" stroke-width="5"/><path d="M-30-8h60" stroke="#dbe9ff" stroke-width="8"/></g>
+    <g transform="translate(320 64)"><path d="M-36-28h72v56h-72Z" fill="url(#gold)" stroke="#ffe7a2" stroke-width="5"/><path d="M-22-28c0-22 44-22 44 0" fill="none" stroke="#ffe7a2" stroke-width="7"/></g>
+    <g transform="translate(448 64)"><path d="M-34-34h68v68h-68Z" fill="url(#violet)" stroke="#eadcff" stroke-width="5"/><path d="M-20-4h40M0-24v40" stroke="#eadcff" stroke-width="6"/></g>
+    <g transform="translate(576 64)"><path d="M-40 12c20-48 60-48 80 0-14 28-66 28-80 0Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/></g>
+    <g transform="translate(704 64)"><path d="M0-42 34-22 34 22 0 42-34 22-34-22Z" fill="url(#green)" stroke="#d7ffe6" stroke-width="5"/><circle r="14" fill="#eafff0"/></g>
+    <g transform="translate(64 192)"><path d="M-10-42h20v84h-20Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/><path d="M-34 16h68" stroke="#ffd0d0" stroke-width="8"/></g>
+    <g transform="translate(192 192)"><path d="M-36-20c16-34 56-34 72 0v46c-22 20-50 20-72 0Z" fill="url(#blue)" stroke="#dbe9ff" stroke-width="5"/></g>
+    <g transform="translate(320 192)"><circle r="36" fill="url(#green)" stroke="#d7ffe6" stroke-width="5"/><path d="M-16-2h32M0-18v36" stroke="#06351e" stroke-width="7"/></g>
+    <g transform="translate(448 192)"><path d="M-30-40h60l-12 80h-36Z" fill="url(#violet)" stroke="#eadcff" stroke-width="5"/><path d="M-14-18h28" stroke="#eadcff" stroke-width="6"/></g>
+    <g transform="translate(576 192)"><path d="M-38 30 0-42 38 30Z" fill="url(#gold)" stroke="#ffe7a2" stroke-width="5"/><circle cy="8" r="10" fill="#fff0bd"/></g>
+    <g transform="translate(704 192)"><path d="M-38-24h76v48h-76Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/><path d="M-22 0h44" stroke="#ffd0d0" stroke-width="7"/></g>
+    <g transform="translate(64 320)"><path d="M0-42c30 24 30 58 0 84-30-26-30-60 0-84Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/></g>
+    <g transform="translate(192 320)"><path d="M0-42 28 0 0 42-28 0Z" fill="url(#blue)" stroke="#dbe9ff" stroke-width="5"/><path d="M-22 0h44" stroke="#dbe9ff" stroke-width="6"/></g>
+    <g transform="translate(320 320)"><path d="M-40 18c28-50 52-50 80 0" fill="none" stroke="#d7ffe6" stroke-width="12"/><path d="M-22 14 0 38 22 14" fill="none" stroke="#d7ffe6" stroke-width="8"/></g>
+    <g transform="translate(448 320)"><path d="M-38 18 0-42 38 18 0 42Z" fill="url(#violet)" stroke="#eadcff" stroke-width="5"/></g>
+    <g transform="translate(576 320)"><circle r="39" fill="url(#gold)" stroke="#ffe7a2" stroke-width="5"/><path d="M-24 0h48M0-24v48" stroke="#211300" stroke-width="7"/></g>
+    <g transform="translate(704 320)"><path d="M-36 24c6-44 66-44 72 0-16 24-56 24-72 0Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/><path d="M-20-16 0 8 20-16" fill="none" stroke="#ffd0d0" stroke-width="7"/></g>
+    <g transform="translate(64 448)"><path d="M-34 34 34-34" stroke="#dbe9ff" stroke-width="10"/><path d="M-34-34 34 34" stroke="#73a7ff" stroke-width="10"/></g>
+    <g transform="translate(192 448)"><path d="M-40 0c24-36 56-36 80 0-24 36-56 36-80 0Z" fill="url(#green)" stroke="#d7ffe6" stroke-width="5"/></g>
+    <g transform="translate(320 448)"><path d="M0-44 36-18 22 36h-44l-14-54Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/></g>
+    <g transform="translate(448 448)"><path d="M-34 34c10-46 58-46 68 0" fill="none" stroke="#ffe7a2" stroke-width="11"/><circle cy="-2" r="13" fill="url(#gold)"/></g>
+    <g transform="translate(576 448)"><path d="M-38-30h76v60h-76Z" fill="url(#violet)" stroke="#eadcff" stroke-width="5"/><path d="M-18-8 0 12 18-8" fill="none" stroke="#eadcff" stroke-width="7"/></g>
+    <g transform="translate(704 448)"><path d="M-42 8h84" stroke="#d7ffe6" stroke-width="10"/><path d="M0-42v84" stroke="#69dda0" stroke-width="10"/></g>
+    <g transform="translate(64 576)"><path d="M-34 34 34-34" stroke="#ffd0d0" stroke-width="12"/><path d="M-16-36 36 16" stroke="#ff6b6b" stroke-width="8"/></g>
+    <g transform="translate(192 576)"><circle r="40" fill="url(#blue)" stroke="#dbe9ff" stroke-width="5"/><path d="M-20-2h40M0-22v40" stroke="#dbe9ff" stroke-width="6"/></g>
+    <g transform="translate(320 576)"><path d="M0-42 14-12 46-8 20 10 28 42 0 24-28 42-20 10-46-8-14-12Z" fill="url(#violet)" stroke="#eadcff" stroke-width="5"/></g>
+    <g transform="translate(448 576)"><path d="M-36 30c10-50 62-50 72 0" fill="none" stroke="#f7c85f" stroke-width="10"/><path d="M-18 12h36" stroke="#ffe7a2" stroke-width="8"/></g>
+    <g transform="translate(576 576)"><path d="M-28-36h56v72h-56Z" fill="url(#green)" stroke="#d7ffe6" stroke-width="5"/><path d="M-12-12h24M-12 10h24" stroke="#d7ffe6" stroke-width="6"/></g>
+    <g transform="translate(704 576)"><path d="M0-40c34 18 42 54 0 80-42-26-34-62 0-80Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/></g>
+    <g transform="translate(64 704)"><circle r="40" fill="url(#gold)" stroke="#ffe7a2" stroke-width="5"/><path d="M-20-18 22 22M20-20-22 20" stroke="#2b1800" stroke-width="7"/></g>
+    <g transform="translate(192 704)"><path d="M-38-16h76v32h-76Z" fill="url(#blue)" stroke="#dbe9ff" stroke-width="5"/><path d="M-24-28h48v56h-48Z" fill="none" stroke="#dbe9ff" stroke-width="6"/></g>
+    <g transform="translate(320 704)"><path d="M-34 30 0-42 34 30Z" fill="url(#green)" stroke="#d7ffe6" stroke-width="5"/><path d="M-18 12h36" stroke="#d7ffe6" stroke-width="7"/></g>
+    <g transform="translate(448 704)"><circle r="38" fill="url(#violet)" stroke="#eadcff" stroke-width="5"/><path d="M-24 0h48M0-24v48" stroke="#eadcff" stroke-width="5" opacity=".65"/></g>
+    <g transform="translate(576 704)"><path d="M-38 24 0-42 38 24Z" fill="url(#red)" stroke="#ffd0d0" stroke-width="5"/><circle cy="6" r="9" fill="#ffd0d0"/></g>
+    <g transform="translate(704 704)"><path d="M-42 0h84M0-42v84" stroke="#ffe7a2" stroke-width="9"/><circle r="18" fill="url(#gold)"/></g>
+  </g>
+</svg>
