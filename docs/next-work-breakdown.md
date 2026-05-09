@@ -113,21 +113,103 @@
 - 갤러리 상세 패널에 클래스/NPC/몬스터/환경 요약 카드 표시
 - `index.html`에 상세 카탈로그 로드 순서 연결
 
+### 26-4: 아이콘/아이템/스킬 이미지 세트 보강
+
+상태: 완료
+
+작업 파일:
+
+- `assets/icons/dark-fantasy-icon-atlas.svg`
+- `data/icon-item-skill-catalog.js`
+- `icon-item-skill-gallery.js`
+- `generated-asset-gallery.js`
+
+완료 내용:
+
+- 다크 판타지 SVG 아이콘 atlas 36칸 추가
+- 아이템 18종 catalog 추가
+- 스킬 18종 catalog 추가
+- 아이템/스킬 갤러리 UI 추가
+- atlas background-position 기반 아이콘 출력
+- rarity별 카드 테두리 스타일 적용
+- generated asset gallery에서 icon catalog/gallery 자동 로드
+
+### 26-5: 아이콘 실제 UI 연결
+
+상태: 완료
+
+작업 파일:
+
+- `icon-runtime-bindings.js`
+- `generated-asset-gallery.js`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 기존 `game.js` 직접 수정 없이 런타임 보조 레이어로 연결
+- skill card의 기존 emoji icon을 atlas icon으로 자동 치환
+- 기본 스킬 alias 매핑 추가
+- inventory list item을 atlas icon + text 구조로 자동 치환
+- 아이템 이름/키워드 alias 매핑 추가
+- MutationObserver로 스킬/인벤토리 재렌더링 대응
+- 800ms fallback interval로 동적 렌더링 누락 보정
+- generated asset gallery에서 `icon-runtime-bindings.js` 자동 로드
+
+## 27차: APK 패키징 준비
+
+상태: 준비 완료
+
+작업 파일:
+
+- `package.json`
+- `capacitor.config.json`
+- `.github/workflows/build-android-apk.yml`
+- `docs/android-apk-build.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- Capacitor Android dependency/script 추가
+- Android app id `com.ydhappy.ydhchronicle` 정의
+- app name `YDH Chronicle` 정의
+- 정적 웹 루트 `webDir: .` 설정
+- Android debug/release APK 빌드 script 추가
+- GitHub Actions 수동 APK build workflow 추가
+- debug/release build_type 선택 지원
+- workflow artifact로 APK 업로드 설정
+- APK 빌드 문서 추가
+
+실제 APK 생성 절차:
+
+```bash
+npm install
+npm run cap:add:android
+npm run cap:sync
+npm run android:debug-apk
+```
+
+GitHub Actions:
+
+```text
+Actions → Build Android APK → Run workflow → build_type=debug
+```
+
 ## 전체 상태
 
-상태: 8차~25차 완료, 26-1~26-3 완료
+상태: 8차~25차 완료, 26-1~26-5 완료, 27차 APK 준비 완료
 
 현재 남은 고도화 후보:
 
-1. 26-4 원본 PNG/WebP binary asset commit 또는 workflow 변환
-2. 26-5 아이콘/아이템/스킬 이미지 세트 보강
-3. 26-6 캐릭터/몬스터/NPC 스프라이트 데이터 연결 고도화
-4. 26-7 맵 오브젝트/환경 이펙트 추가
-5. 운영용 관리자 저장 삭제/정리 API
-6. 원격 아바타 클릭 정보창
-7. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
-8. custom map 파일→MySQL 마이그레이션 도구
-9. 인증 세션 관리 UI
+1. GitHub Actions APK workflow 수동 실행 후 artifact 확인
+2. Android 앱 아이콘/splash 리소스 추가
+3. 실제 android/ 프로젝트 생성 결과 커밋
+4. 캐릭터/몬스터/NPC 스프라이트 데이터 연결 고도화
+5. 맵 오브젝트/환경 이펙트 추가
+6. 운영용 관리자 저장 삭제/정리 API
+7. 원격 아바타 클릭 정보창
+8. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
+9. custom map 파일→MySQL 마이그레이션 도구
+10. 인증 세션 관리 UI
 
 ## 원칙
 
