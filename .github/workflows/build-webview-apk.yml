@@ -7,11 +7,13 @@ on:
       - main
     paths:
       - 'tools/create-android-project.mjs'
+      - 'tools/apply-android-branding.mjs'
       - '**.html'
       - '**.css'
       - '**.js'
       - 'assets/**'
       - 'data/**'
+      - 'package.json'
 
 jobs:
   apk:
