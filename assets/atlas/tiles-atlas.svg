@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="384" height="64" viewBox="0 0 384 64">
+  <defs>
+    <linearGradient id="grass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4fa866"/><stop offset="1" stop-color="#1d6b3b"/></linearGradient>
+    <linearGradient id="road" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a97845"/><stop offset="1" stop-color="#624126"/></linearGradient>
+    <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8992a0"/><stop offset="1" stop-color="#3d4551"/></linearGradient>
+    <linearGradient id="tree" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#254d2a"/><stop offset="1" stop-color="#0e2114"/></linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#4aa8d8"/><stop offset="1" stop-color="#164c83"/></linearGradient>
+    <radialGradient id="portal" cx="50%" cy="50%" r="60%"><stop stop-color="#f7c85f"/><stop offset=".48" stop-color="#6b5cff"/><stop offset="1" stop-color="#101225"/></radialGradient>
+  </defs>
+  <g shape-rendering="crispEdges">
+    <rect x="0" y="0" width="64" height="64" fill="url(#grass)"/><path d="M0 50C13 40 26 58 42 45C50 38 58 42 64 35V64H0Z" fill="#2f7f48" opacity=".75"/>
+    <rect x="64" y="0" width="64" height="64" fill="url(#road)"/><path d="M64 34C82 22 96 44 128 28V64H64Z" fill="#c99b61" opacity=".35"/>
+    <rect x="128" y="0" width="64" height="64" fill="url(#stone)"/><path d="M134 10h23v18h-23zM163 8h22v20h-22zM132 36h28v20h-28zM166 34h20v22h-20z" fill="#c1c7d0" opacity=".24" stroke="#2d333c"/>
+    <rect x="192" y="0" width="64" height="64" fill="url(#tree)"/><circle cx="224" cy="20" r="19" fill="#2f7d3e"/><circle cx="210" cy="31" r="15" fill="#256937"/><circle cx="239" cy="32" r="15" fill="#1e5d31"/><rect x="220" y="35" width="8" height="24" fill="#6d4325"/>
+    <rect x="256" y="0" width="64" height="64" fill="url(#water)"/><path d="M260 20c12-8 22 8 34 0s18 8 30 0" fill="none" stroke="#b6ecff" stroke-width="3" opacity=".65"/><path d="M258 42c12-8 22 8 34 0s20 8 30 0" fill="none" stroke="#b6ecff" stroke-width="3" opacity=".5"/>
+    <rect x="320" y="0" width="64" height="64" fill="url(#portal)"/><circle cx="352" cy="32" r="23" fill="none" stroke="#f7c85f" stroke-width="4" opacity=".9"/><path d="M340 34c14-19 31 0 14 16" fill="none" stroke="#eaf1ff" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>
