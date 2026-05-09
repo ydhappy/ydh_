@@ -146,13 +146,54 @@
 - schema version meta 값을 `3`으로 갱신
 - README에 MySQL custom map 저장 방식 및 API 예시 갱신
 
+## 24차: 실제 PNG/WebP atlas 교체
+
+상태: 분할 진행 중
+
+### 24-1A: atlas 매니페스트와 타일 렌더러 지원
+
+상태: 완료
+
+작업 파일:
+
+- `assets/atlas/tiles-atlas.svg`
+- `data/atlas.js`
+- `map-engine.js`
+- `index.html`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 6칸 단일 타일 atlas fallback SVG 추가
+- `data/atlas.js` 매니페스트 추가
+- atlas manifest에 `image`, `imagePng`, `imageWebp`, tile size, grid, tile code 위치 정의
+- `G/R/S/T/W/P` 기본 타일 atlas 좌표 정의
+- `M/N`은 각각 `G/R` base tile + marker 방식으로 정의
+- `map-engine.js`에서 `window.YDH_ATLAS` 감지 후 atlas 렌더링 지원
+- atlas 사용 시 `background-size`, `background-position` 기반 타일 렌더링
+- atlas가 없거나 tile code가 없으면 기존 개별 SVG asset fallback 유지
+- `tileMap.dataset.atlas`에 `enabled/fallback` 상태 표시
+- `index.html`에서 `data/atlas.js`를 `map-engine.js`보다 먼저 로드
+
+### 24-1B: 실제 PNG/WebP atlas 생성/교체
+
+상태: 대기
+
+목표:
+
+- `assets/atlas/tiles-atlas.png` 생성
+- `assets/atlas/tiles-atlas.webp` 생성
+- PNG/WebP 우선 로드 옵션 추가
+- atlas preview/debug 패널 추가
+- 기존 개별 SVG asset과 atlas 품질 비교 문서화
+
 ## 전체 상태
 
-상태: 8차~23차 완료
+상태: 8차~23차 완료, 24-1A 완료
 
 현재 남은 고도화 후보:
 
-1. 24-1 실제 PNG/WebP atlas 교체
+1. 24-1B 실제 PNG/WebP atlas 생성/교체
 2. 서버 계정 인증 추가
 3. 운영용 관리자 저장 삭제/정리 API
 4. 원격 아바타 클릭 정보창
