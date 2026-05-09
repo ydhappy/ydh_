@@ -166,12 +166,30 @@
         <div><dt>ID</dt><dd>${escapeHtml(placement.id || '-')}</dd></div>
         <div><dt>Layer</dt><dd>${escapeHtml(placement.layer || '-')}</dd></div>
         <div><dt>Kind</dt><dd>${escapeHtml(placement.kind || 'marker')}</dd></div>
+        ${placement.questType ? `<div><dt>Quest</dt><dd>${escapeHtml(placement.questType)} · ${escapeHtml(placement.questTarget || placement.id)}</dd></div>` : ''}
       </dl>
     `;
     panel.classList.add('open');
     panel.querySelector('.map-marker-close')?.addEventListener('click', () => panel.classList.remove('open'));
     setEvent(`${placement.name || 'Marker'} 정보를 확인했습니다.`, 'good');
     notifyGame(`Marker 정보: ${placement.name || placement.id || 'marker'} @ ${placement.x},${placement.y}`);
+    triggerQuestFromPlacement(placement);
+  }
+
+  function triggerQuestFromPlacement(placement) {
+    const type = placement.questType || placement.questTrigger || 'inspectMarker';
+    const target = placement.questTarget || placement.id || placement.name;
+    if (!target) return;
+    window.dispatchEvent(new CustomEvent('ydh-tiled-quest-trigger', {
+      detail: {
+        type,
+        target,
+        amount: Number(placement.questAmount || 1),
+        placement,
+        map: currentMap(),
+        state: { ...state }
+      }
+    }));
   }
 
   function nearestDirectionToPlayer(x, y) {
