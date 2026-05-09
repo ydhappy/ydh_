@@ -1,0 +1,52 @@
+name: Generate Tile Atlas
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_binaries:
+        description: Commit generated PNG/WebP atlas files
+        required: true
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-atlas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install WebP encoder
+        run: sudo apt-get update && sudo apt-get install -y webp
+
+      - name: Generate atlas
+        run: node tools/generate-tile-atlas.mjs
+
+      - name: Show atlas outputs
+        run: |
+          ls -lh assets/atlas
+          cat assets/atlas/tiles-atlas.meta.json
+
+      - name: Commit atlas binaries
+        if: ${{ inputs.commit_binaries == 'true' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/atlas/tiles-atlas.png assets/atlas/tiles-atlas.webp assets/atlas/tiles-atlas.meta.json
+          if git diff --cached --quiet; then
+            echo "No atlas changes to commit."
+          else
+            git commit -m "Generate PNG and WebP tile atlas"
+            git push
+          fi
