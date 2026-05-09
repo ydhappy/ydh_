@@ -38,27 +38,51 @@
 
 완료 내용:
 
-- 서버 HMAC token 유틸 추가
-- `/api/auth/status` 추가
-- `/api/auth/login` 추가
-- `/api/auth/me` 추가
+- 서버 HMAC access token 유틸 추가
+- `/api/auth/status`, `/api/auth/login`, `/api/auth/me` 추가
 - `YDH_AUTH_REQUIRED=false` 기본값 유지
 - `YDH_AUTH_REQUIRED=true`일 때 주요 API Bearer token 보호
-- `YDH_AUTH_SHARED_SECRET` 기반 로그인 secret 검증 지원
-- `YDH_AUTH_SECRET` 기반 token 서명 지원
-- snapshot 저장 시 인증 accountId를 우선 반영
-- custom map scope 계산 시 인증 accountId를 우선 반영
+- snapshot/custom map scope에 인증 accountId 우선 반영
 - 브라우저 `/api/*` fetch에 Authorization header 자동 첨부
 - `SERVER AUTH` 로그인/로그아웃 패널 추가
-- README에 인증 환경변수와 curl 예시 추가
+
+### 25-2: refresh token / 파일 세션 저장소
+
+상태: 완료
+
+작업 파일:
+
+- `server/src/auth-sessions.js`
+- `server/src/auth.js`
+- `server/src/server.js`
+- `server-auth.js`
+- `server-auth-panel.js`
+- `server/README.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 파일 기반 refresh session 저장소 추가
+- 세션 저장 파일 `server/data/auth-sessions.json` 추가 구조 정의
+- 원본 refresh token 대신 SHA-256 hash 저장
+- `/api/auth/login` 응답에 `refreshToken`, `session` 추가
+- `/api/auth/refresh` 추가
+- `/api/auth/logout` 추가
+- refresh 성공 시 refresh token 회전 처리
+- access token 기본 TTL을 15분으로 조정
+- refresh token 기본 TTL을 30일로 설정
+- `/api/health`에 refresh session 상태 포함
+- 브라우저에서 401 발생 시 refresh 후 원 요청 1회 재시도
+- `SERVER AUTH` 패널에 access/refresh/session 상태 표시
+- `SERVER AUTH` 패널에 수동 재발급 버튼 추가
 
 ## 전체 상태
 
-상태: 8차~24차 완료, 25-1 완료
+상태: 8차~24차 완료, 25-1~25-2 완료
 
 현재 남은 고도화 후보:
 
-1. 25-2 refresh token / 세션 저장소
+1. 25-3 refresh session MySQL 저장소
 2. 운영용 관리자 저장 삭제/정리 API
 3. 원격 아바타 클릭 정보창
 4. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
