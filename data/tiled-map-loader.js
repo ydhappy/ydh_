@@ -49,6 +49,13 @@ window.YDH_TILED_MAP_LOADER = (() => {
     return String(propValue(object.properties || [], 'ydhKind', object.type || object.name || 'marker')).toLowerCase();
   }
 
+  function convertProperties(properties = []) {
+    return properties.reduce((result, item) => {
+      result[item.name] = item.value;
+      return result;
+    }, {});
+  }
+
   function convertObjects(tiledMap) {
     const tilewidth = tiledMap.tilewidth || 64;
     const tileheight = tiledMap.tileheight || 64;
@@ -56,6 +63,7 @@ window.YDH_TILED_MAP_LOADER = (() => {
 
     objectLayers(tiledMap).forEach((layer) => {
       (layer.objects || []).forEach((object) => {
+        const properties = convertProperties(object.properties || []);
         const kind = objectKind(object);
         const x = Math.max(0, Math.floor((object.x || 0) / tilewidth));
         const rawY = object.gid ? (object.y || 0) - tileheight : (object.y || 0);
@@ -71,6 +79,11 @@ window.YDH_TILED_MAP_LOADER = (() => {
           targetMapId: propValue(object.properties || [], 'ydhTargetMapId', ''),
           targetMapIndex: propValue(object.properties || [], 'ydhTargetMapIndex', ''),
           dialogue: propValue(object.properties || [], 'ydhDialogue', ''),
+          questType: propValue(object.properties || [], 'ydhQuestType', ''),
+          questTarget: propValue(object.properties || [], 'ydhQuestTarget', ''),
+          questAmount: Number(propValue(object.properties || [], 'ydhQuestAmount', 1)) || 1,
+          questTrigger: propValue(object.properties || [], 'ydhQuestTrigger', ''),
+          properties,
           raw: {
             id: object.id,
             name: object.name || '',
@@ -193,6 +206,7 @@ window.YDH_TILED_MAP_LOADER = (() => {
     appendToYdhMaps,
     propValue,
     buildGidCodeMap,
+    convertProperties,
     convertObjects,
     objectLayers,
     placementSummary,
