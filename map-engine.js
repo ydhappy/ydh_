@@ -73,6 +73,14 @@
     }) || null;
   }
 
+  function placementsAt(x, y, kind = '') {
+    const map = currentMap();
+    return (map.placements || []).filter((placement) => {
+      const kindMatched = !kind || placement.kind === kind;
+      return kindMatched && Number(placement.x) === Number(x) && Number(placement.y) === Number(y);
+    });
+  }
+
   function normalizeEntityId(id = '') {
     return String(id).replace(/^(npc|monster)-/, '').replace(/-([a-z])/g, (_, char) => char.toUpperCase());
   }
@@ -128,11 +136,51 @@
     }
   }
 
+  function appendMarker(cell, placement) {
+    cell.classList.add('has-map-marker');
+    const marker = document.createElement('span');
+    marker.className = 'map-object-marker';
+    marker.textContent = placement.icon || 'ⓘ';
+    marker.title = placement.name || 'Marker';
+    marker.addEventListener('click', (event) => {
+      event.stopPropagation();
+      showMarkerInfo(placement);
+    });
+    cell.appendChild(marker);
+  }
+
+  function showMarkerInfo(placement) {
+    let panel = document.getElementById('mapMarkerInfo');
+    if (!panel) {
+      panel = document.createElement('aside');
+      panel.id = 'mapMarkerInfo';
+      panel.className = 'map-marker-info';
+      document.body.appendChild(panel);
+    }
+    panel.innerHTML = `
+      <button type="button" class="map-marker-close" aria-label="닫기">×</button>
+      <small>TILED MARKER · X:${placement.x} Y:${placement.y}</small>
+      <strong>${escapeHtml(placement.name || placement.id || 'Marker')}</strong>
+      <p>${escapeHtml(placement.dialogue || placement.entityId || '정보가 등록되지 않은 marker입니다.')}</p>
+      <dl>
+        <div><dt>ID</dt><dd>${escapeHtml(placement.id || '-')}</dd></div>
+        <div><dt>Layer</dt><dd>${escapeHtml(placement.layer || '-')}</dd></div>
+        <div><dt>Kind</dt><dd>${escapeHtml(placement.kind || 'marker')}</dd></div>
+      </dl>
+    `;
+    panel.classList.add('open');
+    panel.querySelector('.map-marker-close')?.addEventListener('click', () => panel.classList.remove('open'));
+    setEvent(`${placement.name || 'Marker'} 정보를 확인했습니다.`, 'good');
+    notifyGame(`Marker 정보: ${placement.name || placement.id || 'marker'} @ ${placement.x},${placement.y}`);
+  }
+
   function nearestDirectionToPlayer(x, y) {
     return getDirection16(state.x - x, state.y - y);
   }
 
   function renderTileEntity(cell, code, x, y) {
+    placementsAt(x, y, 'marker').forEach((marker) => appendMarker(cell, marker));
+
     if (state.x === x && state.y === y) {
       appendEntitySprite(cell, entities.player, state.direction, entities.player?.name || 'Player');
       return;
@@ -320,6 +368,15 @@
       event.preventDefault();
       move(dir[0], dir[1]);
     });
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   bind();
