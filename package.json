@@ -1,0 +1,22 @@
+{
+  "name": "ydh-chronicle",
+  "version": "0.26.5",
+  "private": true,
+  "description": "YDH Chronicle mobile homepage MMORPG web app with Android APK packaging support.",
+  "type": "module",
+  "scripts": {
+    "cap:init": "cap init YDHChronicle com.ydhappy.ydhchronicle --web-dir .",
+    "cap:add:android": "cap add android",
+    "cap:sync": "cap sync android",
+    "android:open": "cap open android",
+    "android:debug-apk": "cd android && ./gradlew assembleDebug",
+    "android:release-apk": "cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "latest",
+    "@capacitor/core": "latest"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "latest"
+  }
+}
