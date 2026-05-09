@@ -3,6 +3,7 @@
 
   const MAP_SAVE_KEY = 'ydh-chronicle-map-v1';
   const data = window.YDH_MAPS;
+  const atlas = window.YDH_ATLAS;
   const entities = window.YDH_ENTITIES || {};
   const pickEntityForMap = window.YDH_pickEntityForMap || (() => null);
   const getDirection16 = window.YDH_getDirection16 || ((dx, dy) => {
@@ -63,6 +64,34 @@
     if (!map.rows[y] || x < 0 || x >= map.rows[y].length) return null;
     const code = map.rows[y][x];
     return { code, ...(data.tileTypes[code] || data.tileTypes.G) };
+  }
+
+  function atlasTileFor(code) {
+    const manifest = atlas?.tiles;
+    if (!manifest?.image || !manifest?.codes) return null;
+    const entry = manifest.codes[code];
+    if (!entry) return null;
+    const resolved = entry.base ? manifest.codes[entry.base] : entry;
+    if (!resolved || resolved.x === undefined || resolved.y === undefined) return null;
+    return { manifest, entry, resolved };
+  }
+
+  function applyTileBackground(cell, code, tile) {
+    const atlasTile = atlasTileFor(code);
+    if (!atlasTile) {
+      cell.style.backgroundImage = `url(${tile.asset})`;
+      cell.style.backgroundSize = 'cover';
+      cell.style.backgroundPosition = 'center';
+      return;
+    }
+
+    const { manifest, resolved } = atlasTile;
+    cell.classList.add('atlas-tile');
+    cell.style.backgroundImage = `url(${manifest.image})`;
+    cell.style.backgroundSize = `${manifest.columns * 100}% ${manifest.rows * 100}%`;
+    const x = manifest.columns <= 1 ? 0 : (resolved.x / (manifest.columns - 1)) * 100;
+    const y = manifest.rows <= 1 ? 0 : (resolved.y / (manifest.rows - 1)) * 100;
+    cell.style.backgroundPosition = `${x}% ${y}%`;
   }
 
   function placementAt(x, y, kind = '') {
@@ -227,6 +256,7 @@
     refs.desc.textContent = map.description;
     refs.pos.textContent = `X:${state.x} / Y:${state.y} / DIR:${state.direction} / STEP:${state.steps}`;
     refs.grid.style.gridTemplateColumns = `repeat(${map.rows[0].length}, minmax(0, 1fr))`;
+    refs.grid.dataset.atlas = atlas?.tiles?.image ? 'enabled' : 'fallback';
     refs.grid.innerHTML = '';
 
     map.rows.forEach((row, y) => {
@@ -239,7 +269,8 @@
         cell.dataset.y = String(y);
         cell.dataset.mapIndex = String(state.mapIndex);
         cell.dataset.mapId = map.id;
-        cell.style.backgroundImage = `url(${tile.asset})`;
+        cell.dataset.tileCode = code;
+        applyTileBackground(cell, code, tile);
         cell.title = `${tile.name} (${x}, ${y})`;
         cell.setAttribute('aria-label', `${tile.name} ${x}, ${y}`);
         renderTileEntity(cell, code, x, y);
