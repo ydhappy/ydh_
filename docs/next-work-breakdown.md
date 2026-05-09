@@ -67,24 +67,32 @@
 - `ATLAS DEBUG` 패널 추가
 - atlas 생성/로더 문서 추가
 
-### 24-1C: 생성된 binary atlas commit 및 품질 비교
+### 24-1C: binary atlas 생성 workflow 및 품질 비교
 
-상태: 대기
+상태: 완료
 
-목표:
+작업 파일:
 
-- 로컬/서버에서 `node tools/generate-tile-atlas.mjs` 실행
-- 생성된 `assets/atlas/tiles-atlas.png` commit
-- 가능하면 `assets/atlas/tiles-atlas.webp` commit
-- atlas 품질 비교 및 용량 문서화
+- `.github/workflows/generate-atlas.yml`
+- `docs/atlas-pipeline.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- GitHub Actions 수동 workflow 추가
+- `node tools/generate-tile-atlas.mjs` 실행 자동화
+- Ubuntu runner에서 `webp` 패키지 설치 후 WebP 생성 지원
+- `commit_binaries=true` 선택 시 PNG/WebP/meta 파일 자동 commit
+- atlas 예상 용량 기준 문서화
+- WebP/PNG/SVG fallback 검증 기준 문서화
 
 ## 전체 상태
 
-상태: 8차~23차 완료, 24-1A~24-1B 완료
+상태: 8차~23차 완료, 24-1A~24-1C 완료
 
 현재 남은 고도화 후보:
 
-1. 24-1C 생성된 PNG/WebP binary atlas commit 및 품질 비교
+1. 24-1D 실제 Actions 실행 결과 확인 및 atlas 품질 조정
 2. 서버 계정 인증 추가
 3. 운영용 관리자 저장 삭제/정리 API
 4. 원격 아바타 클릭 정보창
