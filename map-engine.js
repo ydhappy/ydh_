@@ -68,12 +68,17 @@
 
   function atlasTileFor(code) {
     const manifest = atlas?.tiles;
-    if (!manifest?.image || !manifest?.codes) return null;
+    if (!manifest?.image && !manifest?.imageActive) return null;
+    if (!manifest?.codes) return null;
     const entry = manifest.codes[code];
     if (!entry) return null;
     const resolved = entry.base ? manifest.codes[entry.base] : entry;
     if (!resolved || resolved.x === undefined || resolved.y === undefined) return null;
     return { manifest, entry, resolved };
+  }
+
+  function activeAtlasImage(manifest) {
+    return manifest.imageActive || manifest.image || '';
   }
 
   function applyTileBackground(cell, code, tile) {
@@ -87,7 +92,7 @@
 
     const { manifest, resolved } = atlasTile;
     cell.classList.add('atlas-tile');
-    cell.style.backgroundImage = `url(${manifest.image})`;
+    cell.style.backgroundImage = `url(${activeAtlasImage(manifest)})`;
     cell.style.backgroundSize = `${manifest.columns * 100}% ${manifest.rows * 100}%`;
     const x = manifest.columns <= 1 ? 0 : (resolved.x / (manifest.columns - 1)) * 100;
     const y = manifest.rows <= 1 ? 0 : (resolved.y / (manifest.rows - 1)) * 100;
@@ -256,7 +261,7 @@
     refs.desc.textContent = map.description;
     refs.pos.textContent = `X:${state.x} / Y:${state.y} / DIR:${state.direction} / STEP:${state.steps}`;
     refs.grid.style.gridTemplateColumns = `repeat(${map.rows[0].length}, minmax(0, 1fr))`;
-    refs.grid.dataset.atlas = atlas?.tiles?.image ? 'enabled' : 'fallback';
+    refs.grid.dataset.atlas = atlas?.tiles?.image ? (atlas.tiles.activeFormat || 'enabled') : 'fallback';
     refs.grid.innerHTML = '';
 
     map.rows.forEach((row, y) => {
@@ -417,6 +422,8 @@
       event.preventDefault();
       move(dir[0], dir[1]);
     });
+
+    window.addEventListener('ydh-atlas-ready', () => render());
   }
 
   function escapeHtml(value) {
