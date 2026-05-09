@@ -3,6 +3,8 @@ import mysql from 'mysql2/promise';
 let pool;
 let initialized = false;
 
+const GLOBAL_SCOPE = 'global';
+
 function mysqlConfig() {
   return {
     host: process.env.MYSQL_HOST || '127.0.0.1',
@@ -26,6 +28,46 @@ function connection() {
 function toMysqlDate(value = new Date()) {
   const date = value instanceof Date ? value : new Date(value);
   return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+function toIso(value) {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : value;
+}
+
+function cleanScopeValue(value) {
+  const text = String(value || '').trim();
+  return text || GLOBAL_SCOPE;
+}
+
+function scopeFrom(input = {}) {
+  return {
+    accountId: cleanScopeValue(input.accountId),
+    characterId: cleanScopeValue(input.characterId)
+  };
+}
+
+function scopeKey(scope = {}) {
+  const normalized = scopeFrom(scope);
+  return `${normalized.accountId}::${normalized.characterId}`;
+}
+
+function validationScope(payload = {}) {
+  return scopeFrom({
+    accountId: payload.accountId || payload.map?.accountId,
+    characterId: payload.characterId || payload.map?.characterId
+  });
+}
+
+function validateCustomMapPayload(payload) {
+  const errors = [];
+  const map = payload?.map || payload;
+  if (!map || typeof map !== 'object') errors.push('map object is required');
+  if (!map?.id) errors.push('map.id is required');
+  if (!map?.name) errors.push('map.name is required');
+  if (!Array.isArray(map?.rows) || !map.rows.length) errors.push('map.rows is required');
+  if (map?.rows?.some((row) => typeof row !== 'string')) errors.push('map.rows must be string array');
+  return { ok: errors.length === 0, errors, map, scope: validationScope(payload) };
 }
 
 function recordFromSnapshot(snapshot) {
@@ -108,6 +150,26 @@ async function initMysqlStorage() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8
   `);
   await db.query(`
+    CREATE TABLE IF NOT EXISTS ydh_custom_maps (
+      scope_key VARCHAR(180) NOT NULL,
+      map_id VARCHAR(120) NOT NULL,
+      account_id VARCHAR(80) NOT NULL DEFAULT 'global',
+      character_id VARCHAR(80) NOT NULL DEFAULT 'global',
+      map_name VARCHAR(120) NOT NULL,
+      source VARCHAR(40) NOT NULL DEFAULT 'tiled-json',
+      source_url VARCHAR(255) NOT NULL DEFAULT 'server-custom',
+      width INT NOT NULL DEFAULT 0,
+      height INT NOT NULL DEFAULT 0,
+      saved_at DATETIME NOT NULL,
+      updated_at DATETIME NOT NULL,
+      map_json LONGTEXT NOT NULL,
+      PRIMARY KEY (scope_key, map_id),
+      KEY idx_custom_map_scope (account_id, character_id),
+      KEY idx_custom_map_updated_at (updated_at),
+      KEY idx_custom_map_name (map_name)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+  `);
+  await db.query(`
     CREATE TABLE IF NOT EXISTS ydh_schema_meta (
       meta_key VARCHAR(64) NOT NULL,
       meta_value VARCHAR(255) NOT NULL,
@@ -117,7 +179,7 @@ async function initMysqlStorage() {
   `);
   await db.query(`
     INSERT INTO ydh_schema_meta (meta_key, meta_value, updated_at)
-    VALUES ('schema_version', '2', NOW())
+    VALUES ('schema_version', '3', NOW())
     ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value), updated_at = NOW()
   `);
   initialized = true;
@@ -126,7 +188,7 @@ async function initMysqlStorage() {
 function rowToSummary(row) {
   return {
     id: row.id,
-    receivedAt: row.received_at instanceof Date ? row.received_at.toISOString() : row.received_at,
+    receivedAt: toIso(row.received_at),
     schemaVersion: row.schema_version,
     accountId: row.account_id,
     accountName: row.account_name,
@@ -143,6 +205,29 @@ function rowToRecord(row) {
   return {
     ...rowToSummary(row),
     snapshot: JSON.parse(row.snapshot_json)
+  };
+}
+
+function customMapSummary(row) {
+  return {
+    id: row.map_id,
+    name: row.map_name,
+    accountId: row.account_id,
+    characterId: row.character_id,
+    scopeKey: row.scope_key,
+    source: row.source,
+    sourceUrl: row.source_url,
+    width: row.width,
+    height: row.height,
+    savedAt: toIso(row.saved_at),
+    updatedAt: toIso(row.updated_at)
+  };
+}
+
+function customMapRecord(row) {
+  return {
+    ...customMapSummary(row),
+    map: JSON.parse(row.map_json)
   };
 }
 
@@ -308,6 +393,101 @@ export async function listCharacters(accountId) {
   return rows;
 }
 
+export async function saveCustomMap(payload) {
+  await initMysqlStorage();
+  const validation = validateCustomMapPayload(payload);
+  if (!validation.ok) {
+    const error = new Error(validation.errors.join(', '));
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const db = connection();
+  const map = validation.map;
+  const scope = validation.scope;
+  const key = scopeKey(scope);
+  const now = toMysqlDate(new Date());
+  const mapJson = JSON.stringify({ ...map, accountId: scope.accountId, characterId: scope.characterId });
+
+  await db.query(
+    `INSERT INTO ydh_custom_maps (
+      scope_key, map_id, account_id, character_id, map_name, source, source_url,
+      width, height, saved_at, updated_at, map_json
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+      account_id = VALUES(account_id),
+      character_id = VALUES(character_id),
+      map_name = VALUES(map_name),
+      source = VALUES(source),
+      source_url = VALUES(source_url),
+      width = VALUES(width),
+      height = VALUES(height),
+      updated_at = VALUES(updated_at),
+      map_json = VALUES(map_json)`,
+    [
+      key,
+      map.id,
+      scope.accountId,
+      scope.characterId,
+      map.name,
+      map.source || 'tiled-json',
+      map.sourceUrl || 'server-custom',
+      map.rows?.[0]?.length || 0,
+      map.rows?.length || 0,
+      now,
+      now,
+      mapJson
+    ]
+  );
+
+  return getCustomMap(map.id, scope);
+}
+
+export async function listCustomMaps(scope = {}) {
+  await initMysqlStorage();
+  const db = connection();
+  const wanted = scopeFrom(scope);
+  const [rows] = await db.query(
+    `SELECT scope_key, map_id, account_id, character_id, map_name, source, source_url,
+            width, height, saved_at, updated_at
+       FROM ydh_custom_maps
+      WHERE account_id = ? AND character_id = ?
+      ORDER BY updated_at DESC
+      LIMIT 200`,
+    [wanted.accountId, wanted.characterId]
+  );
+  return rows.map(customMapSummary);
+}
+
+export async function getCustomMap(id, scope = {}) {
+  await initMysqlStorage();
+  const db = connection();
+  const wanted = scopeFrom(scope);
+  const [rows] = await db.query(
+    `SELECT scope_key, map_id, account_id, character_id, map_name, source, source_url,
+            width, height, saved_at, updated_at, map_json
+       FROM ydh_custom_maps
+      WHERE map_id = ? AND account_id = ? AND character_id = ?
+      LIMIT 1`,
+    [id, wanted.accountId, wanted.characterId]
+  );
+  if (!rows.length) return null;
+  return customMapRecord(rows[0]);
+}
+
+export async function deleteCustomMap(id, scope = {}) {
+  await initMysqlStorage();
+  const db = connection();
+  const wanted = scopeFrom(scope);
+  const [result] = await db.query(
+    `DELETE FROM ydh_custom_maps
+      WHERE map_id = ? AND account_id = ? AND character_id = ?`,
+    [id, wanted.accountId, wanted.characterId]
+  );
+  const [countRows] = await db.query('SELECT COUNT(*) AS count FROM ydh_custom_maps');
+  return { deleted: result.affectedRows > 0, count: countRows[0]?.count || 0 };
+}
+
 export async function health() {
   await initMysqlStorage();
   const db = connection();
@@ -319,5 +499,18 @@ export async function health() {
     count: snapshotRows[0]?.count || 0,
     accounts: accountRows[0]?.count || 0,
     characters: characterRows[0]?.count || 0
+  };
+}
+
+export async function customMapHealth() {
+  await initMysqlStorage();
+  const db = connection();
+  const [mapRows] = await db.query('SELECT COUNT(*) AS count FROM ydh_custom_maps');
+  const [scopeRows] = await db.query('SELECT COUNT(DISTINCT scope_key) AS count FROM ydh_custom_maps');
+  return {
+    storage: 'mysql',
+    count: mapRows[0]?.count || 0,
+    max: Number(process.env.YDH_MAX_CUSTOM_MAPS || 100),
+    scopes: scopeRows[0]?.count || 0
   };
 }
