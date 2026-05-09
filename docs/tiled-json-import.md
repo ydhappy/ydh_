@@ -2,7 +2,7 @@
 
 ## 상태
 
-현재는 22-1 ~ 22-7까지 완료된 상태입니다.
+현재는 22-1 ~ 22-8A까지 완료된 상태입니다.
 
 - 22-1: Tiled JSON 샘플맵 + 변환기 추가 완료
 - 22-2: index 로드 연결 + 샘플맵 자동 등록 완료
@@ -11,7 +11,8 @@
 - 22-5: Object Layer 배치 데이터 추출 + GM 콘솔 표시 완료
 - 22-6: Object Layer 기반 실제 배치 적용 완료
 - 22-7: custom map 관리 UI/서버 저장 API 완료
-- 22-8: 서버 custom map 복원/import 고도화 대기
+- 22-8A: 서버 custom map 가져오기/삭제 UI 완료
+- 22-8B: marker 정보창/퀘스트 트리거 대기
 
 ## 추가 파일
 
@@ -68,47 +69,6 @@ Object Layer의 object에는 아래 property를 사용할 수 있습니다.
 <script src="map-engine.js"></script>
 ```
 
-## 22-4 다중 등록/붙여넣기 import
-
-```js
-window.YDH_TILED_MAP_REGISTRY = {
-  urls: ['data/tiled/moon-gate-sample.json'],
-  localStorageKey: 'ydh-tiled-custom-maps-v1',
-  maxCustomMaps: 10
-};
-```
-
-지원 기능:
-
-1. 여러 Tiled JSON URL 목록을 registry에서 관리
-2. registry URL을 순차 로드
-3. Tiled JSON 붙여넣기 import 지원
-4. 붙여넣기로 등록한 맵을 localStorage에 보존
-5. 최대 custom map 수 제한
-6. 중복 ID는 재등록 방지
-7. 등록 실패/검증 실패를 TILED MAP MANAGER에 표시
-
-## 22-6 Object Layer 실제 배치 적용
-
-추가된 변환 결과 필드:
-
-```js
-map.baseRows
-map.rows
-map.appliedPlacements
-map.skippedPlacements
-map.tiled.appliedPlacements
-map.tiled.skippedPlacements
-```
-
-적용 방식:
-
-1. Tiled tilelayer를 `baseRows`로 변환
-2. Object Layer placement를 분석
-3. `npc`는 `N`, `monster`는 `M`, `portal`은 `P`로 rows에 합성
-4. 범위 밖 object 또는 지원하지 않는 kind는 `skippedPlacements`로 분리
-5. 최종 `rows`를 기존 `map-engine.js`가 그대로 렌더링
-
 ## 22-7 custom map 관리 UI/서버 저장 API
 
 클라이언트 TILED MAP MANAGER 기능:
@@ -140,16 +100,20 @@ GET    /api/maps/custom/:id
 DELETE /api/maps/custom/:id
 ```
 
-서버 health 응답에는 custom map 저장 상태가 포함됩니다.
+## 22-8A 서버 custom map 가져오기/삭제 UI
 
-```json
-{
-  "customMaps": {
-    "count": 0,
-    "max": 100
-  }
-}
-```
+TILED MAP MANAGER의 `서버 맵 목록` 버튼으로 서버 저장 custom map 요약 목록을 조회합니다.
+
+서버 맵 카드 기능:
+
+- `클라이언트로 가져오기`: `GET /api/maps/custom/:id`로 전체 map을 받아 `YDH_MAPS.maps`에 등록하고 localStorage custom map으로 저장
+- `서버삭제`: `DELETE /api/maps/custom/:id` 호출 후 서버 목록에서 제거
+- 서버 맵 카드는 클라이언트 맵 카드와 분리된 `서버 맵` 영역에 표시
+
+검증/오류 UI:
+
+- 검증 실패는 `실패 N건`으로 요약 표시
+- `실패 상세 보기`를 펼치면 실패 URL/API와 오류 메시지를 확인 가능
 
 ## 안정성 기준
 
@@ -157,14 +121,14 @@ DELETE /api/maps/custom/:id
 - Object Layer는 Tiled 맵에만 적용됩니다.
 - 적용 불가능한 Object는 게임을 중단하지 않고 `skippedPlacements`에 기록합니다.
 - 서버 custom map은 현재 파일 저장 방식입니다.
-- 서버 저장 맵을 클라이언트 맵 목록으로 자동 복원/import하는 기능은 22-8로 분리합니다.
+- 22-8A는 서버 저장 맵을 수동으로 가져오는 기능까지이며, 자동 동기화는 아직 적용하지 않습니다.
 
-## 22-8 다음 작업
+## 22-8B 다음 작업
 
 다음 단계에서 진행합니다.
 
-1. 서버 custom map 목록에서 클라이언트로 import
-2. 서버 custom map 삭제 UI 연결
-3. 검증 실패 맵 상세 보기
-4. Object Layer marker 정보창
-5. Tiled object layer 기반 퀘스트 트리거
+1. Object Layer marker 정보창
+2. Tiled object layer 기반 퀘스트 트리거
+3. 서버 custom map 자동 동기화 옵션
+4. 서버 custom map을 계정/캐릭터별로 분리 저장
+5. custom map MySQL 저장소 연동
