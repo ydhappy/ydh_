@@ -22,7 +22,7 @@ npm run dev
 http://localhost:3000
 ```
 
-서버는 저장 API, WebSocket 위치 동기화, 정적 파일 제공을 함께 처리합니다.
+서버는 저장 API, custom Tiled map API, WebSocket 위치 동기화, 정적 파일 제공을 함께 처리합니다.
 
 ```text
 http://localhost:3000/index.html
@@ -34,6 +34,7 @@ http://localhost:3000/index.html
 | --- | --- | --- |
 | `PORT` | `3000` | 서버 포트 |
 | `YDH_DATA_DIR` | `server/data` | 파일 저장 위치 |
+| `YDH_MAX_CUSTOM_MAPS` | `100` | 서버 custom map 최대 저장 개수 |
 | `YDH_PUBLIC_DIR` | repository root | 정적 파일 제공 위치 |
 | `YDH_STORAGE` | `file` | `file` 또는 `mysql` |
 | `MYSQL_HOST` | `127.0.0.1` | MySQL 호스트 |
@@ -95,12 +96,38 @@ npm start
 curl http://localhost:3000/api/health
 ```
 
-응답에는 저장소 상태와 실시간 접속자 통계가 포함됩니다.
+응답에는 저장소 상태, custom map 저장 상태, 실시간 접속자 통계가 포함됩니다.
 
 ### Realtime stats
 
 ```bash
 curl http://localhost:3000/api/realtime/stats
+```
+
+### Custom Tiled map list
+
+```bash
+curl http://localhost:3000/api/maps/custom
+```
+
+### Custom Tiled map save
+
+```bash
+curl -X POST http://localhost:3000/api/maps/custom \
+  -H "Content-Type: application/json" \
+  -d '{"map":{"id":"test-map","name":"테스트 맵","rows":["GGG","GPG","GGG"],"start":{"x":1,"y":1}}}'
+```
+
+### Custom Tiled map read
+
+```bash
+curl http://localhost:3000/api/maps/custom/test-map
+```
+
+### Custom Tiled map delete
+
+```bash
+curl -X DELETE http://localhost:3000/api/maps/custom/test-map
 ```
 
 ### Account list
@@ -179,11 +206,26 @@ error
 2. `http://localhost:3000/index.html` 접속
 3. `계정` 섹션에서 로컬 계정명 저장
 4. 캐릭터 슬롯 생성 또는 선택
-5. `실시간` 섹션에서 `연결` 클릭
-6. 다른 브라우저/기기에서 같은 서버 접속 후 `연결` 클릭
-7. 맵 이동 시 서로의 위치 카드가 갱신되고, 같은 맵이면 타일맵 위에 원격 아바타가 표시되는지 확인
-8. 같은 좌표에 여러 명이 있으면 `+N` 배지가 표시되는지 확인
-9. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
+5. `TILED MAP MANAGER`에서 custom Tiled JSON 붙여넣기 또는 기존 맵 선택
+6. custom map 카드에서 `내보내기`, `삭제`, `서버저장` 사용
+7. `실시간` 섹션에서 `연결` 클릭
+8. 다른 브라우저/기기에서 같은 서버 접속 후 `연결` 클릭
+9. 맵 이동 시 서로의 위치 카드가 갱신되고, 같은 맵이면 타일맵 위에 원격 아바타가 표시되는지 확인
+10. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
+
+## Custom map 저장 방식
+
+서버 custom map은 파일 저장입니다.
+
+```text
+server/data/custom-maps.json
+```
+
+브라우저 custom map은 localStorage에 저장됩니다.
+
+```text
+ydh-tiled-custom-maps-v1
+```
 
 ## 실시간 타일맵 원격 아바타 표시
 
@@ -241,7 +283,7 @@ ydh_schema_meta
 
 ## 다음 고도화 후보
 
-1. Tiled Map Editor JSON import
+1. 서버 custom map 목록을 클라이언트 맵으로 복원/import
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
