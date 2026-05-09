@@ -1,0 +1,50 @@
+name: Package RunNow ZIP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'run-now/**'
+      - 'assets/generated/**'
+      - '.github/workflows/package-run-now.yml'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare RunNow package
+        run: |
+          mkdir -p dist/YDHChronicle-MobileGame-RunNow/assets
+          cp run-now/index.html dist/YDHChronicle-MobileGame-RunNow/index.html
+          cp assets/generated/classes-showcase.svg dist/YDHChronicle-MobileGame-RunNow/assets/classes-showcase.svg
+          cp assets/generated/npc-showcase.svg dist/YDHChronicle-MobileGame-RunNow/assets/npc-showcase.svg
+          cp assets/generated/monster-showcase.svg dist/YDHChronicle-MobileGame-RunNow/assets/monster-showcase.svg
+          cp assets/generated/environment-showcase.svg dist/YDHChronicle-MobileGame-RunNow/assets/environment-showcase.svg
+          cat > dist/YDHChronicle-MobileGame-RunNow/README_RUN_NOW.txt <<'EOF'
+          YDH Chronicle Mobile - 바로 실행 패키지
+
+          실행 방법:
+          1. ZIP 압축 해제
+          2. index.html 실행
+          3. Android에서는 파일관리자 또는 브라우저로 index.html 열기
+
+          포함:
+          - 모바일 터치 전투
+          - 월드맵 이동
+          - HP/MP/EXP/레벨/골드
+          - 스킬 6종
+          - 인벤토리
+          - 자동 저장 localStorage
+          - 클래스/NPC/몬스터/타일 SVG 갤러리
+          EOF
+
+      - name: Upload RunNow package
+        uses: actions/upload-artifact@v4
+        with:
+          name: YDHChronicle-MobileGame-RunNow
+          path: dist/YDHChronicle-MobileGame-RunNow
