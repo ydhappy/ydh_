@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="YDH MMORPG 홈페이지형 미니게임 - 브라우저에서 바로 즐기는 레트로 판타지 RPG" />
   <title>YDH Chronicle | 모바일 홈페이지 MMORPG</title>
+  <link rel="preload" href="assets/ui/ydh-crest.svg" as="image" />
+  <link rel="preload" href="assets/atlas/tiles-atlas.svg" as="image" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="map.css" />
+  <link rel="stylesheet" href="visual-polish.css" />
   <link rel="stylesheet" href="entity-sprites.css" />
   <link rel="stylesheet" href="battle-sprites.css" />
   <link rel="stylesheet" href="battle-motions.css" />
@@ -149,7 +152,7 @@
         <article class="panel feature-card"><span>📱</span><h3>모바일 지원</h3><p>작은 화면에서도 터치 버튼, 반응형 레이아웃, 가벼운 SVG 에셋으로 동작합니다.</p></article>
       </section>
 
-      <section class="panel asset-pipeline" id="assets"><p class="eyebrow">ASSETS & MAP PIPELINE</p><h2>Assets와 Map 개발 기준</h2><p>초기 버전은 경량 SVG 에셋과 <code>data/maps.js</code> 문자 타일맵으로 구성했습니다. Tiled JSON은 <code>data/tiled-map-loader.js</code>로 기존 문자 타일맵 구조에 안전하게 추가됩니다.</p><div class="asset-pipeline-grid"><div><strong>Tiles</strong><span>grass, road, water, tree, stone, portal SVG 기본 제공</span></div><div><strong>Sprites</strong><span>player, monster, npc 16방향 SVG 스프라이트시트</span></div><div><strong>Maps</strong><span>기본 맵 + Tiled JSON 샘플맵 자동 로드</span></div><div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div></div></section>
+      <section class="panel asset-pipeline" id="assets"><p class="eyebrow">ASSETS & MAP PIPELINE</p><h2>Assets와 Map 개발 기준</h2><p>경량 SVG, atlas, resource catalog, preload panel을 함께 사용합니다. Tiled JSON은 <code>data/tiled-map-loader.js</code>로 기존 문자 타일맵 구조에 안전하게 추가됩니다.</p><div class="asset-pipeline-grid"><div><strong>Tiles</strong><span>SVG fallback + PNG/WebP atlas pipeline</span></div><div><strong>Sprites</strong><span>player, monster, npc 16방향 SVG 스프라이트시트</span></div><div><strong>Resources</strong><span>manifest 기반 preload와 품질 토글</span></div><div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div></div></section>
 
       <section class="panel ranking-panel" id="ranking"><div><p class="eyebrow">HALL OF HEROES</p><h2>내 최고 기록</h2><p>현재 브라우저 기준으로 저장되는 개인 랭킹입니다.</p></div><div class="rank-grid"><span>최고 레벨 <strong id="bestLevel">1</strong></span><span>최고 웨이브 <strong id="bestWave">1</strong></span><span>누적 처치 <strong id="totalKills">0</strong></span></div></section>
 
@@ -161,6 +164,7 @@
 
   <template id="skillTemplate"><button class="skill-card" type="button"><span class="skill-icon"></span><strong class="skill-name"></strong><small class="skill-meta"></small><i class="cooldown-mask"></i></button></template>
 
+  <script src="data/resource-catalog.js"></script>
   <script src="data/lore-content.js"></script>
   <script src="data/item-catalog.js"></script>
   <script src="data/chapter-quests.js"></script>
@@ -193,5 +197,6 @@
   <script src="server-sync-panel.js"></script>
   <script src="realtime-sync.js"></script>
   <script src="realtime-map-peers.js"></script>
+  <script src="ui-enhancements.js"></script>
 </body>
 </html>
