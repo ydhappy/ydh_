@@ -23,6 +23,13 @@ app.use((req, res, next) => {
   next();
 });
 
+function mapScopeFromRequest(req) {
+  return {
+    accountId: req.query.accountId || req.body?.accountId || req.body?.map?.accountId || '',
+    characterId: req.query.characterId || req.body?.characterId || req.body?.map?.characterId || ''
+  };
+}
+
 app.get('/api/health', async (req, res, next) => {
   try {
     const storage = await storageHealth();
@@ -39,7 +46,8 @@ app.get('/api/realtime/stats', (req, res) => {
 
 app.get('/api/maps/custom', async (req, res, next) => {
   try {
-    res.json({ ok: true, maps: await listCustomMaps() });
+    const scope = mapScopeFromRequest(req);
+    res.json({ ok: true, scope, maps: await listCustomMaps(scope) });
   } catch (error) {
     next(error);
   }
@@ -47,7 +55,7 @@ app.get('/api/maps/custom', async (req, res, next) => {
 
 app.post('/api/maps/custom', async (req, res, next) => {
   try {
-    const record = await saveCustomMap(req.body);
+    const record = await saveCustomMap({ ...req.body, ...mapScopeFromRequest(req) });
     res.json({ ok: true, map: record });
   } catch (error) {
     next(error);
@@ -56,7 +64,7 @@ app.post('/api/maps/custom', async (req, res, next) => {
 
 app.get('/api/maps/custom/:id', async (req, res, next) => {
   try {
-    const record = await getCustomMap(req.params.id);
+    const record = await getCustomMap(req.params.id, mapScopeFromRequest(req));
     if (!record) return res.status(404).json({ ok: false, error: 'Custom map not found' });
     res.json({ ok: true, map: record });
   } catch (error) {
@@ -66,7 +74,7 @@ app.get('/api/maps/custom/:id', async (req, res, next) => {
 
 app.delete('/api/maps/custom/:id', async (req, res, next) => {
   try {
-    const result = await deleteCustomMap(req.params.id);
+    const result = await deleteCustomMap(req.params.id, mapScopeFromRequest(req));
     if (!result.deleted) return res.status(404).json({ ok: false, error: 'Custom map not found' });
     res.json({ ok: true, ...result });
   } catch (error) {
