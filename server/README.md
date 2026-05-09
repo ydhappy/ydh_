@@ -96,7 +96,7 @@ npm start
 curl http://localhost:3000/api/health
 ```
 
-응답에는 저장소 상태, custom map 저장 상태, 실시간 접속자 통계가 포함됩니다.
+응답에는 저장소 상태, custom map 저장 상태, 실시간 접속자 통계가 포함됩니다. `customMaps.scopes`는 custom map이 저장된 계정/캐릭터 scope 개수입니다.
 
 ### Realtime stats
 
@@ -106,14 +106,22 @@ curl http://localhost:3000/api/realtime/stats
 
 ### Custom Tiled map list
 
+전체/global 범위:
+
 ```bash
 curl http://localhost:3000/api/maps/custom
+```
+
+계정/캐릭터 범위:
+
+```bash
+curl "http://localhost:3000/api/maps/custom?accountId=acc_xxx&characterId=char_xxx"
 ```
 
 ### Custom Tiled map save
 
 ```bash
-curl -X POST http://localhost:3000/api/maps/custom \
+curl -X POST "http://localhost:3000/api/maps/custom?accountId=acc_xxx&characterId=char_xxx" \
   -H "Content-Type: application/json" \
   -d '{"map":{"id":"test-map","name":"테스트 맵","rows":["GGG","GPG","GGG"],"start":{"x":1,"y":1}}}'
 ```
@@ -121,13 +129,13 @@ curl -X POST http://localhost:3000/api/maps/custom \
 ### Custom Tiled map read
 
 ```bash
-curl http://localhost:3000/api/maps/custom/test-map
+curl "http://localhost:3000/api/maps/custom/test-map?accountId=acc_xxx&characterId=char_xxx"
 ```
 
 ### Custom Tiled map delete
 
 ```bash
-curl -X DELETE http://localhost:3000/api/maps/custom/test-map
+curl -X DELETE "http://localhost:3000/api/maps/custom/test-map?accountId=acc_xxx&characterId=char_xxx"
 ```
 
 ### Account list
@@ -222,6 +230,16 @@ error
 server/data/custom-maps.json
 ```
 
+서버 custom map record는 아래 scope를 가집니다.
+
+```text
+accountId
+characterId
+scopeKey = accountId::characterId
+```
+
+query/body에 scope가 없으면 `global::global`로 저장/조회됩니다.
+
 브라우저 custom map은 localStorage에 저장됩니다.
 
 ```text
@@ -242,8 +260,8 @@ SERVER CUSTOM MAP SYNC
 
 지원 기능:
 
-- `지금 동기화`: 서버 custom map 목록을 조회하고 전체 map을 클라이언트로 import
-- `자동 동기화`: 페이지 로드 시 서버 custom map을 자동으로 import
+- `지금 동기화`: 현재 선택 계정/캐릭터 scope의 서버 custom map 목록을 조회하고 전체 map을 클라이언트로 import
+- `자동 동기화`: 페이지 로드 또는 캐릭터 선택 시 현재 scope의 서버 custom map을 자동 import
 - 가져온 map은 `YDH_MAPS.maps`와 localStorage custom map에 함께 저장
 - 이미 같은 ID의 map이 있으면 맵 목록 중복 추가 없이 localStorage만 갱신
 
@@ -303,9 +321,8 @@ ydh_schema_meta
 
 ## 다음 고도화 후보
 
-1. 서버 custom map을 계정/캐릭터별로 분리 저장
-2. custom map MySQL 저장소 연동
-3. 실제 PNG/WebP atlas 교체
-4. 서버 계정 인증 추가
-5. 운영용 관리자 저장 삭제/정리 API
-6. 원격 아바타 클릭 정보창
+1. custom map MySQL 저장소 연동
+2. 실제 PNG/WebP atlas 교체
+3. 서버 계정 인증 추가
+4. 운영용 관리자 저장 삭제/정리 API
+5. 원격 아바타 클릭 정보창
