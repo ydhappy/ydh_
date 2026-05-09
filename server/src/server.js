@@ -3,6 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attachRealtimeServer } from './realtime.js';
+import { authScope, authStatus, applyAuthToSnapshot, loginHandler, optionalAuth, requireAuth } from './auth.js';
 import { customMapHealth, deleteCustomMap, getCustomMap, listCustomMaps, saveCustomMap } from './map-storage.js';
 import { latestSnapshot, listAccounts, listCharacters, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
@@ -22,29 +23,41 @@ app.use((req, res, next) => {
   res.setHeader('X-YDH-Server', 'chronicle-save-api');
   next();
 });
+app.use(optionalAuth);
 
 function mapScopeFromRequest(req) {
-  return {
+  const raw = {
     accountId: req.query.accountId || req.body?.accountId || req.body?.map?.accountId || '',
     characterId: req.query.characterId || req.body?.characterId || req.body?.map?.characterId || ''
   };
+  return authScope(req, raw);
 }
 
 app.get('/api/health', async (req, res, next) => {
   try {
     const storage = await storageHealth();
     const customMaps = await customMapHealth();
-    res.json({ ok: true, app: 'YDH Chronicle API', storageMode, realtime: realtime.stats(), customMaps, storage, now: new Date().toISOString() });
+    res.json({ ok: true, app: 'YDH Chronicle API', auth: authStatus(), storageMode, realtime: realtime.stats(), customMaps, storage, now: new Date().toISOString() });
   } catch (error) {
     next(error);
   }
+});
+
+app.get('/api/auth/status', (req, res) => {
+  res.json({ ok: true, status: authStatus(), auth: req.auth || null });
+});
+
+app.post('/api/auth/login', loginHandler);
+
+app.get('/api/auth/me', requireAuth, (req, res) => {
+  res.json({ ok: true, auth: req.auth || null, status: authStatus() });
 });
 
 app.get('/api/realtime/stats', (req, res) => {
   res.json({ ok: true, realtime: realtime.stats() });
 });
 
-app.get('/api/maps/custom', async (req, res, next) => {
+app.get('/api/maps/custom', requireAuth, async (req, res, next) => {
   try {
     const scope = mapScopeFromRequest(req);
     res.json({ ok: true, scope, maps: await listCustomMaps(scope) });
@@ -53,7 +66,7 @@ app.get('/api/maps/custom', async (req, res, next) => {
   }
 });
 
-app.post('/api/maps/custom', async (req, res, next) => {
+app.post('/api/maps/custom', requireAuth, async (req, res, next) => {
   try {
     const record = await saveCustomMap({ ...req.body, ...mapScopeFromRequest(req) });
     res.json({ ok: true, map: record });
@@ -62,7 +75,7 @@ app.post('/api/maps/custom', async (req, res, next) => {
   }
 });
 
-app.get('/api/maps/custom/:id', async (req, res, next) => {
+app.get('/api/maps/custom/:id', requireAuth, async (req, res, next) => {
   try {
     const record = await getCustomMap(req.params.id, mapScopeFromRequest(req));
     if (!record) return res.status(404).json({ ok: false, error: 'Custom map not found' });
@@ -72,7 +85,7 @@ app.get('/api/maps/custom/:id', async (req, res, next) => {
   }
 });
 
-app.delete('/api/maps/custom/:id', async (req, res, next) => {
+app.delete('/api/maps/custom/:id', requireAuth, async (req, res, next) => {
   try {
     const result = await deleteCustomMap(req.params.id, mapScopeFromRequest(req));
     if (!result.deleted) return res.status(404).json({ ok: false, error: 'Custom map not found' });
@@ -82,7 +95,7 @@ app.delete('/api/maps/custom/:id', async (req, res, next) => {
   }
 });
 
-app.get('/api/accounts', async (req, res, next) => {
+app.get('/api/accounts', requireAuth, async (req, res, next) => {
   try {
     res.json({ ok: true, storageMode, accounts: await listAccounts() });
   } catch (error) {
@@ -90,36 +103,38 @@ app.get('/api/accounts', async (req, res, next) => {
   }
 });
 
-app.get('/api/characters', async (req, res, next) => {
+app.get('/api/characters', requireAuth, async (req, res, next) => {
   try {
-    res.json({ ok: true, storageMode, characters: await listCharacters(req.query.accountId || '') });
+    const accountId = req.auth?.accountId || req.query.accountId || '';
+    res.json({ ok: true, storageMode, characters: await listCharacters(accountId) });
   } catch (error) {
     next(error);
   }
 });
 
-app.post('/api/save/snapshot', async (req, res, next) => {
+app.post('/api/save/snapshot', requireAuth, async (req, res, next) => {
   try {
-    const validation = validateSnapshot(req.body);
+    const snapshot = applyAuthToSnapshot(req, req.body);
+    const validation = validateSnapshot(snapshot);
     if (!validation.ok) {
       return res.status(400).json({ ok: false, errors: validation.errors });
     }
-    const record = await saveSnapshot(req.body);
+    const record = await saveSnapshot(snapshot);
     res.json({
       ok: true,
       savedAt: record.receivedAt,
       id: record.id,
       storageMode,
-      summary: summarizeSnapshot(req.body)
+      summary: summarizeSnapshot(snapshot)
     });
   } catch (error) {
     next(error);
   }
 });
 
-app.post('/api/save/character', async (req, res, next) => {
+app.post('/api/save/character', requireAuth, async (req, res, next) => {
   try {
-    const snapshot = {
+    const snapshot = applyAuthToSnapshot(req, {
       schemaVersion: 1,
       app: 'YDH Chronicle',
       generatedAt: new Date().toISOString(),
@@ -128,7 +143,7 @@ app.post('/api/save/character', async (req, res, next) => {
       selectedCharacter: null,
       characterSlots: [],
       saves: { character: req.body, map: null, chapterQuests: null, codexUnlocks: null, gmConsoleOpen: null }
-    };
+    });
     const record = await saveSnapshot(snapshot);
     res.json({ ok: true, id: record.id, savedAt: record.receivedAt, storageMode });
   } catch (error) {
@@ -136,7 +151,7 @@ app.post('/api/save/character', async (req, res, next) => {
   }
 });
 
-app.get('/api/save/list', async (req, res, next) => {
+app.get('/api/save/list', requireAuth, async (req, res, next) => {
   try {
     res.json({ ok: true, storageMode, saves: await listSnapshots() });
   } catch (error) {
@@ -144,7 +159,7 @@ app.get('/api/save/list', async (req, res, next) => {
   }
 });
 
-app.get('/api/save/restore', async (req, res, next) => {
+app.get('/api/save/restore', requireAuth, async (req, res, next) => {
   try {
     const latest = await latestSnapshot();
     if (!latest) return res.status(404).json({ ok: false, error: 'No save snapshot found' });
@@ -154,7 +169,7 @@ app.get('/api/save/restore', async (req, res, next) => {
   }
 });
 
-app.get('/api/save/:id', async (req, res, next) => {
+app.get('/api/save/:id', requireAuth, async (req, res, next) => {
   try {
     const record = await snapshotById(req.params.id);
     if (!record) return res.status(404).json({ ok: false, error: 'Save snapshot not found' });
@@ -175,5 +190,6 @@ httpServer.listen(port, () => {
   console.log(`YDH Chronicle server listening on http://localhost:${port}`);
   console.log(`Serving static files from ${publicDir}`);
   console.log(`Storage provider: ${storageMode}`);
+  console.log(`Auth required: ${authStatus().required}`);
   console.log('WebSocket position path: /ws/position');
 });
