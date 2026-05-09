@@ -88,6 +88,19 @@
             { "name": "ydhKind", "type": "string", "value": "portal" },
             { "name": "ydhTargetMapIndex", "type": "int", "value": 0 }
           ]
+        },
+        {
+          "id": 4,
+          "name": "달문 석비",
+          "type": "marker",
+          "x": 256,
+          "y": 256,
+          "width": 64,
+          "height": 64,
+          "properties": [
+            { "name": "ydhKind", "type": "string", "value": "marker" },
+            { "name": "ydhDialogue", "type": "string", "value": "석비에는 오래된 달의 문양과 경고문이 새겨져 있습니다." }
+          ]
         }
       ]
     }
