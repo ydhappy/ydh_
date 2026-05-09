@@ -91,19 +91,47 @@
 - `window.YDH_SERVER_CUSTOM_MAP_SYNC.syncNow()` 공개
 - `ydh-server-custom-maps-synced` 이벤트 발행
 
+### 23-2: 서버 custom map 계정/캐릭터 scope 분리
+
+상태: 완료
+
+작업 파일:
+
+- `server/src/map-storage.js`
+- `server/src/server.js`
+- `server-custom-map-sync.js`
+- `tiled-map-bootstrap.js`
+- `server/README.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 서버 custom map record에 `accountId`, `characterId`, `scopeKey` 추가
+- `scopeKey = accountId::characterId` 기준으로 map 저장/갱신 분리
+- scope가 없으면 `global::global` fallback 사용
+- 기존 저장 파일의 scope 없는 record를 자동 normalize
+- `GET /api/maps/custom?accountId=&characterId=` scope 목록 조회 지원
+- `POST /api/maps/custom?accountId=&characterId=` scope 저장 지원
+- `GET /api/maps/custom/:id?accountId=&characterId=` scope 단건 조회 지원
+- `DELETE /api/maps/custom/:id?accountId=&characterId=` scope 삭제 지원
+- `/api/health`의 customMaps에 scope 개수 포함
+- TILED MAP MANAGER 서버 저장/목록 요청에 현재 계정/캐릭터 scope 자동 첨부
+- SERVER CUSTOM MAP SYNC 자동 동기화에 현재 계정/캐릭터 scope 자동 첨부
+- 캐릭터 선택 이벤트 발생 시 자동 동기화가 켜져 있으면 현재 scope로 재동기화
+- TILED MAP MANAGER 카드에 map scope 표시
+
 ## 전체 상태
 
-상태: 8차~22차 완료, 23-1 완료
+상태: 8차~22차 완료, 23-1~23-2 완료
 
 현재 남은 고도화 후보:
 
-1. 23-2 서버 custom map을 계정/캐릭터별로 분리 저장
-2. custom map MySQL 저장소 연동
-3. 실제 PNG/WebP atlas 교체
-4. 서버 계정 인증 추가
-5. 운영용 관리자 저장 삭제/정리 API
-6. 원격 아바타 클릭 정보창
-7. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
+1. 23-3 custom map MySQL 저장소 연동
+2. 실제 PNG/WebP atlas 교체
+3. 서버 계정 인증 추가
+4. 운영용 관리자 저장 삭제/정리 API
+5. 원격 아바타 클릭 정보창
+6. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
 
 ## 원칙
 
