@@ -21,7 +21,7 @@
 
 ## 26차: 리소스/에셋/이미지/UI/애니메이션 보강
 
-상태: 분할 진행 중
+상태: 완료
 
 ### 26-1: 리소스 매니페스트와 UI 품질 레이어
 
@@ -155,9 +155,9 @@
 - 800ms fallback interval로 동적 렌더링 누락 보정
 - generated asset gallery에서 `icon-runtime-bindings.js` 자동 로드
 
-## 27차: APK 패키징 준비
+## 27차: APK 패키징 자동화
 
-상태: 준비 완료
+상태: 자동화 준비 완료
 
 작업 파일:
 
@@ -165,6 +165,9 @@
 - `capacitor.config.json`
 - `.github/workflows/build-android-apk.yml`
 - `docs/android-apk-build.md`
+- `assets/app/app-icon.svg`
+- `assets/app/splash-screen.svg`
+- `manifest.webmanifest`
 - `docs/next-work-breakdown.md`
 
 완료 내용:
@@ -175,9 +178,14 @@
 - 정적 웹 루트 `webDir: .` 설정
 - Android debug/release APK 빌드 script 추가
 - GitHub Actions 수동 APK build workflow 추가
-- debug/release build_type 선택 지원
-- workflow artifact로 APK 업로드 설정
+- GitHub Actions main push 자동 APK workflow 조건 추가
+- push 경로 필터 추가: html/css/js/assets/data/package/capacitor/workflow
+- workflow 기본 build type을 debug로 설정
+- workflow artifact로 debug/release APK 업로드 설정
 - APK 빌드 문서 추가
+- Android/PWA 공용 app icon source SVG 추가
+- Android/PWA splash source SVG 추가
+- PWA manifest 추가
 
 실제 APK 생성 절차:
 
@@ -194,15 +202,30 @@ GitHub Actions:
 Actions → Build Android APK → Run workflow → build_type=debug
 ```
 
+자동 실행:
+
+```text
+main 브랜치에 html/css/js/assets/data/package/capacitor/workflow 변경사항 push 시 debug APK workflow 자동 실행
+```
+
+현재 확인:
+
+```text
+workflow 파일 자동 실행 설정은 완료.
+해당 커밋 기준 workflow run은 아직 조회되지 않음.
+첫 workflow 파일 추가/변경 커밋은 저장소 Actions 설정 상태에 따라 자동 실행되지 않을 수 있음.
+다음 대상 파일 push 또는 수동 Run workflow로 APK artifact 생성 가능.
+```
+
 ## 전체 상태
 
-상태: 8차~25차 완료, 26-1~26-5 완료, 27차 APK 준비 완료
+상태: 8차~26차 완료, 27차 APK 자동화 준비 완료
 
 현재 남은 고도화 후보:
 
 1. GitHub Actions APK workflow 수동 실행 후 artifact 확인
-2. Android 앱 아이콘/splash 리소스 추가
-3. 실제 android/ 프로젝트 생성 결과 커밋
+2. 실제 android/ 프로젝트 생성 결과 커밋
+3. Android 앱 아이콘/splash PNG density 리소스 생성
 4. 캐릭터/몬스터/NPC 스프라이트 데이터 연결 고도화
 5. 맵 오브젝트/환경 이펙트 추가
 6. 운영용 관리자 저장 삭제/정리 API
