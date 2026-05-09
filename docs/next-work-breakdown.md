@@ -76,13 +76,39 @@
 - `SERVER AUTH` 패널에 access/refresh/session 상태 표시
 - `SERVER AUTH` 패널에 수동 재발급 버튼 추가
 
+### 25-3: refresh session MySQL 저장소
+
+상태: 부분 완료
+
+작업 파일:
+
+- `server/src/mysql-auth-sessions.js`
+- `server/src/auth-session-provider.js`
+- `server/sql/mysql55-schema.sql`
+- `server/README.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- MySQL 전용 refresh session provider 추가
+- `ydh_auth_sessions` 테이블 schema 추가
+- refresh token 원본 대신 `token_hash` 저장
+- session 생성/회전/폐기/health/list 함수 구현
+- schema version meta 값을 `4`로 갱신
+- `YDH_STORAGE=mysql`일 때 provider를 선택하는 delegator 파일 추가
+
+남은 연결:
+
+- `server/src/auth.js`의 session import를 `./auth-sessions.js`에서 `./auth-session-provider.js`로 교체
+- 위 import 전체 치환은 안전 검사에서 차단되어 다음 조각에서 재시도
+
 ## 전체 상태
 
-상태: 8차~24차 완료, 25-1~25-2 완료
+상태: 8차~24차 완료, 25-1~25-2 완료, 25-3 부분 완료
 
 현재 남은 고도화 후보:
 
-1. 25-3 refresh session MySQL 저장소
+1. 25-3B auth.js provider import 교체 재시도
 2. 운영용 관리자 저장 삭제/정리 API
 3. 원격 아바타 클릭 정보창
 4. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
