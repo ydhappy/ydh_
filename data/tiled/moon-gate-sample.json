@@ -98,8 +98,12 @@
           "width": 64,
           "height": 64,
           "properties": [
+            { "name": "ydhId", "type": "string", "value": "moon-gate-stone" },
             { "name": "ydhKind", "type": "string", "value": "marker" },
-            { "name": "ydhDialogue", "type": "string", "value": "석비에는 오래된 달의 문양과 경고문이 새겨져 있습니다." }
+            { "name": "ydhDialogue", "type": "string", "value": "석비에는 오래된 달의 문양과 경고문이 새겨져 있습니다." },
+            { "name": "ydhQuestType", "type": "string", "value": "inspectMarker" },
+            { "name": "ydhQuestTarget", "type": "string", "value": "moon-gate-stone" },
+            { "name": "ydhQuestAmount", "type": "int", "value": 1 }
           ]
         }
       ]
