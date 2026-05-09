@@ -1,10 +1,12 @@
 window.YDH_ATLAS = {
-  version: 1,
+  version: 2,
   mode: 'atlas',
   tiles: {
     image: 'assets/atlas/tiles-atlas.svg',
     imagePng: 'assets/atlas/tiles-atlas.png',
     imageWebp: 'assets/atlas/tiles-atlas.webp',
+    preferredFormats: ['webp', 'png', 'svg'],
+    activeFormat: 'svg',
     tileWidth: 64,
     tileHeight: 64,
     columns: 6,
