@@ -3,7 +3,18 @@
 
   const key = 'ydh-mmo-ws-url';
 
+  function injectStyles() {
+    if (document.getElementById('serverSettingsStyles')) return;
+    const style = document.createElement('style');
+    style.id = 'serverSettingsStyles';
+    style.textContent = `
+      .server-form{display:flex;gap:8px;margin:8px 0 5px}.server-form input{flex:1;min-width:0;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.06);color:#eef4ff;padding:11px 12px}.server-form button{border:0;border-radius:14px;background:var(--gold);color:#160e04;padding:0 14px;font-weight:1000}.server-help{display:block;color:var(--muted);line-height:1.45;margin-bottom:12px}
+    `;
+    document.head.appendChild(style);
+  }
+
   function boot() {
+    injectStyles();
     const form = document.getElementById('serverForm');
     const input = document.getElementById('serverUrlInput');
     if (!form || !input) return;
