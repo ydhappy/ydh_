@@ -1,0 +1,51 @@
+window.YDH_ICON_CATALOG = {
+  version: 1,
+  atlas: {
+    image: 'assets/icons/dark-fantasy-icon-atlas.svg',
+    iconSize: 112,
+    gap: 16,
+    columns: 6,
+    rows: 6,
+    viewBoxSize: 768
+  },
+  items: [
+    { id: 'gold-star', nameKo: '황금 별조각', type: 'material', rarity: 'rare', x: 0, y: 0, use: 'craft' },
+    { id: 'blue-blade', nameKo: '푸른 단검', type: 'weapon', rarity: 'uncommon', x: 1, y: 0, use: 'rogue' },
+    { id: 'gold-chest', nameKo: '황금 상자', type: 'reward', rarity: 'rare', x: 2, y: 0, use: 'loot' },
+    { id: 'violet-book', nameKo: '보라 마도서', type: 'book', rarity: 'epic', x: 3, y: 0, use: 'wizard' },
+    { id: 'blood-orb', nameKo: '피의 구슬', type: 'material', rarity: 'epic', x: 4, y: 0, use: 'dark-craft' },
+    { id: 'green-core', nameKo: '생명의 핵', type: 'material', rarity: 'rare', x: 5, y: 0, use: 'healing' },
+    { id: 'red-sword', nameKo: '붉은 장검', type: 'weapon', rarity: 'rare', x: 0, y: 1, use: 'knight' },
+    { id: 'blue-shield', nameKo: '청은 방패', type: 'armor', rarity: 'uncommon', x: 1, y: 1, use: 'tank' },
+    { id: 'heal-potion', nameKo: '회복 물약', type: 'consumable', rarity: 'common', x: 2, y: 1, use: 'heal' },
+    { id: 'mana-scroll', nameKo: '마나 주문서', type: 'scroll', rarity: 'uncommon', x: 3, y: 1, use: 'mana' },
+    { id: 'holy-triangle', nameKo: '성스러운 문장', type: 'relic', rarity: 'rare', x: 4, y: 1, use: 'cleric' },
+    { id: 'red-ticket', nameKo: '토벌 의뢰서', type: 'quest', rarity: 'common', x: 5, y: 1, use: 'quest' },
+    { id: 'fire-tear', nameKo: '화염의 눈물', type: 'material', rarity: 'rare', x: 0, y: 2, use: 'fire' },
+    { id: 'ice-crystal', nameKo: '얼음 수정', type: 'material', rarity: 'rare', x: 1, y: 2, use: 'ice' },
+    { id: 'ranger-bow', nameKo: '숲의 활', type: 'weapon', rarity: 'uncommon', x: 2, y: 2, use: 'ranger' },
+    { id: 'shadow-gem', nameKo: '그림자 보석', type: 'gem', rarity: 'epic', x: 3, y: 2, use: 'rogue' },
+    { id: 'holy-medal', nameKo: '축복 메달', type: 'accessory', rarity: 'rare', x: 4, y: 2, use: 'cleric' },
+    { id: 'rage-mask', nameKo: '광전사의 가면', type: 'relic', rarity: 'epic', x: 5, y: 2, use: 'orc' }
+  ],
+  skills: [
+    { id: 'slash-cross', nameKo: '십자 베기', classId: 'knight', type: 'attack', x: 0, y: 3, cooldownMs: 420, mp: 0 },
+    { id: 'nature-eye', nameKo: '정령의 눈', classId: 'elf-ranger', type: 'buff', x: 1, y: 3, cooldownMs: 900, mp: 8 },
+    { id: 'berserk-crest', nameKo: '광폭 문장', classId: 'lancer', type: 'buff', x: 2, y: 3, cooldownMs: 1200, mp: 12 },
+    { id: 'holy-arc', nameKo: '성역의 빛', classId: 'cleric', type: 'heal', x: 3, y: 3, cooldownMs: 1400, mp: 16 },
+    { id: 'shadow-box', nameKo: '그림자 봉인', classId: 'dark-rogue', type: 'debuff', x: 4, y: 3, cooldownMs: 1100, mp: 10 },
+    { id: 'nature-cross', nameKo: '자연의 십자', classId: 'cleric', type: 'heal', x: 5, y: 3, cooldownMs: 1000, mp: 10 },
+    { id: 'dual-flame', nameKo: '쌍염 참격', classId: 'dark-rogue', type: 'attack', x: 0, y: 4, cooldownMs: 600, mp: 6 },
+    { id: 'mana-circle', nameKo: '마나 순환', classId: 'wizard', type: 'buff', x: 1, y: 4, cooldownMs: 1600, mp: 0 },
+    { id: 'void-star', nameKo: '공허성', classId: 'wizard', type: 'attack', x: 2, y: 4, cooldownMs: 1800, mp: 24 },
+    { id: 'golden-guard', nameKo: '황금 수호', classId: 'knight', type: 'guard', x: 3, y: 4, cooldownMs: 1300, mp: 10 },
+    { id: 'green-tome', nameKo: '회복의 서', classId: 'cleric', type: 'heal', x: 4, y: 4, cooldownMs: 1800, mp: 22 },
+    { id: 'blood-flame', nameKo: '혈염 폭발', classId: 'wizard', type: 'attack', x: 5, y: 4, cooldownMs: 2200, mp: 30 },
+    { id: 'gold-seal', nameKo: '황금 봉인', classId: 'all', type: 'utility', x: 0, y: 5, cooldownMs: 1500, mp: 8 },
+    { id: 'blue-trap', nameKo: '냉기 덫', classId: 'elf-ranger', type: 'control', x: 1, y: 5, cooldownMs: 1700, mp: 14 },
+    { id: 'earth-ward', nameKo: '대지 수호', classId: 'lancer', type: 'guard', x: 2, y: 5, cooldownMs: 1600, mp: 12 },
+    { id: 'void-ring', nameKo: '공허 고리', classId: 'wizard', type: 'control', x: 3, y: 5, cooldownMs: 2100, mp: 26 },
+    { id: 'danger-mark', nameKo: '위험 표식', classId: 'dark-rogue', type: 'mark', x: 4, y: 5, cooldownMs: 900, mp: 6 },
+    { id: 'sun-cross', nameKo: '태양 십자', classId: 'cleric', type: 'burst-heal', x: 5, y: 5, cooldownMs: 2600, mp: 32 }
+  ]
+};
