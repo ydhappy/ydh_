@@ -33,20 +33,24 @@ jobs:
       - name: Generate atlas
         run: node tools/generate-tile-atlas.mjs
 
+      - name: Validate atlas quality
+        run: node tools/check-atlas-quality.mjs
+
       - name: Show atlas outputs
         run: |
           ls -lh assets/atlas
           cat assets/atlas/tiles-atlas.meta.json
+          cat assets/atlas/tiles-atlas.quality.json
 
       - name: Commit atlas binaries
         if: ${{ inputs.commit_binaries == 'true' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/atlas/tiles-atlas.png assets/atlas/tiles-atlas.webp assets/atlas/tiles-atlas.meta.json
+          git add assets/atlas/tiles-atlas.png assets/atlas/tiles-atlas.webp assets/atlas/tiles-atlas.meta.json assets/atlas/tiles-atlas.quality.json
           if git diff --cached --quiet; then
             echo "No atlas changes to commit."
           else
-            git commit -m "Generate PNG and WebP tile atlas"
+            git commit -m "Generate and validate PNG WebP tile atlas"
             git push
           fi
