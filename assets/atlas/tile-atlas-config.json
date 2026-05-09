@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "tileSize": 64,
+  "columns": 6,
+  "rows": 1,
+  "webpQuality": 90,
+  "qualityLimits": {
+    "maxPngBytes": 24576,
+    "maxWebpBytes": 16384
+  },
+  "style": {
+    "noiseStrength": 0.31,
+    "gradientStrength": 0.65,
+    "grassBlades": 72,
+    "waterWaves": 4,
+    "portalSparkles": 28,
+    "stoneHighlight": true,
+    "roadCurve": true,
+    "treeCanopyRadius": 19
+  },
+  "tiles": [
+    { "code": "G", "name": "grass", "fill": [58, 154, 82], "accent": [27, 105, 55], "detail": [175, 232, 149] },
+    { "code": "R", "name": "road", "fill": [145, 95, 52], "accent": [210, 163, 95], "detail": [116, 72, 39] },
+    { "code": "S", "name": "stone", "fill": [103, 115, 132], "accent": [190, 198, 210], "detail": [48, 55, 66] },
+    { "code": "T", "name": "tree", "fill": [28, 74, 41], "accent": [43, 135, 66], "detail": [108, 67, 38] },
+    { "code": "W", "name": "water", "fill": [34, 104, 173], "accent": [142, 222, 255], "detail": [64, 152, 213] },
+    { "code": "P", "name": "portal", "fill": [38, 31, 105], "accent": [247, 200, 95], "detail": [238, 244, 255] }
+  ]
+}
