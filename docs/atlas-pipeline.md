@@ -2,17 +2,19 @@
 
 ## 상태
 
-현재 24-1A ~ 24-1D까지 완료된 상태입니다.
+현재 24-1A ~ 24-1E까지 완료된 상태입니다.
 
 - 24-1A: atlas 매니페스트와 타일 렌더러 지원 완료
-- 24-1B: PNG/WebP 생성 스크립트 + WebP/PNG/SVG 우선 로더 완료
-- 24-1C: GitHub Actions atlas binary 생성/커밋 workflow + 품질 비교 기준 완료
-- 24-1D: atlas 품질 검사 스크립트 + workflow 검증 단계 완료
+- 24-1B: PNG/WebP 생성 스크립트와 우선 로더 완료
+- 24-1C: GitHub Actions binary 생성 workflow 완료
+- 24-1D: atlas 품질 검사 스크립트와 workflow 검증 단계 완료
+- 24-1E: atlas 색감/디테일 조정 config와 generator 연동 완료
 
-## 파일
+## 주요 파일
 
 ```text
 assets/atlas/tiles-atlas.svg
+assets/atlas/tile-atlas-config.json
 data/atlas.js
 atlas-loader.js
 tools/generate-tile-atlas.mjs
@@ -20,33 +22,10 @@ tools/check-atlas-quality.mjs
 .github/workflows/generate-atlas.yml
 ```
 
-## atlas 우선순위
-
-브라우저는 아래 순서로 atlas 이미지를 검사합니다.
-
-```text
-WebP → PNG → SVG
-```
-
-사용 가능한 첫 번째 이미지를 `window.YDH_ATLAS.tiles.imageActive`에 저장합니다.
-
-선택된 format은 아래 값으로 확인할 수 있습니다.
-
-```js
-window.YDH_ATLAS.tiles.activeFormat
-```
-
-## 로컬 생성/검사 명령
-
-PNG/WebP 생성:
+## 생성/검사
 
 ```bash
 node tools/generate-tile-atlas.mjs
-```
-
-품질 검사:
-
-```bash
 node tools/check-atlas-quality.mjs
 ```
 
@@ -59,132 +38,72 @@ assets/atlas/tiles-atlas.meta.json
 assets/atlas/tiles-atlas.quality.json
 ```
 
-WebP 생성은 아래 둘 중 하나가 있으면 자동으로 수행됩니다.
+## atlas 우선순위
 
 ```text
-cwebp CLI
-npm package sharp
+WebP → PNG → SVG
 ```
 
-WebP 도구가 없으면 PNG만 생성하고 WebP는 건너뜁니다.
-
-## GitHub Actions 생성/검사
-
-수동 실행 workflow:
-
-```text
-.github/workflows/generate-atlas.yml
-```
-
-실행 방법:
-
-1. GitHub repository 접속
-2. Actions 탭 선택
-3. `Generate Tile Atlas` workflow 선택
-4. `Run workflow` 클릭
-5. `commit_binaries=true` 선택
-6. `Validate atlas quality` 단계 통과 확인
-7. 실행 완료 후 아래 파일이 자동 commit 되는지 확인
-
-자동 commit 대상:
-
-```text
-assets/atlas/tiles-atlas.png
-assets/atlas/tiles-atlas.webp
-assets/atlas/tiles-atlas.meta.json
-assets/atlas/tiles-atlas.quality.json
-```
-
-## 품질/용량 기준
-
-현재 generator와 동일한 384x64 atlas 기준 예상값:
-
-```text
-PNG  약 12~13 KB
-WebP 약 5~6 KB
-SVG  텍스트 기반 fallback
-```
-
-자동 실패 조건:
-
-- PNG 파일 없음
-- SVG fallback 파일 없음
-- meta JSON 없음
-- PNG signature 불일치
-- PNG 크기 384x64 불일치
-- PNG 용량 24 KB 초과
-- meta width/height 불일치
-- meta tileWidth/tileHeight 불일치
-- meta columns/rows 불일치
-- tile order가 `G,R,S,T,W,P`가 아님
-- WebP가 있을 때 RIFF/WEBP signature 불일치
-- WebP가 있을 때 용량 16 KB 초과
-
-검증 기준:
-
-- 타일 크기: 64x64
-- atlas 크기: 384x64
-- columns: 6
-- rows: 1
-- tile order: G, R, S, T, W, P
-- WebP가 있으면 WebP가 우선 선택되어야 함
-- WebP가 없고 PNG가 있으면 PNG가 선택되어야 함
-- 둘 다 없으면 SVG fallback이 선택되어야 함
-
-## atlas manifest
+선택된 atlas는 아래 값으로 확인합니다.
 
 ```js
-window.YDH_ATLAS = {
-  version: 2,
-  mode: 'atlas',
-  tiles: {
-    image: 'assets/atlas/tiles-atlas.svg',
-    imagePng: 'assets/atlas/tiles-atlas.png',
-    imageWebp: 'assets/atlas/tiles-atlas.webp',
-    preferredFormats: ['webp', 'png', 'svg'],
-    activeFormat: 'svg',
-    tileWidth: 64,
-    tileHeight: 64,
-    columns: 6,
-    rows: 1,
-    codes: {
-      G: { name: '잔디', x: 0, y: 0 },
-      R: { name: '길', x: 1, y: 0 },
-      S: { name: '돌바닥', x: 2, y: 0 },
-      T: { name: '나무', x: 3, y: 0 },
-      W: { name: '물', x: 4, y: 0 },
-      P: { name: '포탈', x: 5, y: 0 },
-      M: { name: '몬스터 구역', base: 'G', marker: '👹' },
-      N: { name: 'NPC', base: 'R', marker: '💬' }
-    }
-  }
-};
+window.YDH_ATLAS.tiles.imageActive
+window.YDH_ATLAS.tiles.activeFormat
 ```
 
-## debug panel
+## 색감/디테일 조정
 
-`atlas-loader.js`는 `ATLAS DEBUG` 패널을 생성합니다.
+색감과 디테일은 아래 파일에서 조정합니다.
 
-표시 내용:
+```text
+assets/atlas/tile-atlas-config.json
+```
 
-- active atlas path
-- 선택된 format
-- WebP/PNG/SVG 검사 결과
-- 실패 메시지
+조정 항목:
 
-## map-engine 연결
+```text
+webpQuality
+qualityLimits.maxPngBytes
+qualityLimits.maxWebpBytes
+style.noiseStrength
+style.gradientStrength
+style.grassBlades
+style.waterWaves
+style.portalSparkles
+style.stoneHighlight
+style.roadCurve
+style.treeCanopyRadius
+tiles[].fill
+tiles[].accent
+tiles[].detail
+```
 
-`map-engine.js`는 아래 순서로 타일 배경을 선택합니다.
+품질 검사 스크립트는 config의 tile size, grid, tile order, 용량 제한을 읽어서 검사합니다.
 
-1. `window.YDH_ATLAS.tiles.imageActive`
-2. `window.YDH_ATLAS.tiles.image`
-3. 기존 `tile.asset`
+## GitHub Actions
 
-atlas 선택이 완료되면 `ydh-atlas-ready` 이벤트가 발생하고 map-engine은 현재 맵을 다시 렌더링합니다.
+수동 workflow:
 
-## 주의
+```text
+Generate Tile Atlas
+```
 
-- GitHub contents API 직접 작업에서는 binary PNG/WebP 파일 경로 commit이 제한될 수 있어 workflow를 추가했습니다.
-- 실제 binary 파일은 `node tools/generate-tile-atlas.mjs` 또는 GitHub Actions `Generate Tile Atlas`로 생성합니다.
-- PNG 생성은 Node 기본 모듈만 사용합니다.
-- WebP 생성은 `cwebp` 또는 `sharp`가 필요합니다.
+실행 경로:
+
+```text
+Actions → Generate Tile Atlas → Run workflow → commit_binaries=true
+```
+
+workflow는 atlas 생성, 품질 검사, 결과 파일 commit을 수행합니다.
+
+## 검증 기준
+
+```text
+PNG signature 정상
+PNG 크기 config 기준 일치
+PNG 용량 제한 통과
+meta JSON grid/order 일치
+WebP가 있으면 RIFF/WEBP signature 정상
+WebP 용량 제한 통과
+브라우저는 WebP, PNG, SVG 순서로 fallback
+```
