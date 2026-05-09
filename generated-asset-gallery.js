@@ -20,6 +20,7 @@
   async function loadIconGallery() {
     await loadScriptOnce('data/icon-item-skill-catalog.js', 'iconItemSkillCatalogScript');
     await loadScriptOnce('icon-item-skill-gallery.js', 'iconItemSkillGalleryScript');
+    await loadScriptOnce('icon-runtime-bindings.js', 'iconRuntimeBindingsScript');
   }
 
   if (!concepts.length) {
