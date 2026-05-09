@@ -14,8 +14,9 @@ const WEBP_PATH = path.join(atlasDir, 'tiles-atlas.webp');
 const SVG_PATH = path.join(atlasDir, 'tiles-atlas.svg');
 const META_PATH = path.join(atlasDir, 'tiles-atlas.meta.json');
 const REPORT_PATH = path.join(atlasDir, 'tiles-atlas.quality.json');
+const CONFIG_PATH = path.join(atlasDir, 'tile-atlas-config.json');
 
-const expected = {
+const defaultExpected = {
   width: 384,
   height: 64,
   tileWidth: 64,
@@ -26,6 +27,25 @@ const expected = {
   maxPngBytes: 24 * 1024,
   maxWebpBytes: 16 * 1024
 };
+
+async function loadExpected() {
+  if (!existsSync(CONFIG_PATH)) return defaultExpected;
+  const config = JSON.parse(await readFile(CONFIG_PATH, 'utf8'));
+  const tileSize = Number(config.tileSize || defaultExpected.tileWidth);
+  const columns = Number(config.columns || defaultExpected.columns);
+  const rows = Number(config.rows || defaultExpected.rows);
+  return {
+    width: tileSize * columns,
+    height: tileSize * rows,
+    tileWidth: tileSize,
+    tileHeight: tileSize,
+    columns,
+    rows,
+    tileOrder: (config.tiles || []).map((tile) => tile.code).filter(Boolean),
+    maxPngBytes: Number(config.qualityLimits?.maxPngBytes || defaultExpected.maxPngBytes),
+    maxWebpBytes: Number(config.qualityLimits?.maxWebpBytes || defaultExpected.maxWebpBytes)
+  };
+}
 
 function fail(message) {
   const error = new Error(message);
@@ -58,6 +78,7 @@ function readWebpInfo(buffer) {
 }
 
 async function main() {
+  const expected = await loadExpected();
   const png = await fileInfo(PNG_PATH);
   const webp = await fileInfo(WEBP_PATH);
   const svg = await fileInfo(SVG_PATH);
@@ -100,7 +121,8 @@ async function main() {
     png: { path: png.path, bytes: png.bytes, width: dimensions.width, height: dimensions.height, ok: true },
     webp: webpInfo || { path: 'assets/atlas/tiles-atlas.webp', bytes: 0, ok: false, reason: 'not generated' },
     svg: { path: svg.path, bytes: svg.bytes, ok: true },
-    meta: { path: metaFile.path, bytes: metaFile.bytes, ok: true }
+    meta: { path: metaFile.path, bytes: metaFile.bytes, ok: true },
+    config: { path: existsSync(CONFIG_PATH) ? 'assets/atlas/tile-atlas-config.json' : null }
   };
 
   await writeFile(REPORT_PATH, JSON.stringify(report, null, 2), 'utf8');
