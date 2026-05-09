@@ -227,25 +227,46 @@
 - `서버 맵 목록` 조회 버튼 추가
 - custom/server map 카운트 표시 추가
 
-### 22-8: 서버 custom map 복원/import 고도화
+### 22-8A: 서버 custom map 가져오기/삭제 UI
+
+상태: 완료
+
+작업 파일:
+
+- `tiled-map-bootstrap.js`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 서버 custom map 요약 목록을 별도 `서버 맵` 섹션으로 표시
+- `GET /api/maps/custom/:id`로 서버 저장 맵 전체 데이터를 받아 클라이언트에 import
+- 가져온 서버 맵을 `YDH_MAPS.maps`에 등록
+- 가져온 서버 맵을 localStorage custom map으로 보존
+- 서버 맵 카드에 `클라이언트로 가져오기` 버튼 추가
+- 서버 맵 카드에 `서버삭제` 버튼 추가
+- `DELETE /api/maps/custom/:id` 호출 후 서버 목록에서 제거
+- 검증 실패/서버 API 실패를 `실패 상세 보기`로 표시
+
+### 22-8B: Object Layer marker/퀘스트 트리거
 
 상태: 대기
 
 목표:
 
-- 서버 custom map 목록에서 클라이언트로 import
-- 서버 custom map 삭제 UI 연결
-- 검증 실패 맵 상세 보기
 - Object Layer marker 정보창
 - Tiled object layer 기반 퀘스트 트리거
+- 서버 custom map 자동 동기화 옵션
+- 서버 custom map을 계정/캐릭터별로 분리 저장
+- custom map MySQL 저장소 연동
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~7단계 완료
+상태: 8차~21차 완료, 22차 1~8A단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-8 서버 custom map 복원/import 고도화
+1. 22-8B Object Layer marker/퀘스트 트리거
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
