@@ -50,5 +50,17 @@ window.YDH_CHAPTER_QUESTS = [
       { id: 'defeat-lord', type: 'defeatMonster', target: '검은 달의 군주', label: '검은 달의 군주 처치', required: 1 }
     ],
     rewards: { gold: 500, exp: 260, item: '검은 달 봉인석' }
+  },
+  {
+    id: 'quest-ch5-moon-gate-marker',
+    chapterId: 'ch5',
+    title: '달문 석비의 경고',
+    mapId: 'moon-gate-yard',
+    description: '달문 광장에서 오래된 석비의 경고문을 확인한다.',
+    objectives: [
+      { id: 'visit-moon-gate', type: 'visitMap', target: 'moon-gate-yard', label: '달문 광장 방문', required: 1 },
+      { id: 'inspect-moon-stone', type: 'inspectMarker', target: 'moon-gate-stone', label: '달문 석비 확인', required: 1 }
+    ],
+    rewards: { gold: 160, exp: 90, item: '달문 해석문' }
   }
 ];
