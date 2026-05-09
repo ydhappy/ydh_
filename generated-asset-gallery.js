@@ -4,7 +4,29 @@
   const resources = window.YDH_RESOURCES || {};
   const details = window.YDH_GENERATED_ASSET_DETAILS || {};
   const concepts = resources.groups?.generatedConcepts || [];
-  if (!concepts.length) return;
+
+  function loadScriptOnce(src, id) {
+    if (document.getElementById(id)) return Promise.resolve();
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.id = id;
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = resolve;
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadIconGallery() {
+    await loadScriptOnce('data/icon-item-skill-catalog.js', 'iconItemSkillCatalogScript');
+    await loadScriptOnce('icon-item-skill-gallery.js', 'iconItemSkillGalleryScript');
+  }
+
+  if (!concepts.length) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadIconGallery);
+    else loadIconGallery();
+    return;
+  }
 
   function injectStyles() {
     if (document.getElementById('generatedAssetGalleryStyles')) return;
@@ -17,21 +39,9 @@
   }
 
   function categoryDetails(category) {
-    if (category === 'classes') return (details.classes || []).map((item) => ({
-      title: item.nameKo || item.id,
-      line1: `${item.role} / ${item.weapon}`,
-      line2: `HP ${item.gameplay?.hp} · ATK ${item.gameplay?.atk} · DEF ${item.gameplay?.def}`
-    }));
-    if (category === 'npcs') return (details.npcs || []).map((item) => ({
-      title: item.nameKo || item.id,
-      line1: `${item.role} / ${item.interaction}`,
-      line2: (item.services || []).slice(0, 3).join(' · ')
-    }));
-    if (category === 'monsters') return (details.monsters || []).map((item) => ({
-      title: item.nameKo || item.id,
-      line1: `${item.rank} / ${item.family}`,
-      line2: `HP ${item.hp} · ATK ${item.atk} · AI ${item.ai}`
-    }));
+    if (category === 'classes') return (details.classes || []).map((item) => ({ title: item.nameKo || item.id, line1: `${item.role} / ${item.weapon}`, line2: `HP ${item.gameplay?.hp} · ATK ${item.gameplay?.atk} · DEF ${item.gameplay?.def}` }));
+    if (category === 'npcs') return (details.npcs || []).map((item) => ({ title: item.nameKo || item.id, line1: `${item.role} / ${item.interaction}`, line2: (item.services || []).slice(0, 3).join(' · ') }));
+    if (category === 'monsters') return (details.monsters || []).map((item) => ({ title: item.nameKo || item.id, line1: `${item.rank} / ${item.family}`, line2: `HP ${item.hp} · ATK ${item.atk} · AI ${item.ai}` }));
     if (category === 'environment') {
       const env = details.environment || {};
       return [
@@ -58,15 +68,7 @@
           <code>monster ${escapeHtml(spec.monster?.cellWidth || 112)}x${escapeHtml(spec.monster?.cellHeight || 112)}</code>
           <code>tile ${escapeHtml(spec.tile?.cellWidth || 64)}x${escapeHtml(spec.tile?.cellHeight || 64)}</code>
         </div>
-        <div class="generated-detail-grid">
-          ${cards.slice(0, 16).map((item) => `
-            <div class="generated-detail-card">
-              <b>${escapeHtml(item.title)}</b>
-              <small>${escapeHtml(item.line1)}</small>
-              <small>${escapeHtml(item.line2)}</small>
-            </div>
-          `).join('')}
-        </div>
+        <div class="generated-detail-grid">${cards.slice(0, 16).map((item) => `<div class="generated-detail-card"><b>${escapeHtml(item.title)}</b><small>${escapeHtml(item.line1)}</small><small>${escapeHtml(item.line2)}</small></div>`).join('')}</div>
       </div>
     `;
   }
@@ -77,7 +79,6 @@
     if (!main) return;
     injectStyles();
     if (document.getElementById('generatedAssetGallery')) return;
-
     const section = document.createElement('section');
     section.id = 'generatedAssetGallery';
     section.className = 'generated-asset-gallery panel';
@@ -85,32 +86,16 @@
       <p class="eyebrow">GENERATED ASSET CONCEPTS</p>
       <h2>생성형 리소스 쇼케이스</h2>
       <p>클래스, NPC, 몬스터, 환경 타일/오브젝트 보강 이미지를 프로젝트 리소스 catalog에 등록했습니다. 현재 파일은 저장소 부담을 줄인 preview card이며, 상세 카탈로그는 실제 PNG/WebP sprite sheet 제작 기준으로 사용합니다.</p>
-      <div class="generated-asset-grid">
-        ${concepts.map((item) => `
-          <a class="generated-asset-card" href="${escapeHtml(item.path)}" target="_blank" rel="noreferrer">
-            <span class="generated-asset-tag">${escapeHtml(item.category)}</span>
-            <img src="${escapeHtml(item.path)}" alt="${escapeHtml(item.title)}" loading="lazy" />
-            <div>
-              <strong>${escapeHtml(item.title)}</strong>
-              <span>${escapeHtml((item.targets || []).slice(0, 6).join(' / '))}</span>
-            </div>
-          </a>
-        `).join('')}
-      </div>
+      <div class="generated-asset-grid">${concepts.map((item) => `<a class="generated-asset-card" href="${escapeHtml(item.path)}" target="_blank" rel="noreferrer"><span class="generated-asset-tag">${escapeHtml(item.category)}</span><img src="${escapeHtml(item.path)}" alt="${escapeHtml(item.title)}" loading="lazy" /><div><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml((item.targets || []).slice(0, 6).join(' / '))}</span></div></a>`).join('')}</div>
       ${renderDetailPanel()}
     `;
-
     if (assetsSection?.parentNode) assetsSection.parentNode.insertBefore(section, assetsSection.nextSibling);
     else main.appendChild(section);
+    loadIconGallery();
   }
 
   function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
