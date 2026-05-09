@@ -2,10 +2,11 @@
 
 ## 상태
 
-현재 24-1A ~ 24-1B까지 완료된 상태입니다.
+현재 24-1A ~ 24-1C까지 완료된 상태입니다.
 
 - 24-1A: atlas 매니페스트와 타일 렌더러 지원 완료
 - 24-1B: PNG/WebP 생성 스크립트 + WebP/PNG/SVG 우선 로더 완료
+- 24-1C: GitHub Actions atlas binary 생성/커밋 workflow + 품질 비교 기준 완료
 
 ## 파일
 
@@ -14,6 +15,7 @@ assets/atlas/tiles-atlas.svg
 data/atlas.js
 atlas-loader.js
 tools/generate-tile-atlas.mjs
+.github/workflows/generate-atlas.yml
 ```
 
 ## atlas 우선순위
@@ -32,7 +34,7 @@ WebP → PNG → SVG
 window.YDH_ATLAS.tiles.activeFormat
 ```
 
-## 생성 명령
+## 로컬 생성 명령
 
 PNG 생성:
 
@@ -61,6 +63,52 @@ assets/atlas/tiles-atlas.webp
 ```
 
 WebP 도구가 없으면 PNG만 생성하고 WebP는 건너뜁니다.
+
+## GitHub Actions 생성
+
+수동 실행 workflow:
+
+```text
+.github/workflows/generate-atlas.yml
+```
+
+실행 방법:
+
+1. GitHub repository 접속
+2. Actions 탭 선택
+3. `Generate Tile Atlas` workflow 선택
+4. `Run workflow` 클릭
+5. `commit_binaries=true` 선택
+6. 실행 완료 후 아래 파일이 자동 commit 되는지 확인
+
+자동 commit 대상:
+
+```text
+assets/atlas/tiles-atlas.png
+assets/atlas/tiles-atlas.webp
+assets/atlas/tiles-atlas.meta.json
+```
+
+## 품질/용량 기준
+
+현재 generator와 동일한 384x64 atlas 기준 예상값:
+
+```text
+PNG  약 12~13 KB
+WebP 약 5~6 KB
+SVG  텍스트 기반 fallback
+```
+
+검증 기준:
+
+- 타일 크기: 64x64
+- atlas 크기: 384x64
+- columns: 6
+- rows: 1
+- tile order: G, R, S, T, W, P
+- WebP가 있으면 WebP가 우선 선택되어야 함
+- WebP가 없고 PNG가 있으면 PNG가 선택되어야 함
+- 둘 다 없으면 SVG fallback이 선택되어야 함
 
 ## atlas manifest
 
@@ -115,7 +163,7 @@ atlas 선택이 완료되면 `ydh-atlas-ready` 이벤트가 발생하고 map-eng
 
 ## 주의
 
-- GitHub contents API 작업에서는 binary PNG/WebP 직접 생성이 어렵기 때문에 repo에는 생성 스크립트를 우선 반영했습니다.
-- 실제 PNG/WebP 파일은 로컬 또는 서버에서 `node tools/generate-tile-atlas.mjs` 실행 후 커밋하면 됩니다.
+- GitHub contents API 직접 작업에서는 binary PNG/WebP 파일 경로 commit이 제한될 수 있어 workflow를 추가했습니다.
+- 실제 binary 파일은 `node tools/generate-tile-atlas.mjs` 또는 GitHub Actions `Generate Tile Atlas`로 생성합니다.
 - PNG 생성은 Node 기본 모듈만 사용합니다.
 - WebP 생성은 `cwebp` 또는 `sharp`가 필요합니다.
