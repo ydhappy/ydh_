@@ -79,7 +79,7 @@
         <div>
           <p class="eyebrow">CHAPTER QUEST</p>
           <h2>검은 달 연대기 퀘스트</h2>
-          <p>맵 방문, NPC 대화, 몬스터 처치, 아이템 획득으로 소설 챕터를 진행합니다.</p>
+          <p>맵 방문, NPC 대화, 몬스터 처치, 아이템 획득, Tiled marker 확인으로 소설 챕터를 진행합니다.</p>
         </div>
         <div class="chapter-progress-badge">완료 ${done} / ${quests.length}</div>
       </div>
@@ -149,7 +149,8 @@
         '검은 달 폐허': 'black-moon-ruins',
         '별빛 기록관': 'starlight-archive',
         '거울 늪': 'mirror-marsh',
-        '심연의 왕좌': 'abyss-throne'
+        '심연의 왕좌': 'abyss-throne',
+        '달문 광장': 'moon-gate-yard'
       };
       const mapId = mapIdByTitle[mapTitle];
       if (mapId) progress('visitMap', mapId, 1);
@@ -161,6 +162,13 @@
       if (npcMatch) progress('talkNpc', npcMatch[1], 1);
       const monsterMatch = message.match(/맵 조우 이벤트: (.+?) 출현/);
       if (monsterMatch) progress('defeatMonster', monsterMatch[1], 0);
+    });
+
+    window.addEventListener('ydh-tiled-quest-trigger', (event) => {
+      const detail = event.detail || {};
+      if (!detail.type || !detail.target) return;
+      progress(detail.type, detail.target, Number(detail.amount || 1));
+      announce(`Tiled 퀘스트 트리거: ${detail.type} / ${detail.target}`);
     });
 
     const logList = document.getElementById('logList');
