@@ -1,10 +1,13 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import * as mysqlStorage from './mysql-storage.js';
 
 const DATA_DIR = process.env.YDH_DATA_DIR || path.resolve(process.cwd(), 'data');
 const CUSTOM_MAP_FILE = path.join(DATA_DIR, 'custom-maps.json');
 const MAX_CUSTOM_MAPS = Number(process.env.YDH_MAX_CUSTOM_MAPS || 100);
 const GLOBAL_SCOPE = 'global';
+const storageMode = (process.env.YDH_STORAGE || 'file').toLowerCase();
+const useMysql = storageMode === 'mysql';
 
 async function ensureStore() {
   await mkdir(DATA_DIR, { recursive: true });
@@ -81,9 +84,7 @@ function validateCustomMapPayload(payload) {
 function matchesScope(record, scope = {}) {
   const normalized = normalizeRecord(record);
   const wanted = scopeFrom(scope);
-  const accountMatches = wanted.accountId === GLOBAL_SCOPE || normalized.accountId === wanted.accountId;
-  const characterMatches = wanted.characterId === GLOBAL_SCOPE || normalized.characterId === wanted.characterId;
-  return accountMatches && characterMatches;
+  return normalized.accountId === wanted.accountId && normalized.characterId === wanted.characterId;
 }
 
 function summary(record) {
@@ -103,7 +104,7 @@ function summary(record) {
   };
 }
 
-export async function saveCustomMap(payload) {
+async function saveCustomMapFile(payload) {
   const validation = validateCustomMapPayload(payload);
   if (!validation.ok) {
     const error = new Error(validation.errors.join(', '));
@@ -140,20 +141,17 @@ export async function saveCustomMap(payload) {
   return record;
 }
 
-export async function listCustomMaps(scope = {}) {
+async function listCustomMapsFile(scope = {}) {
   const store = await readStore();
   return (store.maps || []).filter((item) => matchesScope(item, scope)).map(summary);
 }
 
-export async function getCustomMap(id, scope = {}) {
+async function getCustomMapFile(id, scope = {}) {
   const store = await readStore();
-  const matches = (store.maps || []).filter((item) => item.id === id && matchesScope(item, scope));
-  if (!matches.length) return null;
-  const exactScope = scopeFrom(scope);
-  return matches.find((item) => item.accountId === exactScope.accountId && item.characterId === exactScope.characterId) || matches[0];
+  return (store.maps || []).find((item) => item.id === id && matchesScope(item, scope)) || null;
 }
 
-export async function deleteCustomMap(id, scope = {}) {
+async function deleteCustomMapFile(id, scope = {}) {
   const store = await readStore();
   const before = store.maps || [];
   const after = before.filter((item) => !(item.id === id && matchesScope(item, scope)));
@@ -162,11 +160,36 @@ export async function deleteCustomMap(id, scope = {}) {
   return { deleted: before.length !== after.length, count: after.length };
 }
 
-export async function customMapHealth() {
+async function customMapHealthFile() {
   const store = await readStore();
   const maps = store.maps || [];
   const scopes = Array.from(new Set(maps.map((item) => normalizeRecord(item).scopeKey)));
-  return { count: maps.length, max: MAX_CUSTOM_MAPS, scopes: scopes.length };
+  return { storage: 'file', count: maps.length, max: MAX_CUSTOM_MAPS, scopes: scopes.length };
+}
+
+export async function saveCustomMap(payload) {
+  if (useMysql && typeof mysqlStorage.saveCustomMap === 'function') return mysqlStorage.saveCustomMap(payload);
+  return saveCustomMapFile(payload);
+}
+
+export async function listCustomMaps(scope = {}) {
+  if (useMysql && typeof mysqlStorage.listCustomMaps === 'function') return mysqlStorage.listCustomMaps(scope);
+  return listCustomMapsFile(scope);
+}
+
+export async function getCustomMap(id, scope = {}) {
+  if (useMysql && typeof mysqlStorage.getCustomMap === 'function') return mysqlStorage.getCustomMap(id, scope);
+  return getCustomMapFile(id, scope);
+}
+
+export async function deleteCustomMap(id, scope = {}) {
+  if (useMysql && typeof mysqlStorage.deleteCustomMap === 'function') return mysqlStorage.deleteCustomMap(id, scope);
+  return deleteCustomMapFile(id, scope);
+}
+
+export async function customMapHealth() {
+  if (useMysql && typeof mysqlStorage.customMapHealth === 'function') return mysqlStorage.customMapHealth();
+  return customMapHealthFile();
 }
 
 export const customMapScope = { GLOBAL_SCOPE, scopeFrom, scopeKey };
