@@ -62,7 +62,7 @@
 
 ## 23차: 서버 custom map 고도화
 
-상태: 분할 진행 중
+상태: 완료
 
 ### 23-1: 서버 custom map 자동 동기화 옵션
 
@@ -120,18 +120,44 @@
 - 캐릭터 선택 이벤트 발생 시 자동 동기화가 켜져 있으면 현재 scope로 재동기화
 - TILED MAP MANAGER 카드에 map scope 표시
 
+### 23-3: custom map MySQL 저장소 연동
+
+상태: 완료
+
+작업 파일:
+
+- `server/src/mysql-storage.js`
+- `server/src/map-storage.js`
+- `server/sql/mysql55-schema.sql`
+- `server/README.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- MySQL 5.5 호환 `ydh_custom_maps` 테이블 추가
+- `map_json`을 `LONGTEXT`로 저장하여 MySQL 5.5 JSON 타입 부재 대응
+- `scope_key + map_id` 복합 primary key 적용
+- `account_id + character_id` scope index 추가
+- `updated_at`, `map_name` 조회 index 추가
+- `mysql-storage.js`에 custom map 저장/목록/단건/삭제 함수 추가
+- `mysql-storage.js`에 `customMapHealth()` 추가
+- `map-storage.js`가 `YDH_STORAGE=mysql`일 때 MySQL custom map provider로 위임
+- 파일 저장 모드는 기존 `server/data/custom-maps.json` 유지
+- schema version meta 값을 `3`으로 갱신
+- README에 MySQL custom map 저장 방식 및 API 예시 갱신
+
 ## 전체 상태
 
-상태: 8차~22차 완료, 23-1~23-2 완료
+상태: 8차~23차 완료
 
 현재 남은 고도화 후보:
 
-1. 23-3 custom map MySQL 저장소 연동
-2. 실제 PNG/WebP atlas 교체
-3. 서버 계정 인증 추가
-4. 운영용 관리자 저장 삭제/정리 API
-5. 원격 아바타 클릭 정보창
-6. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
+1. 24-1 실제 PNG/WebP atlas 교체
+2. 서버 계정 인증 추가
+3. 운영용 관리자 저장 삭제/정리 API
+4. 원격 아바타 클릭 정보창
+5. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
+6. custom map 파일→MySQL 마이그레이션 도구
 
 ## 원칙
 
