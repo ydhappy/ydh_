@@ -1,0 +1,21 @@
+{
+  "name": "YDH Chronicle",
+  "short_name": "YDH",
+  "description": "YDH Chronicle mobile homepage MMORPG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#070b12",
+  "theme_color": "#101827",
+  "icons": [
+    {
+      "src": "assets/app/app-icon.svg",
+      "sizes": "1024x1024",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "ko-KR"
+}
