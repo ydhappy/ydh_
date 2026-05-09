@@ -26,6 +26,38 @@
     return window.YDH_MAPS?.maps || [];
   }
 
+  function readJson(key, fallback = null) {
+    try {
+      return JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function currentScope() {
+    const keys = window.YDH_SAVE_SCHEMA?.localStorageKeys || {};
+    const account = readJson(keys.accountProfile || 'ydh-account-profile-v1', null);
+    const selected = readJson(keys.selectedCharacter || 'ydh-selected-character-v1', null);
+    return {
+      accountId: selected?.accountId || account?.accountId || '',
+      characterId: selected?.characterId || ''
+    };
+  }
+
+  function scopeQuery() {
+    const scope = currentScope();
+    const query = new URLSearchParams();
+    if (scope.accountId) query.set('accountId', scope.accountId);
+    if (scope.characterId) query.set('characterId', scope.characterId);
+    const text = query.toString();
+    return text ? `?${text}` : '';
+  }
+
+  function scopeLabel() {
+    const scope = currentScope();
+    return `${scope.accountId || 'global'} / ${scope.characterId || 'global'}`;
+  }
+
   function readCustomMaps() {
     try {
       const list = JSON.parse(localStorage.getItem(registry.localStorageKey) || '[]');
@@ -60,8 +92,11 @@
     if (!validation.ok) return { ok: false, reason: validation.errors.join(', ') };
     if (!window.YDH_MAPS?.maps) return { ok: false, reason: 'YDH_MAPS.maps not ready' };
 
+    const scope = currentScope();
     const normalized = {
       ...map,
+      accountId: map.accountId || scope.accountId || 'global',
+      characterId: map.characterId || scope.characterId || 'global',
       source: map.source || 'tiled-json',
       sourceUrl: map.sourceUrl || 'server-auto-sync'
     };
@@ -80,12 +115,12 @@
   }
 
   async function fetchServerMap(id) {
-    const result = await fetchJson(`/api/maps/custom/${encodeURIComponent(id)}`);
+    const result = await fetchJson(`/api/maps/custom/${encodeURIComponent(id)}${scopeQuery()}`);
     return result.map?.map || result.map;
   }
 
   async function listServerMaps() {
-    const result = await fetchJson('/api/maps/custom');
+    const result = await fetchJson(`/api/maps/custom${scopeQuery()}`);
     return result.maps || [];
   }
 
@@ -97,6 +132,7 @@
 
     const summary = {
       reason,
+      scope: currentScope(),
       found: 0,
       imported: 0,
       updatedLocal: 0,
@@ -170,9 +206,9 @@
 
   function resultText() {
     if (state.syncing) return '동기화 중입니다.';
-    if (!state.lastResult) return '아직 동기화 기록이 없습니다.';
+    if (!state.lastResult) return `현재 범위: ${scopeLabel()} · 아직 동기화 기록이 없습니다.`;
     const r = state.lastResult;
-    return `최근 ${r.at} · 서버 ${r.found}개 · 신규 ${r.imported} · 로컬갱신 ${r.updatedLocal} · 실패 ${r.failed}`;
+    return `범위 ${scopeLabel()} · 최근 ${r.at} · 서버 ${r.found}개 · 신규 ${r.imported} · 로컬갱신 ${r.updatedLocal} · 실패 ${r.failed}`;
   }
 
   function render() {
@@ -194,7 +230,7 @@
         <div>
           <p class="eyebrow">SERVER CUSTOM MAP SYNC</p>
           <h3>서버 custom map 자동 동기화</h3>
-          <p>서버에 저장된 custom map을 클라이언트 맵 목록과 localStorage custom map으로 가져옵니다.</p>
+          <p>현재 계정/캐릭터 범위의 서버 custom map을 클라이언트 맵 목록과 localStorage custom map으로 가져옵니다.</p>
         </div>
         <div class="server-map-sync-badge">${state.enabled ? 'AUTO ON' : 'AUTO OFF'}</div>
       </div>
@@ -220,8 +256,12 @@
 
   function boot() {
     render();
-    window.YDH_SERVER_CUSTOM_MAP_SYNC = { syncNow, setEnabled, state };
+    window.YDH_SERVER_CUSTOM_MAP_SYNC = { syncNow, setEnabled, state, currentScope };
     window.addEventListener('ydh-tiled-maps-loaded', render);
+    window.addEventListener('ydh-character-selected', () => {
+      render();
+      if (state.enabled) syncNow('character-selected');
+    });
     if (state.enabled) syncNow('boot');
   }
 
