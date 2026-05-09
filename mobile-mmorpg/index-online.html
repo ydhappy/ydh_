@@ -15,9 +15,11 @@
     <section class="hud bottom-left"><div class="joystick" id="joy"><i id="stick"></i></div><div class="chat" id="chatLog"></div></section>
     <section class="hud bottom-right"><button class="skill primary" id="attackBtn">공격</button><button class="skill" data-skill="powerSlash">십자</button><button class="skill" data-skill="fireBurst">화염</button><button class="skill" data-skill="healLight">회복</button><button class="skill" data-skill="guardAura">수호</button><button class="skill menu" id="menuBtn">메뉴</button></section>
     <section class="panel quest-panel" id="questPanel"><b>퀘스트</b><span id="questText">늑대 3마리 처치 0/3</span></section>
-    <section class="modal hidden" id="menuModal"><div class="modal-card"><button class="close" id="closeMenu">닫기</button><h2>YDH Chronicle Online MMORPG</h2><p>모바일 Canvas MMORPG 클라이언트입니다. 필드 이동, 몬스터 사냥, NPC 상호작용, 퀘스트, 인벤토리, 실시간 접속 상태와 채팅을 지원합니다.</p><div class="menu-grid"><button data-class="knight">기사</button><button data-class="wizard">마법사</button><button data-class="ranger">요정</button><button data-class="rogue">로그</button></div><h3>인벤토리</h3><ul id="inventoryList"></ul><button class="danger" id="resetBtn">저장 초기화</button></div></section>
+    <section class="modal hidden" id="menuModal"><div class="modal-card"><button class="close" id="closeMenu">닫기</button><h2>YDH Chronicle Online MMORPG</h2><p>모바일 Canvas MMORPG 클라이언트입니다. 필드 이동, 몬스터 사냥, NPC 상호작용, 퀘스트, 인벤토리, 실시간 접속 상태와 채팅을 지원합니다.</p><div class="menu-grid"><button data-class="knight">기사</button><button data-class="wizard">마법사</button><button data-class="ranger">요정</button><button data-class="rogue">로그</button></div><h3>서버 연결</h3><form id="serverForm" class="server-form"><input id="serverUrlInput" placeholder="ws://192.168.0.10:8787/mmo" /><button type="submit">저장</button></form><small class="server-help">같은 Wi-Fi 서버 IP를 입력 후 앱을 재시작하면 적용됩니다.</small><h3>인벤토리</h3><ul id="inventoryList"></ul><button class="danger" id="resetBtn">저장 초기화</button></div></section>
   </main>
   <script src="game.js"></script>
   <script src="net.js"></script>
+  <script src="remote-render.js"></script>
+  <script src="server-settings.js"></script>
 </body>
 </html>
