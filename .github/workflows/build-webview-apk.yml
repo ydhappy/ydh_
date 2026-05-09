@@ -14,6 +14,7 @@ on:
       - 'assets/**'
       - 'data/**'
       - 'package.json'
+      - '.github/workflows/build-webview-apk.yml'
 
 jobs:
   apk:
@@ -27,9 +28,16 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-      - run: node tools/create-android-project.mjs
-      - run: gradle app:assembleDebug
+        with:
+          gradle-version: 8.9
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Generate native WebView Android project
+        run: node tools/create-android-project.mjs
+      - name: Build debug APK
+        run: gradle :app:assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: ydh-chronicle-webview-debug-apk
