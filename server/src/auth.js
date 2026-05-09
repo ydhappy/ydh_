@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
+import { createRefreshSession, refreshConfig, revokeRefreshSession, rotateRefreshSession, sessionHealth } from './auth-sessions.js';
 
 const AUTH_REQUIRED = String(process.env.YDH_AUTH_REQUIRED || 'false').toLowerCase() === 'true';
-const TOKEN_TTL_SECONDS = Number(process.env.YDH_AUTH_TOKEN_TTL_SECONDS || 7 * 24 * 60 * 60);
+const TOKEN_TTL_SECONDS = Number(process.env.YDH_AUTH_TOKEN_TTL_SECONDS || 15 * 60);
 const SHARED_SECRET = process.env.YDH_AUTH_SHARED_SECRET || '';
 const SERVER_SECRET = process.env.YDH_AUTH_SECRET || process.env.YDH_AUTH_SHARED_SECRET || 'ydh-dev-secret-change-me';
 const ISSUER = 'ydh-chronicle-api';
@@ -36,12 +37,20 @@ function cleanName(value, fallback = 'YDH Player') {
   return String(value || fallback).trim().slice(0, 80);
 }
 
+function requestMeta(req) {
+  return {
+    userAgent: req.get?.('user-agent') || req.headers?.['user-agent'] || '',
+    ip: req.ip || req.socket?.remoteAddress || ''
+  };
+}
+
 export function authStatus() {
   return {
     required: AUTH_REQUIRED,
     sharedSecretRequired: !!SHARED_SECRET,
     tokenTtlSeconds: TOKEN_TTL_SECONDS,
-    issuer: ISSUER
+    issuer: ISSUER,
+    refresh: refreshConfig()
   };
 }
 
@@ -101,18 +110,42 @@ export function requireAuth(req, res, next) {
   return next();
 }
 
-export function loginHandler(req, res) {
+export async function loginHandler(req, res) {
   const body = req.body || {};
   if (SHARED_SECRET && body.secret !== SHARED_SECRET) {
     return res.status(401).json({ ok: false, error: 'Invalid auth secret' });
   }
-  const token = createAuthToken({
-    accountId: body.accountId || body.account?.accountId || 'local',
-    displayName: body.displayName || body.accountName || body.account?.displayName || 'YDH Player',
+  const identity = {
+    accountId: cleanId(body.accountId || body.account?.accountId || 'local', 'local'),
+    displayName: cleanName(body.displayName || body.accountName || body.account?.displayName || 'YDH Player'),
     roles: body.roles || ['player']
-  });
+  };
+  const token = createAuthToken(identity);
   const auth = verifyAuthToken(token);
-  return res.json({ ok: true, token, auth, status: authStatus() });
+  const refresh = await createRefreshSession({ ...identity, ...requestMeta(req) });
+  return res.json({ ok: true, token, refreshToken: refresh.refreshToken, auth, session: refresh.session, status: authStatus() });
+}
+
+export async function refreshHandler(req, res) {
+  const body = req.body || {};
+  const rotated = await rotateRefreshSession(body.refreshToken || '', requestMeta(req));
+  if (!rotated) return res.status(401).json({ ok: false, error: 'Invalid refresh token' });
+  const token = createAuthToken(rotated.session);
+  const auth = verifyAuthToken(token);
+  return res.json({ ok: true, token, refreshToken: rotated.refreshToken, auth, session: rotated.session, status: authStatus() });
+}
+
+export async function logoutHandler(req, res) {
+  const body = req.body || {};
+  const result = await revokeRefreshSession(body.refreshToken || '');
+  return res.json({ ok: true, ...result });
+}
+
+export async function authHealth() {
+  return {
+    ...authStatus(),
+    sessions: await sessionHealth()
+  };
 }
 
 export function authScope(req, fallback = {}) {
