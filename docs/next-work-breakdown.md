@@ -110,13 +110,33 @@
 - GitHub Actions workflow에 `Validate atlas quality` 단계 추가
 - 자동 commit 대상에 `tiles-atlas.quality.json` 추가
 
+### 24-1E: atlas 색감/디테일 조정 config
+
+상태: 완료
+
+작업 파일:
+
+- `assets/atlas/tile-atlas-config.json`
+- `tools/generate-tile-atlas.mjs`
+- `tools/check-atlas-quality.mjs`
+- `docs/atlas-pipeline.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- atlas 색감/디테일 조정용 config 추가
+- generator가 config의 tile size, grid, WebP quality, tile palette를 읽도록 변경
+- grass/road/stone/tree/water/portal 디테일 수치를 config화
+- quality checker가 config의 tile size, grid, tile order, 용량 제한을 읽도록 변경
+- Actions 직접 dispatch는 현재 도구에서 불가하여 실행 후 결과 확인은 다음 수동 실행 단계로 분리
+
 ## 전체 상태
 
-상태: 8차~23차 완료, 24-1A~24-1D 완료
+상태: 8차~23차 완료, 24-1A~24-1E 완료
 
 현재 남은 고도화 후보:
 
-1. 24-1E 실제 Actions 실행 후 생성 결과 확인 및 atlas 색감/디테일 조정
+1. 24-1F GitHub Actions 수동 실행 후 생성 결과 확인
 2. 서버 계정 인증 추가
 3. 운영용 관리자 저장 삭제/정리 API
 4. 원격 아바타 클릭 정보창
