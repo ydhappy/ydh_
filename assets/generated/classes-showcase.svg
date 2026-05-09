@@ -1,4 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="675" viewBox="0 0 900 675" role="img" aria-label="Playable Class Character Sheet">
-  <title>Playable Class Character Sheet</title>
-  <image href="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAKjA4QBAREA/8QAHQAAAgMAAwEBAAAAAAAAAAAAAAcDBAUGCAIJAf/EAE4QAAIBAwIDBQQGBQcKAwAAAAABAgMRAAQhBRIxQQYTIlFhcYGRMqGxwdFCUmJykgcUIzNDU2ODkrLBBzRTVKKz0+EUcqLwFYPS/8QAGwEAAwEBAQEBAAAAAAAAAAAAAAQFAgMGAQf/xAA5EQACAgEDAwIEBQQCAgMAAAAAAQIRAwQSITEFQVEiMmFxE5GhsfAUI0JSwdEGcoLhM1KS8f/aAAwDAQACEQMRAD8A" width="900" height="675" preserveAspectRatio="xMidYMid meet"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="675" viewBox="0 0 900 675" role="img" aria-label="Generated playable class asset card">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#070b12"/><stop offset=".55" stop-color="#111827"/><stop offset="1" stop-color="#1b1207"/></linearGradient>
+    <linearGradient id="line" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f7c85f"/><stop offset=".5" stop-color="#ff835f"/><stop offset="1" stop-color="#73a7ff"/></linearGradient>
+  </defs>
+  <rect width="900" height="675" fill="url(#bg)"/>
+  <rect x="30" y="30" width="840" height="615" rx="34" fill="#121927" stroke="url(#line)" stroke-width="3"/>
+  <text x="450" y="92" text-anchor="middle" font-family="Georgia,serif" font-size="42" fill="#f7c85f">PLAYABLE CLASS ASSET SHEET</text>
+  <text x="450" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#aab5c7">Knight / Wizard / Elf Ranger / Dark Rogue / Cleric / Lancer</text>
+  <g transform="translate(70 180)">
+    <g fill="#0b101a" stroke="url(#line)" stroke-width="2" opacity=".95">
+      <rect x="0" y="0" width="220" height="170" rx="22"/><rect x="250" y="0" width="220" height="170" rx="22"/><rect x="500" y="0" width="220" height="170" rx="22"/>
+      <rect x="0" y="210" width="220" height="170" rx="22"/><rect x="250" y="210" width="220" height="170" rx="22"/><rect x="500" y="210" width="220" height="170" rx="22"/>
+    </g>
+    <g font-family="Georgia,serif" font-size="24" fill="#eef4ff" text-anchor="middle">
+      <text x="110" y="44">Knight</text><text x="360" y="44">Wizard</text><text x="610" y="44">Elf Ranger</text>
+      <text x="110" y="254">Dark Rogue</text><text x="360" y="254">Cleric</text><text x="610" y="254">Lancer</text>
+    </g>
+    <g fill="none" stroke="url(#line)" stroke-width="5" opacity=".7">
+      <circle cx="110" cy="102" r="34"/><circle cx="360" cy="102" r="34"/><circle cx="610" cy="102" r="34"/>
+      <circle cx="110" cy="312" r="34"/><circle cx="360" cy="312" r="34"/><circle cx="610" cy="312" r="34"/>
+    </g>
+    <g fill="#aab5c7" font-family="Arial,sans-serif" font-size="13" text-anchor="middle">
+      <text x="110" y="150">16 direction concept generated</text><text x="360" y="150">16 direction concept generated</text><text x="610" y="150">16 direction concept generated</text>
+      <text x="110" y="360">16 direction concept generated</text><text x="360" y="360">16 direction concept generated</text><text x="610" y="360">16 direction concept generated</text>
+    </g>
+  </g>
+  <text x="450" y="610" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="#7f8aa3">Generated concept preview card. Replace with optimized PNG or WebP when binary upload is available.</text>
 </svg>
