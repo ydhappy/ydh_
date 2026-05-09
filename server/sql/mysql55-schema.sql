@@ -78,6 +78,26 @@ CREATE TABLE IF NOT EXISTS ydh_custom_maps (
   KEY idx_custom_map_name (map_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS ydh_auth_sessions (
+  session_id VARCHAR(64) NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  account_id VARCHAR(80) NOT NULL DEFAULT 'local',
+  display_name VARCHAR(80) NOT NULL DEFAULT 'YDH Player',
+  roles_json LONGTEXT NOT NULL,
+  created_at DATETIME NOT NULL,
+  last_used_at DATETIME NOT NULL,
+  expires_at DATETIME NOT NULL,
+  revoked_at DATETIME DEFAULT NULL,
+  user_agent VARCHAR(255) DEFAULT '',
+  ip VARCHAR(80) DEFAULT '',
+  PRIMARY KEY (session_id),
+  UNIQUE KEY uk_auth_session_token_hash (token_hash),
+  KEY idx_auth_session_account (account_id),
+  KEY idx_auth_session_expires (expires_at),
+  KEY idx_auth_session_revoked (revoked_at),
+  KEY idx_auth_session_last_used (last_used_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS ydh_schema_meta (
   meta_key VARCHAR(64) NOT NULL,
   meta_value VARCHAR(255) NOT NULL,
@@ -86,5 +106,5 @@ CREATE TABLE IF NOT EXISTS ydh_schema_meta (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO ydh_schema_meta (meta_key, meta_value, updated_at)
-VALUES ('schema_version', '3', NOW())
+VALUES ('schema_version', '4', NOW())
 ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value), updated_at = NOW();
