@@ -20,7 +20,7 @@
 
 ## 25차: 서버 계정 인증
 
-상태: 분할 진행 중
+상태: 완료
 
 ### 25-1: 선택형 서버 계정 인증 기반
 
@@ -78,11 +78,13 @@
 
 ### 25-3: refresh session MySQL 저장소
 
-상태: 부분 완료
+상태: 완료
 
 작업 파일:
 
 - `server/src/mysql-auth-sessions.js`
+- `server/src/auth-sessions-file.js`
+- `server/src/auth-sessions.js`
 - `server/src/auth-session-provider.js`
 - `server/sql/mysql55-schema.sql`
 - `server/README.md`
@@ -91,28 +93,27 @@
 완료 내용:
 
 - MySQL 전용 refresh session provider 추가
+- 기존 파일 세션 provider를 `auth-sessions-file.js`로 분리
+- 기존 `auth-sessions.js`를 storage mode delegator로 교체
+- `YDH_STORAGE=file`이면 파일 세션 provider 사용
+- `YDH_STORAGE=mysql`이면 MySQL 세션 provider 사용
+- `auth.js` import 수정 없이 기존 import 경로 그대로 MySQL 전환 가능
 - `ydh_auth_sessions` 테이블 schema 추가
 - refresh token 원본 대신 `token_hash` 저장
 - session 생성/회전/폐기/health/list 함수 구현
 - schema version meta 값을 `4`로 갱신
-- `YDH_STORAGE=mysql`일 때 provider를 선택하는 delegator 파일 추가
-
-남은 연결:
-
-- `server/src/auth.js`의 session import를 `./auth-sessions.js`에서 `./auth-session-provider.js`로 교체
-- 위 import 전체 치환은 안전 검사에서 차단되어 다음 조각에서 재시도
 
 ## 전체 상태
 
-상태: 8차~24차 완료, 25-1~25-2 완료, 25-3 부분 완료
+상태: 8차~25차 완료
 
 현재 남은 고도화 후보:
 
-1. 25-3B auth.js provider import 교체 재시도
-2. 운영용 관리자 저장 삭제/정리 API
-3. 원격 아바타 클릭 정보창
-4. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
-5. custom map 파일→MySQL 마이그레이션 도구
+1. 운영용 관리자 저장 삭제/정리 API
+2. 원격 아바타 클릭 정보창
+3. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
+4. custom map 파일→MySQL 마이그레이션 도구
+5. 인증 세션 관리 UI
 
 ## 원칙
 
