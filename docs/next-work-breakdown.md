@@ -89,16 +89,40 @@
 - 현재 연결 도구의 binary 업로드 한계로 원본 PNG 직접 커밋 대신 경량 SVG preview card 방식 적용
 - 추후 binary 업로드 경로가 안정화되면 같은 asset id/path 체계로 PNG/WebP 교체 가능
 
+### 26-3: 생성 에셋 상세 카탈로그와 제작 사양 연결
+
+상태: 완료
+
+작업 파일:
+
+- `data/generated-asset-detail-catalog.js`
+- `generated-asset-gallery.js`
+- `index.html`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 16방향 direction order와 degree 기준 정의
+- 클래스/NPC/몬스터/타일별 sprite sheet target cell size 정의
+- 클래스 6종 역할, 장비, 팔레트, 실루엣, 기본 스탯, 스킬, sprite priority 정의
+- NPC 8종 역할, interaction, service, anchor map 정의
+- 몬스터 8종 rank, family, habitat, AI, drop, 기본 전투 스탯 정의
+- 환경 terrain/props/animated/collision 분류 정의
+- production checklist 추가
+- 갤러리 상세 패널에 제작 사양 표시
+- 갤러리 상세 패널에 클래스/NPC/몬스터/환경 요약 카드 표시
+- `index.html`에 상세 카탈로그 로드 순서 연결
+
 ## 전체 상태
 
-상태: 8차~25차 완료, 26-1~26-2 완료
+상태: 8차~25차 완료, 26-1~26-3 완료
 
 현재 남은 고도화 후보:
 
-1. 26-3 원본 PNG/WebP binary asset commit 또는 workflow 변환
-2. 26-4 아이콘/아이템/스킬 이미지 세트 보강
-3. 26-5 캐릭터/몬스터/NPC 스프라이트 데이터 연결 고도화
-4. 26-6 맵 오브젝트/환경 이펙트 추가
+1. 26-4 원본 PNG/WebP binary asset commit 또는 workflow 변환
+2. 26-5 아이콘/아이템/스킬 이미지 세트 보강
+3. 26-6 캐릭터/몬스터/NPC 스프라이트 데이터 연결 고도화
+4. 26-7 맵 오브젝트/환경 이펙트 추가
 5. 운영용 관리자 저장 삭제/정리 API
 6. 원격 아바타 클릭 정보창
 7. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
