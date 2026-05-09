@@ -2,11 +2,12 @@
 
 ## 상태
 
-현재 24-1A ~ 24-1C까지 완료된 상태입니다.
+현재 24-1A ~ 24-1D까지 완료된 상태입니다.
 
 - 24-1A: atlas 매니페스트와 타일 렌더러 지원 완료
 - 24-1B: PNG/WebP 생성 스크립트 + WebP/PNG/SVG 우선 로더 완료
 - 24-1C: GitHub Actions atlas binary 생성/커밋 workflow + 품질 비교 기준 완료
+- 24-1D: atlas 품질 검사 스크립트 + workflow 검증 단계 완료
 
 ## 파일
 
@@ -15,6 +16,7 @@ assets/atlas/tiles-atlas.svg
 data/atlas.js
 atlas-loader.js
 tools/generate-tile-atlas.mjs
+tools/check-atlas-quality.mjs
 .github/workflows/generate-atlas.yml
 ```
 
@@ -34,19 +36,27 @@ WebP → PNG → SVG
 window.YDH_ATLAS.tiles.activeFormat
 ```
 
-## 로컬 생성 명령
+## 로컬 생성/검사 명령
 
-PNG 생성:
+PNG/WebP 생성:
 
 ```bash
 node tools/generate-tile-atlas.mjs
+```
+
+품질 검사:
+
+```bash
+node tools/check-atlas-quality.mjs
 ```
 
 생성 결과:
 
 ```text
 assets/atlas/tiles-atlas.png
+assets/atlas/tiles-atlas.webp
 assets/atlas/tiles-atlas.meta.json
+assets/atlas/tiles-atlas.quality.json
 ```
 
 WebP 생성은 아래 둘 중 하나가 있으면 자동으로 수행됩니다.
@@ -56,15 +66,9 @@ cwebp CLI
 npm package sharp
 ```
 
-WebP 생성 결과:
-
-```text
-assets/atlas/tiles-atlas.webp
-```
-
 WebP 도구가 없으면 PNG만 생성하고 WebP는 건너뜁니다.
 
-## GitHub Actions 생성
+## GitHub Actions 생성/검사
 
 수동 실행 workflow:
 
@@ -79,7 +83,8 @@ WebP 도구가 없으면 PNG만 생성하고 WebP는 건너뜁니다.
 3. `Generate Tile Atlas` workflow 선택
 4. `Run workflow` 클릭
 5. `commit_binaries=true` 선택
-6. 실행 완료 후 아래 파일이 자동 commit 되는지 확인
+6. `Validate atlas quality` 단계 통과 확인
+7. 실행 완료 후 아래 파일이 자동 commit 되는지 확인
 
 자동 commit 대상:
 
@@ -87,6 +92,7 @@ WebP 도구가 없으면 PNG만 생성하고 WebP는 건너뜁니다.
 assets/atlas/tiles-atlas.png
 assets/atlas/tiles-atlas.webp
 assets/atlas/tiles-atlas.meta.json
+assets/atlas/tiles-atlas.quality.json
 ```
 
 ## 품질/용량 기준
@@ -98,6 +104,21 @@ PNG  약 12~13 KB
 WebP 약 5~6 KB
 SVG  텍스트 기반 fallback
 ```
+
+자동 실패 조건:
+
+- PNG 파일 없음
+- SVG fallback 파일 없음
+- meta JSON 없음
+- PNG signature 불일치
+- PNG 크기 384x64 불일치
+- PNG 용량 24 KB 초과
+- meta width/height 불일치
+- meta tileWidth/tileHeight 불일치
+- meta columns/rows 불일치
+- tile order가 `G,R,S,T,W,P`가 아님
+- WebP가 있을 때 RIFF/WEBP signature 불일치
+- WebP가 있을 때 용량 16 KB 초과
 
 검증 기준:
 
