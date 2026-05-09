@@ -201,23 +201,51 @@
 
 ### 22-7: custom map 관리 UI/서버 저장 연동
 
+상태: 완료
+
+작업 파일:
+
+- `server/src/map-storage.js`
+- `server/src/server.js`
+- `tiled-map-bootstrap.js`
+- `server/README.md`
+- `docs/tiled-json-import.md`
+- `docs/next-work-breakdown.md`
+
+완료 내용:
+
+- 서버 custom map 파일 저장소 추가
+- `server/data/custom-maps.json` 저장 구조 추가
+- `GET /api/maps/custom` 목록 API 추가
+- `POST /api/maps/custom` 저장 API 추가
+- `GET /api/maps/custom/:id` 단건 조회 API 추가
+- `DELETE /api/maps/custom/:id` 삭제 API 추가
+- `/api/health` 응답에 custom map 저장 상태 추가
+- TILED MAP MANAGER에 `내보내기` 버튼 추가
+- localStorage custom map `삭제` 버튼 추가
+- localStorage custom map `서버저장` 버튼 추가
+- `서버 맵 목록` 조회 버튼 추가
+- custom/server map 카운트 표시 추가
+
+### 22-8: 서버 custom map 복원/import 고도화
+
 상태: 대기
 
 목표:
 
-- custom map 내보내기/삭제 UI
-- custom map 서버 저장 연동
+- 서버 custom map 목록에서 클라이언트로 import
+- 서버 custom map 삭제 UI 연결
 - 검증 실패 맵 상세 보기
 - Object Layer marker 정보창
 - Tiled object layer 기반 퀘스트 트리거
 
 ## 전체 상태
 
-상태: 8차~21차 완료, 22차 1~6단계 완료
+상태: 8차~21차 완료, 22차 1~7단계 완료
 
 현재 남은 고도화 후보:
 
-1. 22-7 custom map 관리 UI/서버 저장 연동
+1. 22-8 서버 custom map 복원/import 고도화
 2. 실제 PNG/WebP atlas 교체
 3. 서버 계정 인증 추가
 4. 운영용 관리자 저장 삭제/정리 API
