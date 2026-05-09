@@ -3,7 +3,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { attachRealtimeServer } from './realtime.js';
-import { authScope, authStatus, applyAuthToSnapshot, loginHandler, optionalAuth, requireAuth } from './auth.js';
+import { authHealth, authScope, authStatus, applyAuthToSnapshot, loginHandler, logoutHandler, optionalAuth, refreshHandler, requireAuth } from './auth.js';
 import { customMapHealth, deleteCustomMap, getCustomMap, listCustomMaps, saveCustomMap } from './map-storage.js';
 import { latestSnapshot, listAccounts, listCharacters, listSnapshots, saveSnapshot, snapshotById, storageHealth, storageMode } from './storage-provider.js';
 import { summarizeSnapshot, validateSnapshot } from './validation.js';
@@ -37,7 +37,8 @@ app.get('/api/health', async (req, res, next) => {
   try {
     const storage = await storageHealth();
     const customMaps = await customMapHealth();
-    res.json({ ok: true, app: 'YDH Chronicle API', auth: authStatus(), storageMode, realtime: realtime.stats(), customMaps, storage, now: new Date().toISOString() });
+    const auth = await authHealth();
+    res.json({ ok: true, app: 'YDH Chronicle API', auth, storageMode, realtime: realtime.stats(), customMaps, storage, now: new Date().toISOString() });
   } catch (error) {
     next(error);
   }
@@ -48,6 +49,8 @@ app.get('/api/auth/status', (req, res) => {
 });
 
 app.post('/api/auth/login', loginHandler);
+app.post('/api/auth/refresh', refreshHandler);
+app.post('/api/auth/logout', logoutHandler);
 
 app.get('/api/auth/me', requireAuth, (req, res) => {
   res.json({ ok: true, auth: req.auth || null, status: authStatus() });
