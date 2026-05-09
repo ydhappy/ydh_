@@ -59,6 +59,25 @@ CREATE TABLE IF NOT EXISTS ydh_save_snapshots (
   KEY idx_character_name (character_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS ydh_custom_maps (
+  scope_key VARCHAR(180) NOT NULL,
+  map_id VARCHAR(120) NOT NULL,
+  account_id VARCHAR(80) NOT NULL DEFAULT 'global',
+  character_id VARCHAR(80) NOT NULL DEFAULT 'global',
+  map_name VARCHAR(120) NOT NULL,
+  source VARCHAR(40) NOT NULL DEFAULT 'tiled-json',
+  source_url VARCHAR(255) NOT NULL DEFAULT 'server-custom',
+  width INT NOT NULL DEFAULT 0,
+  height INT NOT NULL DEFAULT 0,
+  saved_at DATETIME NOT NULL,
+  updated_at DATETIME NOT NULL,
+  map_json LONGTEXT NOT NULL,
+  PRIMARY KEY (scope_key, map_id),
+  KEY idx_custom_map_scope (account_id, character_id),
+  KEY idx_custom_map_updated_at (updated_at),
+  KEY idx_custom_map_name (map_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS ydh_schema_meta (
   meta_key VARCHAR(64) NOT NULL,
   meta_value VARCHAR(255) NOT NULL,
@@ -67,5 +86,5 @@ CREATE TABLE IF NOT EXISTS ydh_schema_meta (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO ydh_schema_meta (meta_key, meta_value, updated_at)
-VALUES ('schema_version', '2', NOW())
+VALUES ('schema_version', '3', NOW())
 ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value), updated_at = NOW();
