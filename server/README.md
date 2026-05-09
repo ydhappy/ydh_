@@ -208,10 +208,11 @@ error
 4. 캐릭터 슬롯 생성 또는 선택
 5. `TILED MAP MANAGER`에서 custom Tiled JSON 붙여넣기 또는 기존 맵 선택
 6. custom map 카드에서 `내보내기`, `삭제`, `서버저장` 사용
-7. `실시간` 섹션에서 `연결` 클릭
-8. 다른 브라우저/기기에서 같은 서버 접속 후 `연결` 클릭
-9. 맵 이동 시 서로의 위치 카드가 갱신되고, 같은 맵이면 타일맵 위에 원격 아바타가 표시되는지 확인
-10. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
+7. `SERVER CUSTOM MAP SYNC`에서 `지금 동기화` 또는 `자동 동기화` 사용
+8. `실시간` 섹션에서 `연결` 클릭
+9. 다른 브라우저/기기에서 같은 서버 접속 후 `연결` 클릭
+10. 맵 이동 시 서로의 위치 카드가 갱신되고, 같은 맵이면 타일맵 위에 원격 아바타가 표시되는지 확인
+11. 저장은 `서버연동` 섹션에서 `서버 저장` 클릭
 
 ## Custom map 저장 방식
 
@@ -226,6 +227,25 @@ server/data/custom-maps.json
 ```text
 ydh-tiled-custom-maps-v1
 ```
+
+서버 custom map 자동 동기화 설정은 localStorage에 저장됩니다.
+
+```text
+ydh-server-custom-map-auto-sync-v1
+```
+
+자동 동기화 패널:
+
+```text
+SERVER CUSTOM MAP SYNC
+```
+
+지원 기능:
+
+- `지금 동기화`: 서버 custom map 목록을 조회하고 전체 map을 클라이언트로 import
+- `자동 동기화`: 페이지 로드 시 서버 custom map을 자동으로 import
+- 가져온 map은 `YDH_MAPS.maps`와 localStorage custom map에 함께 저장
+- 이미 같은 ID의 map이 있으면 맵 목록 중복 추가 없이 localStorage만 갱신
 
 ## 실시간 타일맵 원격 아바타 표시
 
@@ -283,8 +303,9 @@ ydh_schema_meta
 
 ## 다음 고도화 후보
 
-1. 서버 custom map 목록을 클라이언트 맵으로 복원/import
-2. 실제 PNG/WebP atlas 교체
-3. 서버 계정 인증 추가
-4. 운영용 관리자 저장 삭제/정리 API
-5. 원격 아바타 클릭 정보창
+1. 서버 custom map을 계정/캐릭터별로 분리 저장
+2. custom map MySQL 저장소 연동
+3. 실제 PNG/WebP atlas 교체
+4. 서버 계정 인증 추가
+5. 운영용 관리자 저장 삭제/정리 API
+6. 원격 아바타 클릭 정보창
