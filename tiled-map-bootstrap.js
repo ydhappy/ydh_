@@ -17,7 +17,7 @@
     }
   ];
 
-  const status = { registered: [], loaded: [], duplicates: [], failed: [], validation: [], custom: [] };
+  const status = { registered: [], loaded: [], duplicates: [], failed: [], validation: [], custom: [], server: [] };
 
   function maps() { return window.YDH_MAPS?.maps || []; }
   function tileTypes() { return window.YDH_MAPS?.tileTypes || {}; }
@@ -137,8 +137,51 @@
     status.custom = list.map((item) => ({ id: item.id, name: item.name, savedAt: item.savedAt }));
   }
 
+  function removeCustomMap(id) {
+    const list = readCustomMaps().filter((item) => item.id !== id);
+    writeCustomMaps(list);
+    status.custom = list.map((item) => ({ id: item.id, name: item.name, savedAt: item.savedAt }));
+    window.YDH_MAPS.maps = maps().filter((map) => !(map.id === id && map.sourceUrl === 'localStorage'));
+  }
+
+  function customRecordFor(id) {
+    return readCustomMaps().find((item) => item.id === id) || null;
+  }
+
+  function exportMap(map) {
+    const blob = new Blob([JSON.stringify(map, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${map.id || 'ydh-custom-map'}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    log(`맵 내보내기: ${map.name}`);
+  }
+
+  async function saveMapToServer(map) {
+    const response = await fetch('/api/maps/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ map })
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) throw new Error(result.error || `HTTP ${response.status}`);
+    status.server = status.server.filter((item) => item.id !== map.id);
+    status.server.unshift({ id: map.id, name: map.name, savedAt: result.map?.updatedAt || new Date().toISOString() });
+    return result;
+  }
+
+  async function listServerMaps() {
+    const response = await fetch('/api/maps/custom');
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) throw new Error(result.error || `HTTP ${response.status}`);
+    status.server = result.maps || [];
+    return result.maps || [];
+  }
+
   function publish() {
-    window.YDH_TILED_BOOTSTRAP = { registered: [...status.registered], duplicates: [...status.duplicates], failed: [...status.failed], validation: [...status.validation], custom: [...status.custom], urls: [...(registry.urls || [])], loadedAt: new Date().toISOString() };
+    window.YDH_TILED_BOOTSTRAP = { registered: [...status.registered], duplicates: [...status.duplicates], failed: [...status.failed], validation: [...status.validation], custom: [...status.custom], server: [...status.server], urls: [...(registry.urls || [])], loadedAt: new Date().toISOString() };
     window.dispatchEvent(new CustomEvent('ydh-tiled-maps-loaded', { detail: window.YDH_TILED_BOOTSTRAP }));
   }
 
@@ -146,7 +189,7 @@
     if (document.getElementById('tiledMapManagerStyles')) return;
     const style = document.createElement('style');
     style.id = 'tiledMapManagerStyles';
-    style.textContent = '.tiled-manager-panel{margin:22px 0;padding:24px}.tiled-manager-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.tiled-manager-head h2{margin:0 0 10px}.tiled-manager-head p{margin:0;color:var(--muted);line-height:1.65}.tiled-manager-badge{min-width:150px;padding:12px 14px;border-radius:18px;background:rgba(115,167,255,.1);border:1px solid rgba(115,167,255,.24);color:#9fc5ff;font-weight:900;text-align:center}.tiled-import-box{display:grid;gap:8px;margin-bottom:14px}.tiled-import-box textarea{min-height:120px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.24);color:#eef4ff;padding:12px;resize:vertical}.tiled-import-box button,.tiled-map-actions button{border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);padding:8px 11px;font-weight:900;cursor:pointer}.tiled-import-box button:hover,.tiled-map-actions button:hover{background:var(--gold);color:#1b1207}.tiled-map-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tiled-map-card{padding:14px;border-radius:18px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08)}.tiled-map-card.tiled{border-color:rgba(105,221,160,.22)}.tiled-map-card strong{display:block;color:#eef4ff;margin-bottom:5px}.tiled-map-card small{display:block;color:var(--muted);font-size:.76rem;line-height:1.45}.tiled-map-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tiled-validation{margin-top:14px;padding:12px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.07);color:var(--muted);font-size:.8rem;line-height:1.6}.tiled-validation b{color:#eef4ff}.tiled-ok{color:#69dda0}.tiled-warn{color:#f7c85f}.tiled-error{color:#ff7b7b}@media(max-width:820px){.tiled-manager-head{flex-direction:column}.tiled-manager-badge{width:100%;text-align:left}.tiled-map-grid{grid-template-columns:1fr}.tiled-map-actions button{flex:1}}';
+    style.textContent = '.tiled-manager-panel{margin:22px 0;padding:24px}.tiled-manager-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:16px}.tiled-manager-head h2{margin:0 0 10px}.tiled-manager-head p{margin:0;color:var(--muted);line-height:1.65}.tiled-manager-badge{min-width:150px;padding:12px 14px;border-radius:18px;background:rgba(115,167,255,.1);border:1px solid rgba(115,167,255,.24);color:#9fc5ff;font-weight:900;text-align:center}.tiled-import-box{display:grid;gap:8px;margin-bottom:14px}.tiled-import-box textarea{min-height:120px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.24);color:#eef4ff;padding:12px;resize:vertical}.tiled-import-actions{display:flex;gap:8px;flex-wrap:wrap}.tiled-import-box button,.tiled-map-actions button{border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);padding:8px 11px;font-weight:900;cursor:pointer}.tiled-import-box button:hover,.tiled-map-actions button:hover{background:var(--gold);color:#1b1207}.tiled-map-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tiled-map-card{padding:14px;border-radius:18px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08)}.tiled-map-card.tiled{border-color:rgba(105,221,160,.22)}.tiled-map-card.custom{border-color:rgba(247,200,95,.24)}.tiled-map-card strong{display:block;color:#eef4ff;margin-bottom:5px}.tiled-map-card small{display:block;color:var(--muted);font-size:.76rem;line-height:1.45}.tiled-map-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tiled-validation{margin-top:14px;padding:12px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.07);color:var(--muted);font-size:.8rem;line-height:1.6}.tiled-validation b{color:#eef4ff}.tiled-ok{color:#69dda0}.tiled-warn{color:#f7c85f}.tiled-error{color:#ff7b7b}@media(max-width:820px){.tiled-manager-head{flex-direction:column}.tiled-manager-badge{width:100%;text-align:left}.tiled-map-grid{grid-template-columns:1fr}.tiled-map-actions button,.tiled-import-actions button{flex:1}}';
     document.head.appendChild(style);
   }
 
@@ -164,18 +207,24 @@
     }
     const allMaps = maps();
     const tiledCount = allMaps.filter((map) => map.source === 'tiled-json').length;
-    section.innerHTML = `<div class="tiled-manager-head"><div><p class="eyebrow">TILED MAP MANAGER</p><h2>Tiled JSON 맵 선택/검증</h2><p>여러 Tiled JSON URL과 붙여넣기 import 맵을 기존 맵 구조에 추가합니다.</p></div><div class="tiled-manager-badge">전체 ${allMaps.length}개<br />Tiled ${tiledCount}개</div></div><div class="tiled-import-box"><textarea id="tiledJsonPaste" placeholder="Tiled JSON 내용을 여기에 붙여넣고 등록하세요."></textarea><button type="button" id="importTiledJson">붙여넣기 JSON 등록</button></div><div class="tiled-map-grid">${allMaps.map((map, index) => renderMapCard(map, index)).join('')}</div><div class="tiled-validation">${renderValidation()}</div>`;
+    section.innerHTML = `<div class="tiled-manager-head"><div><p class="eyebrow">TILED MAP MANAGER</p><h2>Tiled JSON 맵 선택/검증</h2><p>custom map을 localStorage, JSON 파일, 서버 API로 관리합니다.</p></div><div class="tiled-manager-badge">전체 ${allMaps.length}개<br />Tiled ${tiledCount}개</div></div><div class="tiled-import-box"><textarea id="tiledJsonPaste" placeholder="Tiled JSON 내용을 여기에 붙여넣고 등록하세요."></textarea><div class="tiled-import-actions"><button type="button" id="importTiledJson">붙여넣기 JSON 등록</button><button type="button" id="refreshServerMaps">서버 맵 목록</button></div></div><div class="tiled-map-grid">${allMaps.map((map, index) => renderMapCard(map, index)).join('')}</div><div class="tiled-validation">${renderValidation()}</div>`;
     section.querySelectorAll('[data-select-map-index]').forEach((button) => button.addEventListener('click', () => selectMap(Number(button.dataset.selectMapIndex))));
+    section.querySelectorAll('[data-export-map-id]').forEach((button) => button.addEventListener('click', () => exportById(button.dataset.exportMapId)));
+    section.querySelectorAll('[data-delete-custom-map-id]').forEach((button) => button.addEventListener('click', () => deleteById(button.dataset.deleteCustomMapId)));
+    section.querySelectorAll('[data-save-server-map-id]').forEach((button) => button.addEventListener('click', () => saveByIdToServer(button.dataset.saveServerMapId)));
     section.querySelector('#importTiledJson')?.addEventListener('click', () => importFromTextarea(section.querySelector('#tiledJsonPaste')));
+    section.querySelector('#refreshServerMaps')?.addEventListener('click', refreshServerMaps);
   }
 
   function renderMapCard(map, index) {
+    const isCustom = !!customRecordFor(map.id);
     const source = map.source === 'tiled-json' ? `Tiled JSON${map.sourceUrl ? ` · ${map.sourceUrl}` : ''}` : '기본 문자맵';
-    return `<article class="tiled-map-card ${map.source === 'tiled-json' ? 'tiled' : ''}"><strong>${escapeHtml(map.name)}</strong><small>${escapeHtml(source)} · ${escapeHtml(map.id)} · ${map.rows?.[0]?.length || 0}x${map.rows?.length || 0}</small><small>시작 X:${map.start?.x ?? 0} Y:${map.start?.y ?? 0} · 포탈:${map.portalTo ?? '-'}</small><div class="tiled-map-actions"><button type="button" data-select-map-index="${index}">이 맵으로 이동</button></div></article>`;
+    const server = status.server.find((item) => item.id === map.id);
+    return `<article class="tiled-map-card ${map.source === 'tiled-json' ? 'tiled' : ''} ${isCustom ? 'custom' : ''}"><strong>${escapeHtml(map.name)}</strong><small>${escapeHtml(source)} · ${escapeHtml(map.id)} · ${map.rows?.[0]?.length || 0}x${map.rows?.length || 0}</small><small>시작 X:${map.start?.x ?? 0} Y:${map.start?.y ?? 0} · 포탈:${map.portalTo ?? '-'}${server ? ` · 서버저장 ${escapeHtml(server.updatedAt || server.savedAt || '')}` : ''}</small><div class="tiled-map-actions"><button type="button" data-select-map-index="${index}">이 맵으로 이동</button><button type="button" data-export-map-id="${escapeHtml(map.id)}">내보내기</button>${isCustom ? `<button type="button" data-delete-custom-map-id="${escapeHtml(map.id)}">삭제</button><button type="button" data-save-server-map-id="${escapeHtml(map.id)}">서버저장</button>` : ''}</div></article>`;
   }
 
   function renderValidation() {
-    const lines = [`<b>검증</b> ${status.validation.length}개 맵 검사 / custom ${status.custom.length}개`];
+    const lines = [`<b>검증</b> ${status.validation.length}개 맵 검사 / custom ${status.custom.length}개 / server ${status.server.length}개`];
     status.validation.forEach((item) => {
       const cls = item.ok ? 'tiled-ok' : 'tiled-error';
       const msg = item.ok ? 'OK' : item.errors.join(', ');
@@ -199,6 +248,52 @@
     } catch (error) {
       status.failed.push({ url: 'pasted-json', error: error.message });
       log(`붙여넣기 등록 실패 - ${error.message}`, 'error');
+      publish();
+      renderManager();
+    }
+  }
+
+  function mapById(id) {
+    return maps().find((map) => map.id === id) || null;
+  }
+
+  function exportById(id) {
+    const map = mapById(id);
+    if (map) exportMap(map);
+  }
+
+  function deleteById(id) {
+    removeCustomMap(id);
+    log(`custom map 삭제: ${id}`);
+    publish();
+    renderManager();
+  }
+
+  async function saveByIdToServer(id) {
+    const map = mapById(id);
+    if (!map) return;
+    try {
+      await saveMapToServer(map);
+      log(`서버 저장 완료: ${map.name}`);
+      publish();
+      renderManager();
+    } catch (error) {
+      status.failed.push({ url: 'server-save', error: error.message });
+      log(`서버 저장 실패 - ${error.message}`, 'error');
+      publish();
+      renderManager();
+    }
+  }
+
+  async function refreshServerMaps() {
+    try {
+      await listServerMaps();
+      log('서버 custom map 목록 갱신 완료');
+      publish();
+      renderManager();
+    } catch (error) {
+      status.failed.push({ url: 'server-list', error: error.message });
+      log(`서버 맵 목록 실패 - ${error.message}`, 'error');
       publish();
       renderManager();
     }
