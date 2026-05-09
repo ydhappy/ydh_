@@ -8,7 +8,9 @@
     selected: atlas.tiles.image,
     format: 'svg',
     checked: [],
-    error: ''
+    error: '',
+    binaryReady: false,
+    fallbackOnly: false
   };
 
   function candidateList() {
@@ -33,12 +35,19 @@
 
   async function selectBestAtlas() {
     const candidates = candidateList();
+    state.checked = [];
+    state.error = '';
+    state.binaryReady = false;
+    state.fallbackOnly = false;
+
     for (const candidate of candidates) {
       const ok = await probeImage(candidate.url);
       state.checked.push({ ...candidate, ok });
       if (ok) {
         state.selected = candidate.url;
         state.format = candidate.format;
+        state.binaryReady = candidate.format === 'webp' || candidate.format === 'png';
+        state.fallbackOnly = candidate.format === 'svg';
         atlas.tiles.imageActive = candidate.url;
         atlas.tiles.activeFormat = candidate.format;
         publish();
@@ -49,9 +58,22 @@
     state.error = 'No atlas image could be loaded.';
     atlas.tiles.imageActive = atlas.tiles.image;
     atlas.tiles.activeFormat = 'svg';
+    state.fallbackOnly = true;
     publish();
     renderDebugPanel();
     return null;
+  }
+
+  function statusText() {
+    if (state.binaryReady) return `BINARY READY · ${String(state.format).toUpperCase()}`;
+    if (state.fallbackOnly) return 'SVG FALLBACK ONLY';
+    return 'CHECKING';
+  }
+
+  function statusHint() {
+    if (state.binaryReady) return 'PNG/WebP atlas가 생성되어 브라우저에서 binary atlas를 사용 중입니다.';
+    if (state.fallbackOnly) return 'PNG/WebP가 아직 없어서 SVG fallback을 사용 중입니다. Actions → Generate Tile Atlas → Run workflow로 binary를 생성하세요.';
+    return 'atlas 이미지 존재 여부를 검사 중입니다.';
   }
 
   function publish() {
@@ -60,6 +82,8 @@
         image: atlas.tiles.imageActive || atlas.tiles.image,
         format: atlas.tiles.activeFormat || 'svg',
         checked: [...state.checked],
+        binaryReady: state.binaryReady,
+        fallbackOnly: state.fallbackOnly,
         error: state.error
       }
     }));
@@ -71,7 +95,7 @@
     style.id = 'atlasLoaderStyles';
     style.textContent = `
       .atlas-debug-panel{margin:14px 0 22px;padding:18px;border-radius:20px;background:rgba(0,0,0,.2);border:1px solid rgba(105,221,160,.22)}
-      .atlas-debug-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}.atlas-debug-head h3{margin:0 0 6px;color:#eef4ff}.atlas-debug-head p{margin:0;color:var(--muted);line-height:1.55}.atlas-debug-badge{padding:9px 12px;border-radius:999px;background:rgba(105,221,160,.12);color:#69dda0;font-weight:900;white-space:nowrap}.atlas-debug-list{display:grid;gap:6px;color:var(--muted);font-size:.82rem;line-height:1.55}.atlas-debug-list span{display:inline-flex;gap:8px;align-items:center}.atlas-debug-error{color:#ff7b7b}@media(max-width:820px){.atlas-debug-head{flex-direction:column}.atlas-debug-badge{width:100%;box-sizing:border-box}}
+      .atlas-debug-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}.atlas-debug-head h3{margin:0 0 6px;color:#eef4ff}.atlas-debug-head p{margin:0;color:var(--muted);line-height:1.55}.atlas-debug-badge{padding:9px 12px;border-radius:999px;background:rgba(105,221,160,.12);color:#69dda0;font-weight:900;white-space:nowrap}.atlas-debug-badge.fallback{background:rgba(247,200,95,.12);color:#f7c85f}.atlas-debug-badge.error{background:rgba(255,123,123,.12);color:#ff7b7b}.atlas-debug-list{display:grid;gap:6px;color:var(--muted);font-size:.82rem;line-height:1.55}.atlas-debug-list span{display:inline-flex;gap:8px;align-items:center}.atlas-debug-error{color:#ff7b7b}.atlas-debug-hint{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.05);color:var(--muted)}@media(max-width:820px){.atlas-debug-head{flex-direction:column}.atlas-debug-badge{width:100%;box-sizing:border-box}}
     `;
     document.head.appendChild(style);
   }
@@ -93,6 +117,8 @@
       ? state.checked.map((item) => `<span>${item.ok ? '✅' : '⬜'} ${escapeHtml(item.format)} · ${escapeHtml(item.url)}</span>`).join('')
       : '<span>검사 대기 중</span>';
 
+    const badgeClass = state.error ? 'error' : (state.fallbackOnly ? 'fallback' : '');
+
     panel.innerHTML = `
       <div class="atlas-debug-head">
         <div>
@@ -100,13 +126,14 @@
           <h3>타일 atlas 로더</h3>
           <p>WebP → PNG → SVG 순서로 사용 가능한 atlas를 선택합니다.</p>
         </div>
-        <div class="atlas-debug-badge">${escapeHtml((atlas.tiles.activeFormat || 'svg').toUpperCase())}</div>
+        <div class="atlas-debug-badge ${badgeClass}">${escapeHtml(statusText())}</div>
       </div>
       <div class="atlas-debug-list ${state.error ? 'atlas-debug-error' : ''}">
         <span>active: ${escapeHtml(atlas.tiles.imageActive || atlas.tiles.image)}</span>
         ${checked}
         ${state.error ? `<span>${escapeHtml(state.error)}</span>` : ''}
       </div>
+      <div class="atlas-debug-hint">${escapeHtml(statusHint())}</div>
     `;
   }
 
