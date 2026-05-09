@@ -2,7 +2,7 @@
 
 ## 상태
 
-현재는 22-1 ~ 22-8B-1까지 완료된 상태입니다.
+현재는 22-1 ~ 22-8B-2까지 완료된 상태입니다.
 
 - 22-1: Tiled JSON 샘플맵 + 변환기 추가 완료
 - 22-2: index 로드 연결 + 샘플맵 자동 등록 완료
@@ -13,7 +13,7 @@
 - 22-7: custom map 관리 UI/서버 저장 API 완료
 - 22-8A: 서버 custom map 가져오기/삭제 UI 완료
 - 22-8B-1: Object Layer marker 정보창 완료
-- 22-8B-2: Tiled object layer 기반 퀘스트 트리거 대기
+- 22-8B-2: Tiled object layer 기반 퀘스트 트리거 완료
 
 ## 추가 파일
 
@@ -29,6 +29,8 @@
 - `gm-console.js`
 - `map-engine.js`
 - `map.css`
+- `chapter-quests.js`
+- `data/chapter-quests.js`
 - `server/src/server.js`
 
 ## Tiled Object Layer property
@@ -43,6 +45,10 @@ Object Layer의 object에는 아래 property를 사용할 수 있습니다.
 | `ydhTargetMapId` | 포탈 대상 맵 ID |
 | `ydhTargetMapIndex` | 포탈 대상 맵 index |
 | `ydhDialogue` | NPC/marker 설명 또는 대사 |
+| `ydhQuestType` | 퀘스트 진행 type. 예: `inspectMarker` |
+| `ydhQuestTarget` | 퀘스트 objective target |
+| `ydhQuestAmount` | 증가량. 기본값 `1` |
+| `ydhQuestTrigger` | `ydhQuestType` 대체용 trigger 이름 |
 
 ## 자동 로드 흐름
 
@@ -56,37 +62,6 @@ Object Layer의 object에는 아래 property를 사용할 수 있습니다.
 <script src="map-engine.js"></script>
 ```
 
-## 22-7 custom map 관리 UI/서버 저장 API
-
-브라우저 localStorage key:
-
-```text
-ydh-tiled-custom-maps-v1
-```
-
-서버 저장 파일:
-
-```text
-server/data/custom-maps.json
-```
-
-서버 API:
-
-```text
-GET    /api/maps/custom
-POST   /api/maps/custom
-GET    /api/maps/custom/:id
-DELETE /api/maps/custom/:id
-```
-
-## 22-8A 서버 custom map 가져오기/삭제 UI
-
-서버 맵 카드 기능:
-
-- `클라이언트로 가져오기`: `GET /api/maps/custom/:id`로 전체 map을 받아 `YDH_MAPS.maps`에 등록하고 localStorage custom map으로 저장
-- `서버삭제`: `DELETE /api/maps/custom/:id` 호출 후 서버 목록에서 제거
-- 서버 맵 카드는 클라이언트 맵 카드와 분리된 `서버 맵` 영역에 표시
-
 ## 22-8B-1 Object Layer marker 정보창
 
 Tiled Object Layer에서 `ydhKind=marker`인 object는 rows에는 합성하지 않고, 해당 타일 위에 정보 아이콘으로 표시합니다.
@@ -99,31 +74,64 @@ Tiled Object Layer에서 `ydhKind=marker`인 object는 rows에는 합성하지 �
 4. 패널에는 marker 이름, 좌표, layer, kind, id, `ydhDialogue` 설명 표시
 5. marker 클릭 이벤트는 이동 이벤트와 분리되어 인접 이동을 발생시키지 않음
 
-샘플맵 marker:
+## 22-8B-2 Tiled object layer 기반 퀘스트 트리거
 
-```text
-달문 석비 · marker · X:4 Y:4
+marker 클릭 시 `map-engine.js`가 아래 이벤트를 발행합니다.
+
+```js
+window.dispatchEvent(new CustomEvent('ydh-tiled-quest-trigger', {
+  detail: {
+    type,
+    target,
+    amount,
+    placement,
+    map,
+    state
+  }
+}));
 ```
 
-관련 파일:
+`chapter-quests.js`는 `ydh-tiled-quest-trigger`를 받아 기존 `progress(type, target, amount)` 흐름으로 퀘스트 진행도를 갱신합니다.
 
-- `map-engine.js`
-- `map.css`
-- `data/tiled/moon-gate-sample.json`
+샘플 objective:
+
+```js
+{ id: 'inspect-moon-stone', type: 'inspectMarker', target: 'moon-gate-stone', label: '달문 석비 확인', required: 1 }
+```
+
+샘플 marker property:
+
+```json
+{ "name": "ydhQuestType", "type": "string", "value": "inspectMarker" }
+{ "name": "ydhQuestTarget", "type": "string", "value": "moon-gate-stone" }
+{ "name": "ydhQuestAmount", "type": "int", "value": 1 }
+```
+
+추가 퀘스트:
+
+```text
+quest-ch5-moon-gate-marker · 달문 석비의 경고
+```
+
+테스트 흐름:
+
+1. TILED MAP MANAGER에서 `달문 광장`으로 이동
+2. `달문 석비` marker 클릭
+3. 정보창 표시 확인
+4. 챕터 퀘스트 `달문 석비 확인` 진행도 1/1 확인
 
 ## 안정성 기준
 
 - 기존 문자 타일맵은 제거하지 않습니다.
 - Object Layer는 Tiled 맵에만 적용됩니다.
 - marker는 이동/전투/포탈 타일 코드로 변환하지 않습니다.
-- marker 정보창은 화면 우하단 고정 패널이며 모바일에서는 전체 폭에 맞춰 표시됩니다.
+- marker quest trigger는 기존 퀘스트 progress 구조를 재사용합니다.
+- property가 없는 marker는 기본 `inspectMarker` + marker id/name으로 이벤트를 발행합니다.
 
-## 22-8B-2 다음 작업
+## 다음 작업
 
-다음 단계에서 진행합니다.
-
-1. Tiled object layer 기반 퀘스트 트리거
-2. marker 기반 퀘스트 시작/완료 조건
-3. 서버 custom map 자동 동기화 옵션
-4. 서버 custom map을 계정/캐릭터별로 분리 저장
-5. custom map MySQL 저장소 연동
+1. 서버 custom map 자동 동기화 옵션
+2. 서버 custom map을 계정/캐릭터별로 분리 저장
+3. custom map MySQL 저장소 연동
+4. 실제 PNG/WebP atlas 교체
+5. 원격 아바타 클릭 정보창
