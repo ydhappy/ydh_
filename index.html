@@ -108,24 +108,9 @@
             <div class="level-badge">Lv.<span id="level">1</span></div>
           </div>
 
-          <div class="bar-group">
-            <div class="bar-line">
-              <span>HP</span><strong id="hpText">100 / 100</strong>
-            </div>
-            <div class="bar"><i id="hpBar"></i></div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-line">
-              <span>MP</span><strong id="mpText">40 / 40</strong>
-            </div>
-            <div class="bar mana"><i id="mpBar"></i></div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-line">
-              <span>EXP</span><strong id="expText">0 / 80</strong>
-            </div>
-            <div class="bar exp"><i id="expBar"></i></div>
-          </div>
+          <div class="bar-group"><div class="bar-line"><span>HP</span><strong id="hpText">100 / 100</strong></div><div class="bar"><i id="hpBar"></i></div></div>
+          <div class="bar-group"><div class="bar-line"><span>MP</span><strong id="mpText">40 / 40</strong></div><div class="bar mana"><i id="mpBar"></i></div></div>
+          <div class="bar-group"><div class="bar-line"><span>EXP</span><strong id="expText">0 / 80</strong></div><div class="bar exp"><i id="expBar"></i></div></div>
 
           <div class="stat-grid">
             <span>공격 <strong id="atkStat">12</strong></span>
@@ -134,174 +119,47 @@
             <span>웨이브 <strong id="waveStat">1</strong></span>
           </div>
 
-          <div class="inventory">
-            <h3>인벤토리</h3>
-            <ul id="inventoryList"></ul>
-          </div>
+          <div class="inventory"><h3>인벤토리</h3><ul id="inventoryList"></ul></div>
         </aside>
 
         <section class="panel battle-panel" aria-label="전투 화면">
-          <div class="battle-topline">
-            <div>
-              <p class="eyebrow">FIELD</p>
-              <h2 id="zoneName">말하는 섬 해안</h2>
-            </div>
-            <button class="btn small" type="button" id="nextZoneBtn">전투 지역 이동</button>
-          </div>
-
-          <div class="battlefield" id="battlefield">
-            <div class="weather"></div>
-            <div class="unit player-unit" id="playerUnit">
-              <span class="unit-sprite">🧝</span>
-              <small>YDH</small>
-            </div>
-            <div class="impact" id="impact"></div>
-            <div class="unit monster-unit" id="monsterUnit">
-              <span class="unit-sprite" id="monsterSprite">🐺</span>
-              <small id="monsterName">그림자 늑대</small>
-            </div>
-            <div class="ground"></div>
-          </div>
+          <div class="battle-topline"><div><p class="eyebrow">FIELD</p><h2 id="zoneName">말하는 섬 해안</h2></div><button class="btn small" type="button" id="nextZoneBtn">전투 지역 이동</button></div>
+          <div class="battlefield" id="battlefield"><div class="weather"></div><div class="unit player-unit" id="playerUnit"><span class="unit-sprite">🧝</span><small>YDH</small></div><div class="impact" id="impact"></div><div class="unit monster-unit" id="monsterUnit"><span class="unit-sprite" id="monsterSprite">🐺</span><small id="monsterName">그림자 늑대</small></div><div class="ground"></div></div>
 
           <section class="map-panel" aria-label="타일맵 탐험">
-            <div class="map-head">
-              <div>
-                <p class="eyebrow">WORLD MAP</p>
-                <h3 id="mapTitle">말하는 섬 해안</h3>
-                <p id="mapDesc">맵 데이터를 불러오는 중입니다.</p>
-              </div>
-              <span class="map-position" id="mapPosition">X:0 / Y:0</span>
-            </div>
+            <div class="map-head"><div><p class="eyebrow">WORLD MAP</p><h3 id="mapTitle">말하는 섬 해안</h3><p id="mapDesc">맵 데이터를 불러오는 중입니다.</p></div><span class="map-position" id="mapPosition">X:0 / Y:0</span></div>
             <div class="tile-map" id="tileMap" role="grid" aria-label="이동 가능한 타일맵"></div>
-            <div class="map-controls" aria-label="모바일 이동 버튼">
-              <button type="button" id="moveNorth" aria-label="위로 이동">▲</button>
-              <button type="button" id="moveWest" aria-label="왼쪽 이동">◀</button>
-              <button type="button" id="moveSouth" aria-label="아래로 이동">▼</button>
-              <button type="button" id="moveEast" aria-label="오른쪽 이동">▶</button>
-            </div>
+            <div class="map-controls" aria-label="모바일 이동 버튼"><button type="button" id="moveNorth" aria-label="위로 이동">▲</button><button type="button" id="moveWest" aria-label="왼쪽 이동">◀</button><button type="button" id="moveSouth" aria-label="아래로 이동">▼</button><button type="button" id="moveEast" aria-label="오른쪽 이동">▶</button></div>
             <p class="map-event" id="mapEvent">방향키, WASD, 터치 버튼, 인접 타일 클릭으로 이동합니다.</p>
-            <div class="mobile-help">
-              <span>모바일: 방향 버튼</span>
-              <span>PC: WASD/방향키</span>
-              <span>포탈: 다음 맵</span>
-              <span>👹: 조우 구역</span>
-            </div>
+            <div class="mobile-help"><span>모바일: 방향 버튼</span><span>PC: WASD/방향키</span><span>포탈: 다음 맵</span><span>👹: 조우 구역</span></div>
           </section>
 
-          <div class="monster-card">
-            <div>
-              <span id="monsterTitle">그림자 늑대</span>
-              <strong id="monsterHpText">55 / 55</strong>
-            </div>
-            <div class="bar danger"><i id="monsterHpBar"></i></div>
-          </div>
-
+          <div class="monster-card"><div><span id="monsterTitle">그림자 늑대</span><strong id="monsterHpText">55 / 55</strong></div><div class="bar danger"><i id="monsterHpBar"></i></div></div>
           <div class="skill-grid" id="skillGrid" aria-label="스킬 목록"></div>
-
-          <div class="combat-actions">
-            <button class="btn primary" type="button" id="attackBtn">기본 공격</button>
-            <button class="btn" type="button" id="potionBtn">물약 사용</button>
-            <button class="btn" type="button" id="restBtn">마을 휴식</button>
-          </div>
+          <div class="combat-actions"><button class="btn primary" type="button" id="attackBtn">기본 공격</button><button class="btn" type="button" id="potionBtn">물약 사용</button><button class="btn" type="button" id="restBtn">마을 휴식</button></div>
         </section>
 
-        <aside class="panel log-panel">
-          <div class="panel-heading">
-            <p class="eyebrow">GM CONSOLE</p>
-            <h2>실시간 로그</h2>
-          </div>
-          <div class="quest-box">
-            <h3>현재 퀘스트</h3>
-            <p id="questText">몬스터 3마리 처치</p>
-            <div class="bar quest"><i id="questBar"></i></div>
-          </div>
-          <ol class="log-list" id="logList"></ol>
-        </aside>
+        <aside class="panel log-panel"><div class="panel-heading"><p class="eyebrow">GM CONSOLE</p><h2>실시간 로그</h2></div><div class="quest-box"><h3>현재 퀘스트</h3><p id="questText">몬스터 3마리 처치</p><div class="bar quest"><i id="questBar"></i></div></div><ol class="log-list" id="logList"></ol></aside>
       </section>
 
       <section class="systems" id="systems">
-        <article class="panel feature-card">
-          <span>⚔️</span>
-          <h3>전투 루프</h3>
-          <p>공격, 스킬, 피격, 처치, 보상, 웨이브 증가까지 한 화면에서 순환합니다.</p>
-        </article>
-        <article class="panel feature-card">
-          <span>🗺️</span>
-          <h3>타일맵 탐험</h3>
-          <p>문자 기반 맵 데이터와 Tiled JSON 변환 맵을 SVG 타일로 렌더링합니다.</p>
-        </article>
-        <article class="panel feature-card">
-          <span>🎒</span>
-          <h3>장비 파밍</h3>
-          <p>몬스터 처치 시 공격/방어 보너스 아이템이 드롭되고 자동 장착됩니다.</p>
-        </article>
-        <article class="panel feature-card">
-          <span>📱</span>
-          <h3>모바일 지원</h3>
-          <p>작은 화면에서도 터치 버튼, 반응형 레이아웃, 가벼운 SVG 에셋으로 동작합니다.</p>
-        </article>
+        <article class="panel feature-card"><span>⚔️</span><h3>전투 루프</h3><p>공격, 스킬, 피격, 처치, 보상, 웨이브 증가까지 한 화면에서 순환합니다.</p></article>
+        <article class="panel feature-card"><span>🗺️</span><h3>타일맵 탐험</h3><p>문자 기반 맵 데이터와 Tiled JSON 변환 맵을 SVG 타일로 렌더링합니다.</p></article>
+        <article class="panel feature-card"><span>🎒</span><h3>장비 파밍</h3><p>몬스터 처치 시 공격/방어 보너스 아이템이 드롭되고 자동 장착됩니다.</p></article>
+        <article class="panel feature-card"><span>📱</span><h3>모바일 지원</h3><p>작은 화면에서도 터치 버튼, 반응형 레이아웃, 가벼운 SVG 에셋으로 동작합니다.</p></article>
       </section>
 
-      <section class="panel asset-pipeline" id="assets">
-        <p class="eyebrow">ASSETS & MAP PIPELINE</p>
-        <h2>Assets와 Map 개발 기준</h2>
-        <p>
-          초기 버전은 경량 SVG 에셋과 <code>data/maps.js</code> 문자 타일맵으로 구성했습니다.
-          Tiled JSON은 <code>data/tiled-map-loader.js</code>로 기존 문자 타일맵 구조에 안전하게 추가됩니다.
-        </p>
-        <div class="asset-pipeline-grid">
-          <div><strong>Tiles</strong><span>grass, road, water, tree, stone, portal SVG 기본 제공</span></div>
-          <div><strong>Sprites</strong><span>player, monster, npc 16방향 SVG 스프라이트시트</span></div>
-          <div><strong>Maps</strong><span>기본 맵 + Tiled JSON 샘플맵 자동 로드</span></div>
-          <div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div>
-        </div>
-      </section>
+      <section class="panel asset-pipeline" id="assets"><p class="eyebrow">ASSETS & MAP PIPELINE</p><h2>Assets와 Map 개발 기준</h2><p>초기 버전은 경량 SVG 에셋과 <code>data/maps.js</code> 문자 타일맵으로 구성했습니다. Tiled JSON은 <code>data/tiled-map-loader.js</code>로 기존 문자 타일맵 구조에 안전하게 추가됩니다.</p><div class="asset-pipeline-grid"><div><strong>Tiles</strong><span>grass, road, water, tree, stone, portal SVG 기본 제공</span></div><div><strong>Sprites</strong><span>player, monster, npc 16방향 SVG 스프라이트시트</span></div><div><strong>Maps</strong><span>기본 맵 + Tiled JSON 샘플맵 자동 로드</span></div><div><strong>Mobile</strong><span>터치 버튼, 클릭 이동, 키보드 이동을 동시에 지원</span></div></div></section>
 
-      <section class="panel ranking-panel" id="ranking">
-        <div>
-          <p class="eyebrow">HALL OF HEROES</p>
-          <h2>내 최고 기록</h2>
-          <p>현재 브라우저 기준으로 저장되는 개인 랭킹입니다.</p>
-        </div>
-        <div class="rank-grid">
-          <span>최고 레벨 <strong id="bestLevel">1</strong></span>
-          <span>최고 웨이브 <strong id="bestWave">1</strong></span>
-          <span>누적 처치 <strong id="totalKills">0</strong></span>
-        </div>
-      </section>
+      <section class="panel ranking-panel" id="ranking"><div><p class="eyebrow">HALL OF HEROES</p><h2>내 최고 기록</h2><p>현재 브라우저 기준으로 저장되는 개인 랭킹입니다.</p></div><div class="rank-grid"><span>최고 레벨 <strong id="bestLevel">1</strong></span><span>최고 웨이브 <strong id="bestWave">1</strong></span><span>누적 처치 <strong id="totalKills">0</strong></span></div></section>
 
-      <section class="roadmap" id="roadmap">
-        <div class="panel roadmap-copy">
-          <p class="eyebrow">NEXT PATCH</p>
-          <h2>다음 확장 후보</h2>
-          <p>
-            이후 Tiled JSON 대량 import, 타일셋 atlas, 서버 API, 계정 로그인, 실제 DB, 맵 에디터,
-            로봇 AI 사냥 루틴을 붙이면 홈페이지형 프로토타입에서 경량 MMORPG 런처로 확장할 수 있습니다.
-          </p>
-        </div>
-        <div class="timeline">
-          <div><strong>1</strong><span>Tiled Map Editor JSON import</span></div>
-          <div><strong>2</strong><span>타일셋 PNG atlas</span></div>
-          <div><strong>3</strong><span>WebSocket 위치 동기화</span></div>
-          <div><strong>4</strong><span>GM 맵/스폰 콘솔</span></div>
-        </div>
-      </section>
+      <section class="roadmap" id="roadmap"><div class="panel roadmap-copy"><p class="eyebrow">NEXT PATCH</p><h2>다음 확장 후보</h2><p>이후 Tiled JSON 대량 import, 타일셋 atlas, 서버 API, 계정 로그인, 실제 DB, 맵 에디터, 로봇 AI 사냥 루틴을 붙이면 홈페이지형 프로토타입에서 경량 MMORPG 런처로 확장할 수 있습니다.</p></div><div class="timeline"><div><strong>1</strong><span>Tiled Map Editor JSON import</span></div><div><strong>2</strong><span>타일셋 PNG atlas</span></div><div><strong>3</strong><span>WebSocket 위치 동기화</span></div><div><strong>4</strong><span>GM 맵/스폰 콘솔</span></div></div></section>
     </main>
 
-    <footer class="footer">
-      <span>© YDH Chronicle</span>
-      <a href="#top">상단으로</a>
-    </footer>
+    <footer class="footer"><span>© YDH Chronicle</span><a href="#top">상단으로</a></footer>
   </div>
 
-  <template id="skillTemplate">
-    <button class="skill-card" type="button">
-      <span class="skill-icon"></span>
-      <strong class="skill-name"></strong>
-      <small class="skill-meta"></small>
-      <i class="cooldown-mask"></i>
-    </button>
-  </template>
+  <template id="skillTemplate"><button class="skill-card" type="button"><span class="skill-icon"></span><strong class="skill-name"></strong><small class="skill-meta"></small><i class="cooldown-mask"></i></button></template>
 
   <script src="data/lore-content.js"></script>
   <script src="data/item-catalog.js"></script>
@@ -316,6 +174,7 @@
   <script src="data/combat-motions.js"></script>
   <script src="game-map-bridge.js"></script>
   <script src="tiled-map-bootstrap.js"></script>
+  <script src="server-custom-map-sync.js"></script>
   <script src="map-engine.js"></script>
   <script src="walk-animations.js"></script>
   <script src="game.js"></script>
