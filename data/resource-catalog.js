@@ -1,5 +1,5 @@
 window.YDH_RESOURCES = {
-  version: 1,
+  version: 2,
   groups: {
     styles: [
       'styles.css',
@@ -62,7 +62,45 @@ window.YDH_RESOURCES = {
       'assets/atlas/tiles-atlas.png',
       'assets/ui/ydh-crest.svg',
       'assets/ui/ornament-frame.svg',
-      'assets/effects/spark-rune.svg'
+      'assets/effects/spark-rune.svg',
+      'assets/generated/classes-showcase.svg',
+      'assets/generated/npc-showcase.svg',
+      'assets/generated/monster-showcase.svg',
+      'assets/generated/environment-showcase.svg'
+    ],
+    generatedConcepts: [
+      {
+        id: 'classes-showcase',
+        title: '클래스 캐릭터 쇼케이스',
+        category: 'classes',
+        path: 'assets/generated/classes-showcase.svg',
+        sourceStatus: 'preview-card',
+        targets: ['knight', 'wizard', 'elf-ranger', 'dark-rogue', 'cleric', 'lancer']
+      },
+      {
+        id: 'npc-showcase',
+        title: 'NPC 쇼케이스',
+        category: 'npcs',
+        path: 'assets/generated/npc-showcase.svg',
+        sourceStatus: 'preview-card',
+        targets: ['town-guard', 'blacksmith', 'potion-merchant', 'innkeeper', 'priestess', 'teleport-keeper', 'royal-messenger', 'forest-hermit']
+      },
+      {
+        id: 'monster-showcase',
+        title: '몬스터 쇼케이스',
+        category: 'monsters',
+        path: 'assets/generated/monster-showcase.svg',
+        sourceStatus: 'preview-card',
+        targets: ['spectral-wolf-alpha', 'skeleton-warrior', 'goblin-scout', 'horned-orc-berserker', 'shadow-spider', 'cave-bat', 'undead-mage', 'swamp-lizard']
+      },
+      {
+        id: 'environment-showcase',
+        title: '환경 타일/오브젝트 쇼케이스',
+        category: 'environment',
+        path: 'assets/generated/environment-showcase.svg',
+        sourceStatus: 'preview-card',
+        targets: ['terrain', 'props', 'portal', 'market', 'shrine', 'forest', 'dungeon']
+      }
     ]
   },
   budgets: {
@@ -103,7 +141,11 @@ window.YDH_RESOURCES = {
       'assets/atlas/tiles-atlas.webp',
       'assets/atlas/tiles-atlas.png',
       'assets/ui/ornament-frame.svg',
-      'assets/effects/spark-rune.svg'
+      'assets/effects/spark-rune.svg',
+      'assets/generated/classes-showcase.svg',
+      'assets/generated/npc-showcase.svg',
+      'assets/generated/monster-showcase.svg',
+      'assets/generated/environment-showcase.svg'
     ]
   }
 };
