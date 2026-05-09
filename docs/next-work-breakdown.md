@@ -1,6 +1,6 @@
 # YDH Chronicle 남은 작업 분할 계획
 
-## 8차~23차
+## 8차~24차
 
 상태: 완료
 
@@ -16,92 +16,49 @@
 - 실시간 타일맵 원격 아바타 렌더링 완료
 - Tiled Map Editor JSON import 완료
 - 서버 custom map 자동 동기화, scope 분리, MySQL 저장소 완료
+- PNG/WebP atlas 생성 파이프라인과 readiness 표시 완료
 
-## 24차: 실제 PNG/WebP atlas 교체
+## 25차: 서버 계정 인증
 
-상태: 완료
+상태: 분할 진행 중
 
-### 24-1A: atlas 매니페스트와 타일 렌더러 지원
+### 25-1: 선택형 서버 계정 인증 기반
 
 상태: 완료
 
 작업 파일:
 
-- `assets/atlas/tiles-atlas.svg`
-- `data/atlas.js`
-- `map-engine.js`
+- `server/src/auth.js`
+- `server/src/server.js`
+- `server-auth.js`
+- `server-auth-panel.js`
 - `index.html`
-
-### 24-1B: PNG/WebP atlas 생성 스크립트와 우선 로더
-
-상태: 완료
-
-작업 파일:
-
-- `tools/generate-tile-atlas.mjs`
-- `atlas-loader.js`
-- `data/atlas.js`
-- `map-engine.js`
-- `index.html`
-- `docs/atlas-pipeline.md`
-
-### 24-1C: binary atlas 생성 workflow 및 품질 비교
-
-상태: 완료
-
-작업 파일:
-
-- `.github/workflows/generate-atlas.yml`
-- `docs/atlas-pipeline.md`
-- `docs/next-work-breakdown.md`
-
-### 24-1D: atlas 품질 검사 및 workflow 검증 단계
-
-상태: 완료
-
-작업 파일:
-
-- `tools/check-atlas-quality.mjs`
-- `.github/workflows/generate-atlas.yml`
-- `docs/atlas-pipeline.md`
-- `docs/next-work-breakdown.md`
-
-### 24-1E: atlas 색감/디테일 조정 config
-
-상태: 완료
-
-작업 파일:
-
-- `assets/atlas/tile-atlas-config.json`
-- `tools/generate-tile-atlas.mjs`
-- `tools/check-atlas-quality.mjs`
-- `docs/atlas-pipeline.md`
-- `docs/next-work-breakdown.md`
-
-### 24-1F: binary atlas readiness 표시
-
-상태: 완료
-
-작업 파일:
-
-- `atlas-loader.js`
+- `server/README.md`
 - `docs/next-work-breakdown.md`
 
 완료 내용:
 
-- ATLAS DEBUG 패널에 binary 생성 완료 여부 표시
-- WebP/PNG 사용 시 `BINARY READY` 표시
-- SVG fallback만 있을 때 `SVG FALLBACK ONLY` 표시
-- fallback 상태에서 Actions 실행 안내 표시
-- `ydh-atlas-ready` 이벤트 detail에 `binaryReady`, `fallbackOnly` 추가
+- 서버 HMAC token 유틸 추가
+- `/api/auth/status` 추가
+- `/api/auth/login` 추가
+- `/api/auth/me` 추가
+- `YDH_AUTH_REQUIRED=false` 기본값 유지
+- `YDH_AUTH_REQUIRED=true`일 때 주요 API Bearer token 보호
+- `YDH_AUTH_SHARED_SECRET` 기반 로그인 secret 검증 지원
+- `YDH_AUTH_SECRET` 기반 token 서명 지원
+- snapshot 저장 시 인증 accountId를 우선 반영
+- custom map scope 계산 시 인증 accountId를 우선 반영
+- 브라우저 `/api/*` fetch에 Authorization header 자동 첨부
+- `SERVER AUTH` 로그인/로그아웃 패널 추가
+- README에 인증 환경변수와 curl 예시 추가
 
 ## 전체 상태
 
-상태: 8차~24차 완료
+상태: 8차~24차 완료, 25-1 완료
 
 현재 남은 고도화 후보:
 
-1. 25-1 서버 계정 인증 추가
+1. 25-2 refresh token / 세션 저장소
 2. 운영용 관리자 저장 삭제/정리 API
 3. 원격 아바타 클릭 정보창
 4. MySQL 정규화 테이블 기반 캐릭터별 최신 저장 조회
